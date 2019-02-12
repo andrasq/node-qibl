@@ -46,3 +46,12 @@ Construct a Buffer like `new Buffer()` used to before it was deprecated.
 Return a hash with three functions `from`, `alloc` and `allocUnsafe` that can each create a
 new Buffer.  The implementation delegates to either the Buffer constructor or the Buffer
 class factory methods, as appropriate.
+
+### toStruct( hash )
+
+Convert the object from hashed accesses to an optimized mapped accesses analogous to `C`
+`struct`s.  This is a hidden internal language detail; V8 optimizes objects with a static
+layout for more efficient access.  Use over time can result in an object being optimized for
+mapped lookups or optimized for hashed lookups, but making an object into a prototype forces
+an immediate conversion to mapped lookups.  To retain the speedup, do not add new properties
+to structs.

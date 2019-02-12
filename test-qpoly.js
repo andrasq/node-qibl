@@ -121,4 +121,16 @@ module.exports = {
 
         t.done();
     },
+
+    'createBuffer': {
+    },
+
+    'bufferFactory': {
+    },
+
+    'toStruct should return struct': function(t) {
+        var hash = new Object({a:1});
+        t.equal(qpoly.toStruct(hash), hash);
+        t.done();
+    },
 }

@@ -17,6 +17,7 @@ module.exports = {
     str_repeat: str_repeat,
     createBuffer: createBuffer,
     bufferFactory: bufferFactory,
+    toStruct: toStruct,
 };
 
 // hashes are generic objects without a class
@@ -91,3 +92,6 @@ function bufferFactory( ) {
     };
 }
 
+function toStruct( obj ) {
+    return toStruct.prototype = obj;
+}
