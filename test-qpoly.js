@@ -133,4 +133,16 @@ module.exports = {
         t.equal(qpoly.toStruct(hash), hash);
         t.done();
     },
+
+    'varargs': {
+    },
+
+    'thunkify': {
+    },
+
+    '_invoke1': {
+    },
+
+    '_invoke2': {
+    },
 }

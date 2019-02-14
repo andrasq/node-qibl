@@ -1,12 +1,18 @@
 /**
  * qpoly -- useful polyfills that at times I wished I had
  *
+ * Copyright (C) 2019 Andras Radics
+ * Licensed under the Apache License, Version 2.0
+ *
  * 2019-09-11 - AR.
  */
 
 'use strict';
 
 var nodeVersion = parseInt(process.version.slice(1));
+
+var _invoke1 = (nodeVersion < 6) ? _invoke1 : eval("_invoke1 = function(func, argv) { func(...argv) }");
+var _invoke2 = (nodeVersion < 6) ? _invoke2 : eval("_invoke2 = function(func, self, argv) { func.call(self, ...argv) }");
 
 module.exports = {
     isHash: isHash,
@@ -18,6 +24,10 @@ module.exports = {
     createBuffer: createBuffer,
     bufferFactory: bufferFactory,
     toStruct: toStruct,
+    varargs: varargs,
+    thunkify: thunkify,
+    _invoke1: _invoke1,
+    _invoke2: _invoke2,
 };
 
 // hashes are generic objects without a class
@@ -94,4 +104,45 @@ function bufferFactory( ) {
 
 function toStruct( obj ) {
     return toStruct.prototype = obj;
+}
+
+function varargs( handler ) {
+    return function( /* VARARGS */ ) {
+        var len = arguments.length, arvgv = new Array();
+        for (var i=0; i<len; i++) argv.push(arguments[i]);
+        return handler(argv);
+    }
+}
+
+function thunkify( func, self ) {
+    if (typeof func !== 'function') {
+        if (self) func = self[func];
+        if (typeof func !== 'function') throw new Error('not a function or method');
+    }
+    return varargs(function(argv) {
+        return function(cb) {
+            argv.push(cb);
+            self ? _invoke2(func, self, argv) : _invoke1(func, argv);
+        }
+    })
+}
+
+function _invoke1( func, argv ) {
+    switch (argv.length) {
+    case 0: return func();
+    case 1: return func(argv[0]);
+    case 2: return func(argv[0], argv[1]);
+    case 3: return func(argv[0], argv[1], argv[2]);
+    default: return func.apply(null, argv);
+    }
+}
+
+function _invoke2( func, self, argv ) {
+    switch (argv.length) {
+    case 0: return func.call(self);
+    case 1: return func.call(self, argv[0]);
+    case 2: return func.call(self, argv[0], argv[1]);
+    case 3: return func.call(self, argv[0], argv[1], argv[2]);
+    default: return func.apply(self, argv);
+    }
 }
