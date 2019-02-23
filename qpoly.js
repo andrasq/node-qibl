@@ -106,19 +106,17 @@ function toStruct( obj ) {
     return toStruct.prototype = obj;
 }
 
-function varargs( handler ) {
+function varargs( handler, self ) {
     return function( /* VARARGS */ ) {
-        var len = arguments.length, arvgv = new Array();
+        var len = arguments.length, argv = new Array();
         for (var i=0; i<len; i++) argv.push(arguments[i]);
-        return handler(argv);
+        return handler(argv, self);
     }
 }
 
+// see also qinvoke
 function thunkify( func, self ) {
-    if (typeof func !== 'function') {
-        if (self) func = self[func];
-        if (typeof func !== 'function') throw new Error('not a function or method');
-    }
+    if (typeof func !== 'function') throw new Error('thunkify: not a function');
     return varargs(function(argv) {
         return function(cb) {
             argv.push(cb);
@@ -127,6 +125,7 @@ function thunkify( func, self ) {
     })
 }
 
+// see also qinvoke
 function _invoke1( func, argv ) {
     switch (argv.length) {
     case 0: return func();

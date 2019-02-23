@@ -135,9 +135,66 @@ module.exports = {
     },
 
     'varargs': {
+        'should call handler with the call args in an array': function(t) {
+            var gotArgs;
+            var obj = {};
+            function handler(argv, self) { gotArgs = argv }
+            qpoly.varargs(handler)();
+            t.deepEqual(gotArgs, []);
+            qpoly.varargs(handler)(1);
+            t.deepEqual(gotArgs, [1]);
+            qpoly.varargs(handler)(1, "two");
+            t.deepEqual(gotArgs, [1, "two"]);
+            qpoly.varargs(handler)(1, "two", obj);
+            t.deepEqual(gotArgs, [1, "two", obj]);
+            t.done();
+        },
+
+        'should pass along the provided self': function(t) {
+            var myItem = {};
+            function handler(argv, self) {
+                t.deepEqual(argv, [1, 2, 3]);
+                t.equal(self, myItem);
+                t.done();
+            }
+            qpoly.varargs(handler, myItem)(1, 2, 3);
+        },
     },
 
     'thunkify': {
+        'should return a function that curries the arguments and returns a function': function(t) {
+            var args;
+            var cb = function() {};
+            var func = function() { args = arguments };
+            var thunk = qpoly.thunkify(func);
+            t.equal(typeof thunk, 'function');
+            t.equal(typeof thunk(), 'function');
+            thunk(1, 2, 3)(cb);
+            t.equal(args[0], 1);
+            t.equal(args[1], 2);
+            t.equal(args[2], 3);
+            t.equal(args[3], cb);
+            t.done();
+        },
+
+        'should throw if not a function': function(t) {
+            t.throws(function() { qpoly.thunkify(3) }, /not a function/);
+            t.throws(function() { qpoly.thunkify({}) }, /not a function/);
+            t.throws(function() { qpoly.thunkify(false) }, /not a function/);
+            t.throws(function() { qpoly.thunkify(0) }, /not a function/);
+            t.throws(function() { qpoly.thunkify(null) }, /not a function/);
+            t.done();
+        },
+
+        'should invoke the function with a this object': function(t) {
+            var myItem = {};
+            function call() {
+                t.deepEqual([].slice.call(arguments, 0), [1, 2, 3, 4, null]);
+                t.equal(this, myItem);
+                t.done();
+            }
+            qpoly.thunkify(call, myItem)(1, 2, 3, 4)(null);
+        },
     },
 
     '_invoke1': {

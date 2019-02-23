@@ -55,3 +55,9 @@ layout for more efficient access.  Use over time can result in an object being o
 mapped lookups or optimized for hashed lookups, but making an object into a prototype forces
 an immediate conversion to mapped lookups.  To retain the speedup, do not add new properties
 to structs.
+
+### varargs( handler(argv, self) [,self] )
+
+Return a function that when called will in turn call handler with all its arguments in an
+array.  This functionality is no longer really needed with ES6 rest args, but is useful for
+portability.
