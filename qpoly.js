@@ -73,16 +73,21 @@ function fill( buf, ch, base, bound ) {
 
 // See also `qprintf`.
 function str_repeat( str, n ) {
-    switch (n) {
-    case 2: return '' + str + str;
-    case 1: return '' + str;
-    case 0: return '';
-    default:
-        var half = str_repeat(str, n >>> 1);
-        return (n & 1) ? (half + half + str) : (half + half);
+
+    if (typeof str !== 'string') str = String(str);
+    // if (n <= 2) return (n === 2) ? str + str : (n === 1) ? str : '';
+
+    // 20m x20 in 0.86s, vs 1.23s for self-recursive switch
+    var ret = '';
+    while (n >= 1) {
+        if (n & 1) ret += str;
+        str = str + str;
+        n = n >>> 1;
     }
+    return ret;
 }
 
+// see also sane-buffer
 function createBuffer( a, b, c ) {
     if (nodeVersion < 10) return new Buffer(a, b, c);
     else if (a != null && a.constructor === Number) return Buffer.allocUnsafe(a);
