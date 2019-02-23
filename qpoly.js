@@ -111,6 +111,20 @@ function toStruct( obj ) {
     return toStruct.prototype = obj;
 }
 
+/**
+// See also `kubelogger`.
+function removeAllListeners( emitter, event ) {
+    var listeners = emitter.listeners(event);
+    for (var i=0; i<listeners.length; i++) emitter.removeListener(event, listeners[i]);
+    return listeners;
+}
+
+function addListeners( emitter, event, listeners ) {
+    for (var i=0; i<listeners.length; i++) emitter.on(event, listeners[i]);
+    return listeners;
+}
+**/
+
 function varargs( handler, self ) {
     return function( /* VARARGS */ ) {
         var len = arguments.length, argv = new Array();
