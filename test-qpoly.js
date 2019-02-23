@@ -202,4 +202,21 @@ module.exports = {
 
     '_invoke2': {
     },
+
+    'escapeRegex': {
+        'should escape all metachars': function(t) {
+            var chars = [];
+            for (var i = 0; i < 128; i++) chars[i] = i;
+
+            var str = ".[]+()*?";
+            t.ok(!new RegExp(str).test(str));
+            t.ok(new RegExp(qpoly.escapeRegex(str)).test(str));
+
+            var str = new Buffer(chars).toString('binary');
+            t.throws(function() { new RegExp(str) });
+            t.ok(new RegExp(qpoly.escapeRegex(str)).test(str));
+
+            t.done();
+        },
+    },
 }

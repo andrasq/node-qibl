@@ -28,6 +28,7 @@ module.exports = {
     thunkify: thunkify,
     _invoke1: _invoke1,
     _invoke2: _invoke2,
+    escapeRegex: escapeRegex,
 };
 
 // hashes are generic objects without a class
@@ -163,4 +164,31 @@ function _invoke2( func, self, argv ) {
     case 3: return func.call(self, argv[0], argv[1], argv[2]);
     default: return func.apply(self, argv);
     }
+}
+
+/**
+function _copyFunctionProperties( target, src ) {
+    var name, names = Object.getOwnPropertyNames(src);
+    var skip = ['name', 'length', 'prototype'];
+    for (var i = 0; i < names.length; i++) {
+        if (skip.indexOf(names[i]) < 0) Object.defineProperty(target, names[i], Object.getOwnPropertyDescriptor(src, names[i]))
+    }
+}
+**/
+
+// backslash-escape the chars that have special meaning in regex strings
+// See also microrest, restiq.
+function escapeRegex( str ) {
+    // For PCRE or POSIX, the regex metacharacters are:
+    //   . [ (          - terms
+    //   * + ? {        - repetition specifiers
+    //   |              - alternation
+    //   \              - escape char
+    //   ^ $            - anchors
+    //   )              - close paren (else invalid node regex)
+    // Matching close chars ] } are not special without the open char.
+    // / is not special in a regex, it matches a literal /.
+    // : and = are not special outside of [] ranges or (?) conditionals.
+    // ) has to be escaped always, else results in "invalid regex"
+    return str.replace(/([.[(*+?{|\\^$=)])/g, '\\$1');
 }
