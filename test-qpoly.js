@@ -219,4 +219,38 @@ module.exports = {
             t.done();
         },
     },
+
+    'selectField': {
+        'should select column': function(t) {
+            t.deepEqual(qpoly.selectField([], 'k'), []);
+            t.deepEqual(qpoly.selectField([{a:1}, {k:2}, {c:3, k:4}, {d:5}], 'k'), [undefined, 2, 4, undefined]);
+            t.deepEqual(qpoly.selectField([null, undefined, 0, false], 'k'), [undefined, undefined, undefined, undefined]);
+            t.done();
+        },
+    },
+
+    'vinterpolate': {
+        'should interpolate fields': function(t) {
+            t.equal(qpoly.vinterpolate("foobar", "o", []), "foobar");
+            t.equal(qpoly.vinterpolate("foobar", "o", [1]), "f1obar");
+            t.equal(qpoly.vinterpolate("foobar", "o", [1, 2.5]), "f12.5bar");
+            t.equal(qpoly.vinterpolate("foobar", "oob", [3]), "f3ar");
+
+            t.equal(qpoly.vinterpolate("foobar", "boo", [1]), "foobar");
+            t.equal(qpoly.vinterpolate("foobar", "o", []), "foobar");
+            t.equal(qpoly.vinterpolate("oooo", "o", ['O', 'OO']), "OOOoo");
+
+            t.equal(qpoly.vinterpolate("o", "o", ['$ok ;|\' 3'], qpoly.addslashes), "\\$ok \\;\\|\\\' 3");
+
+            t.done();
+        },
+    },
+
+    'addslashes': {
+        'should escape dangerous metacharacters': function(t) {
+            t.equal(qpoly.addslashes(';|$"'), '\\;\\|\\$\\"');
+            t.equal(qpoly.addslashes("'"), "\\'");
+            t.done();
+        },
+    }
 }

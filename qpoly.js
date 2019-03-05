@@ -29,6 +29,9 @@ module.exports = {
     _invoke1: _invoke1,
     _invoke2: _invoke2,
     escapeRegex: escapeRegex,
+    selectField: selectField,
+    vinterpolate: vinterpolate,
+    addslashes: addslashes,
 };
 
 // hashes are generic objects without a class
@@ -192,3 +195,31 @@ function escapeRegex( str ) {
     // ) has to be escaped always, else results in "invalid regex"
     return str.replace(/([.[(*+?{|\\^$=)])/g, '\\$1');
 }
+
+function selectField( arrayOfObjects, key ) {
+    var values = new Array();
+    for (var i = 0; i < arrayOfObjects.length; i++) {
+        var obj = arrayOfObjects[i];
+        (obj == null) ? values.push(undefined) : values.push(obj[key]);
+    }
+    return values;
+}
+
+// replace each occurrence of patt in str with the next one of the args
+function vinterpolate( str, patt, args, addslashes ) {
+    var prevPos = 0, pos, ret = "", argix = 0;
+    while ((pos = str.indexOf(patt, prevPos)) >= 0 && argix < args.length) {
+        if (pos > prevPos) ret += str.slice(prevPos, pos);
+        ret += typeof args[argix] === 'number' ? args[argix++]
+            : addslashes ? addslashes(String(args[argix++]))
+            : String(args[argix++]);
+        prevPos = pos + patt.length;
+    }
+    if (prevPos < str.length) ret += str.slice(prevPos);
+    return ret;
+}
+
+function addslashes( str ) {
+    return str.replace(/([\'\"\\\x00\$;|])/g, '\\$1');
+}
+
