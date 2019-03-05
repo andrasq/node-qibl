@@ -240,7 +240,7 @@ module.exports = {
             t.equal(qpoly.vinterpolate("foobar", "o", []), "foobar");
             t.equal(qpoly.vinterpolate("oooo", "o", ['O', 'OO']), "OOOoo");
 
-            t.equal(qpoly.vinterpolate("o", "o", ['$ok ;|\' 3'], qpoly.addslashes), "\\$ok \\;\\|\\\' 3");
+            t.equal(qpoly.vinterpolate("o", "o", ['$ok ;|\' 3'], qpoly.addslashes), "$ok ;|\\\' 3");
 
             t.done();
         },
@@ -248,8 +248,9 @@ module.exports = {
 
     'addslashes': {
         'should escape dangerous metacharacters': function(t) {
-            t.equal(qpoly.addslashes(';|$"'), '\\;\\|\\$\\"');
-            t.equal(qpoly.addslashes("'"), "\\'");
+            var patt = /([\\"';|$])/g;
+            t.equal(qpoly.addslashes(';|$"', patt), '\\;\\|\\$\\"');
+            t.equal(qpoly.addslashes("'", patt), "\\'");
             t.done();
         },
     }

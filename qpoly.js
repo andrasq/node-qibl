@@ -219,7 +219,9 @@ function vinterpolate( str, patt, args, addslashes ) {
     return ret;
 }
 
-function addslashes( str ) {
-    return str.replace(/([\'\"\\\x00\$;|])/g, '\\$1');
+function addslashes( str, patt ) {
+    // TODO: default to escaping only \' \" \\ \0, pass them in for escapeshellcmd()
+    patt = patt || /([\'\"\\\x00])/g;
+    return str.replace(patt, '\\$1');
 }
 
