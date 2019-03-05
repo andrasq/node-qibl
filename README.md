@@ -37,17 +37,17 @@ Repeat the string value `str` `n` times.  N should be non-negative, else node wi
 of memory.  Uses an efficient binary subdivision approach.  Returns the repeated string.
 Similar to `String.prototype.repeat`.
 
-### createBuffer( arg, encodingOrOffset, length )
+### qpoly.createBuffer( arg, encodingOrOffset, length )
 
 Construct a Buffer like `new Buffer()` used to before it was deprecated.
 
-### bufferFactory( )
+### qpoly.bufferFactory( )
 
 Return a hash with three functions `from`, `alloc` and `allocUnsafe` that can each create a
 new Buffer.  The implementation delegates to either the Buffer constructor or the Buffer
 class factory methods, as appropriate.
 
-### toStruct( hash )
+### qpoly.toStruct( hash )
 
 Convert the object from hashed accesses to an optimized mapped accesses analogous to `C`
 `struct`s.  This is a hidden internal language detail; V8 optimizes objects with a static
@@ -56,13 +56,13 @@ mapped lookups or optimized for hashed lookups, but making an object into a prot
 an immediate conversion to mapped lookups.  To retain the speedup, do not add new properties
 to structs.
 
-### varargs( handler(argv, self) [,self] )
+### qpoly.varargs( handler(argv, self) [,self] )
 
 Return a function that when called will in turn call handler with all its arguments in an
 array.  This functionality is no longer really needed with ES6 rest args, but is useful for
 portability.
 
-### escapeRegex( str )
+### qpoly.escapeRegex( str )
 
 Backslash-escape all characters in str that would act as metacharacters inside a regular
 expression.  Returns the string with escapes added.
@@ -72,7 +72,7 @@ expression.  Returns the string with escapes added.
 Return an array with the values of the named property in each of the objects in the input
 array.
 
-### vinterpolate( string, substring, argv [,addslashes] )
+### qpoly.vinterpolate( string, substring, argv [,addslashes] )
 
 Replace each occurrence of the substring in string with the next argument in the vector
 argv.  Substrings without a corresponding argument are not replaced.
@@ -80,7 +80,7 @@ argv.  Substrings without a corresponding argument are not replaced.
     vinterpolate("Hello, %s!", '%s', ["world"]);
     // => "Hello, world!"
 
-### addslashes( str [,regex] )
+### qpoly.addslashes( str [,regex] )
 
 Backslash-escape characters in the string.  Without a regex, the characters escaped by
 default are ', ", \ and \0 (single-quote, double-quote, backslash and NUL).
