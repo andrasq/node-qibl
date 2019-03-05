@@ -21,7 +21,7 @@ Assign all enumerable own properties of the sources `src` onto `target`, and ret
 
 ### qpoly.merge( target, src1, ... )
 
-Recursively copy all enumerable properties of the source objects, inherited included, onto
+Recursively copy all enumerable properties of the source objects, including inherited properties, onto
 the `target` object.  All nested hashes are copied onto a new hash `{}` so the target
 will not share any sub-object with any of the sources.  Non-hash objects (ie instances of
 classes other than `Object`) are assigned by value.  Returns the `target`.
