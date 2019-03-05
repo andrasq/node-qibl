@@ -61,3 +61,32 @@ to structs.
 Return a function that when called will in turn call handler with all its arguments in an
 array.  This functionality is no longer really needed with ES6 rest args, but is useful for
 portability.
+
+### escapeRegex( str )
+
+Backslash-escape all characters in str that would act as metacharacters inside a regular
+expression.  Returns the string with escapes added.
+
+### selectField( arrayOfObjects, fieldName )
+
+Return an array with the values of the named property in each of the objects in the input
+array.
+
+### vinterpolate( string, substring, argv [,addslashes] )
+
+Replace each occurrence of the substring in string with the next argument in the vector
+argv.  Substrings without a corresponding argument are not replaced.
+
+    vinterpolate("Hello, %s!", '%s', ["world"]);
+    // => "Hello, world!"
+
+### addslashes( str [,regex] )
+
+Backslash-escape characters in the string.  Without a regex, the characters escaped by
+default are ', ", \ and \0 (single-quote, double-quote, backslash and NUL).
+
+If a regex is passed in, the patterns matched by its first capturing group will be the ones
+escaped instead.
+
+    addslashes("curl test.com/;cat /etc/passwd", /([;|&$])/g);
+    // => "curl test.com/\;cat /etc/passwd"

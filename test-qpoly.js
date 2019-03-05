@@ -248,7 +248,7 @@ module.exports = {
 
     'addslashes': {
         'should escape dangerous metacharacters': function(t) {
-            var patt = /([\\"';|$])/g;
+            var patt = /([\\"';|&$])/g;
             t.equal(qpoly.addslashes(';|$"', patt), '\\;\\|\\$\\"');
             t.equal(qpoly.addslashes("'", patt), "\\'");
             t.done();
