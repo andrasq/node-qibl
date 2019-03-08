@@ -225,3 +225,22 @@ function addslashes( str, patt ) {
     return str.replace(patt, '\\$1');
 }
 
+/**
+function readBody( emitter, cb ) {
+    var doneCount = 0, chunks = null;
+    emitter.on('data', function(chunk) {
+        if (!chunks) chunks = chunks;
+        else if (typeof chunks === 'string') chunks += chunk;
+        else if (Array.isArray(chunks)) chunks.push(chunk);
+        else chunks = new Array(chunks, chunk);
+    })
+    emitter.on('end', function() {
+        if (doneCount++) return;
+        if (!chunks || !Array.isArray(chunks)) return cb(null, chunks);
+        cb(null, Buffer.concat(chunks));
+    })
+    emitter.on('error', function(err) {
+        if (!doneCount++) cb(err);
+    })
+}
+**/
