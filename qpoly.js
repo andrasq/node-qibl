@@ -21,8 +21,9 @@ module.exports = {
     merge: merge,
     fill: fill,
     str_repeat: str_repeat,
-    createBuffer: createBuffer,
-    bufferFactory: bufferFactory,
+    newBuf: saneBuf().new,
+    allocBuf: saneBuf().alloc,
+    fromBuf: saneBuf().from,
     toStruct: toStruct,
     varargs: varargs,
     thunkify: thunkify,
@@ -91,24 +92,17 @@ function str_repeat( str, n ) {
     return ret;
 }
 
-// see also sane-buffer
-function createBuffer( a, b, c ) {
-    if (nodeVersion < 10) return new Buffer(a, b, c);
-    else if (a != null && a.constructor === Number) return Buffer.allocUnsafe(a);
-    else return Buffer.from(a, b, c);
-}
-
-function bufferFactory( ) {
-    if (nodeVersion < 10) return {
-        from: function(a, b, c) { return new Buffer(a, b, c) },
-        allocUnsafe: function(n) { return new Buffer(+n) },
-        alloc: function(n) { return fill(new Buffer(+n), 0, 0, +n) },
+// test-coverage-proof efficient polyfills to allocate new Buffers on any version of node
+// Note that newer node can take a very large hit if the Buffer constructor is called from a helper function:
+// allocBuf() and fromBuf() will be fast on all versions, but newBuf() will be slow on new node.
+// see also sane-buffer, qbson/lib/new-buffer
+var nodeMajor = parseInt(process.versions.node);
+function saneBuf( ) {
+    return {
+        new:   eval('nodeMajor < 10 ? Buffer : function(a, b, c) { return typeof(a) === "number" ? Buffer.allocUnsafe(a) : Buffer.from(a, b, c) }'),
+        alloc: eval('nodeMajor >= 6 ? Buffer.allocUnsafe : Buffer'),
+        from:  eval('nodeMajor >= 6 ? Buffer.from : Buffer'),
     }
-    else return {
-        from: Buffer.from,
-        allocUnsafe: Buffer.allocUnsafe,
-        alloc: Buffer.alloc,
-    };
 }
 
 function toStruct( obj ) {
@@ -203,6 +197,14 @@ function selectField( arrayOfObjects, key ) {
         (obj == null) ? values.push(undefined) : values.push(obj[key]);
     }
     return values;
+}
+
+// Object.values
+function values( object ) {
+    var keys = Object.keys(object);
+    var ret = new Array();
+    for (var i = 0; i < keys.length; i++) ret.push(object[keys[i]]);
+    return ret;
 }
 
 // replace each occurrence of patt in str with the next one of the args
