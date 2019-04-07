@@ -11,8 +11,8 @@
 
 var nodeVersion = parseInt(process.version.slice(1));
 
-var _invoke1 = (nodeVersion < 6) ? _invoke1 : eval("_invoke1 = function(func, argv) { func(...argv) }");
-var _invoke2 = (nodeVersion < 6) ? _invoke2 : eval("_invoke2 = function(func, self, argv) { func.call(self, ...argv) }");
+var invoke = eval("(nodeVersion < 6) && _invoke || function(func, argv) { func(...argv) }");
+var invoke2 = eval("(nodeVersion < 6) && _invoke2 || function(func, self, argv) { func.call(self, ...argv) }");
 
 module.exports = {
     isHash: isHash,
@@ -27,9 +27,12 @@ module.exports = {
     toStruct: toStruct,
     varargs: varargs,
     thunkify: thunkify,
-    _invoke1: _invoke1,
+    invoke: invoke,
+    invoke2: invoke2,
+    _invoke: _invoke,
     _invoke2: _invoke2,
     escapeRegex: escapeRegex,
+    values: values,
     selectField: selectField,
     vinterpolate: vinterpolate,
     addslashes: addslashes,
@@ -137,13 +140,13 @@ function thunkify( func, self ) {
     return varargs(function(argv) {
         return function(cb) {
             argv.push(cb);
-            self ? _invoke2(func, self, argv) : _invoke1(func, argv);
+            self ? invoke2(func, self, argv) : invoke(func, argv);
         }
     })
 }
 
 // see also qinvoke
-function _invoke1( func, argv ) {
+function _invoke( func, argv ) {
     switch (argv.length) {
     case 0: return func();
     case 1: return func(argv[0]);

@@ -202,10 +202,64 @@ module.exports = {
         },
     },
 
-    '_invoke1': {
-    },
+    'invoke': {
+        '_invoke should call function': function(t) {
+            var called = false;
+            var caller1 = function(a) { called = a };
+            var caller2 = function(a, b) { called = b };
+            var caller3 = function(a, b, c) { called = c };
+            var caller4 = function(a, b, c, d) { called = d };
+            qpoly._invoke(caller1, []);
+            t.strictEqual(called, undefined);
+            qpoly._invoke(caller1, [1]);
+            t.strictEqual(called, 1);
+            qpoly._invoke(caller2, [1, 2]);
+            t.strictEqual(called, 2);
+            qpoly._invoke(caller3, [1, 2, 3]);
+            t.strictEqual(called, 3);
+            qpoly._invoke(caller4, [1, 2, 3, 4]);
+            t.strictEqual(called, 4);
+            t.done();
+        },
 
-    '_invoke2': {
+        '_invoke2 should call method': function(t) {
+            var object = {
+                called: false,
+                caller1: function(a) { this.called = a },
+                caller2: function(a, b) { this.called = b },
+                caller3: function(a, b, c) { this.called = c },
+                caller4: function(a, b, c, d) { this.called = d },
+            };
+            qpoly._invoke2(object.caller1, object, []);
+            t.strictEqual(object.called, undefined);
+            qpoly._invoke2(object.caller1, object, [1]);
+            t.strictEqual(object.called, 1);
+            qpoly._invoke2(object.caller2, object, [1, 2]);
+            t.strictEqual(object.called, 2);
+            qpoly._invoke2(object.caller3, object, [1, 2, 3]);
+            t.strictEqual(object.called, 3);
+            qpoly._invoke2(object.caller4, object, [1, 2, 3, 4]);
+            t.strictEqual(object.called, 4);
+            t.done();
+        },
+
+        'invoke should call function': function(t) {
+            var called = false;
+            var caller5 = function(a, b, c, d, e) { called = arguments[4] };
+            qpoly.invoke(caller5, [1, 2, 3, 4, 5]);
+            t.strictEqual(called, 5);
+            t.done();
+        },
+
+        'invoke2 should call method': function(t) {
+            var object = {
+                called: false,
+                caller5: function(a, b, c, d, e) { this.called = arguments[4] },
+            };
+            qpoly.invoke2(object.caller5, object, [1, 2, 3, 4, 5]);
+            t.strictEqual(object.called, 5);
+            t.done();
+        },
     },
 
     'escapeRegex': {
@@ -230,6 +284,16 @@ module.exports = {
             t.deepEqual(qpoly.selectField([], 'k'), []);
             t.deepEqual(qpoly.selectField([{a:1}, {k:2}, {c:3, k:4}, {d:5}], 'k'), [undefined, 2, 4, undefined]);
             t.deepEqual(qpoly.selectField([null, undefined, 0, false], 'k'), [undefined, undefined, undefined, undefined]);
+            t.done();
+        },
+    },
+
+    'values': {
+        'should return values': function(t) {
+            t.deepEqual(qpoly.values(0), []);
+            t.deepEqual(qpoly.values("foo"), ['f', 'o', 'o']);
+            t.deepEqual(qpoly.values({}), []);
+            t.deepEqual(qpoly.values({a:1, b:"two"}), [1, "two"]);
             t.done();
         },
     },
