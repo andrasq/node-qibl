@@ -127,10 +127,42 @@ module.exports = {
         t.done();
     },
 
-    'createBuffer': {
-    },
+    'saneBuf': {
+        'newBuf should emulate legacy constructor': function(t) {
+            var buf = qpoly.newBuf("foo");
+            t.ok(Buffer.isBuffer(buf));
+            t.equal(buf.length, 3);
+            for (var i=0; i<3; i++) t.equal(buf[i], "foo".charCodeAt(i));
 
-    'bufferFactory': {
+            var buf = qpoly.newBuf(4);
+            t.ok(Buffer.isBuffer(buf));
+            t.equal(buf.length, 4);
+
+            t.done();
+        },
+
+        'should construct from string': function(t) {
+            var buf = qpoly.fromBuf("foobar");
+            t.ok(Buffer.isBuffer(buf));
+            t.equal(buf.length, 6);
+            for (var i=0; i<6; i++) t.equal(buf[i], "foobar".charCodeAt(i));
+            t.done();
+        },
+
+        'should construct from Buffer': function(t) {
+            var buf = qpoly.fromBuf(qpoly.fromBuf("foobar"));
+            t.ok(Buffer.isBuffer(buf));
+            t.equal(buf.length, 6);
+            for (var i=0; i<6; i++) t.equal(buf[i], "foobar".charCodeAt(i));
+            t.done();
+        },
+
+        'should allocate by length': function(t) {
+            var buf = qpoly.allocBuf(7);
+            t.ok(Buffer.isBuffer(buf));
+            t.equal(buf.length, 7);
+            t.done();
+        },
     },
 
     'toStruct should return struct': function(t) {
@@ -209,15 +241,15 @@ module.exports = {
             var caller2 = function(a, b) { called = b };
             var caller3 = function(a, b, c) { called = c };
             var caller4 = function(a, b, c, d) { called = d };
-            qpoly._invoke(caller1, []);
+            qpoly._invoke1(caller1, []);
             t.strictEqual(called, undefined);
-            qpoly._invoke(caller1, [1]);
+            qpoly._invoke1(caller1, [1]);
             t.strictEqual(called, 1);
-            qpoly._invoke(caller2, [1, 2]);
+            qpoly._invoke1(caller2, [1, 2]);
             t.strictEqual(called, 2);
-            qpoly._invoke(caller3, [1, 2, 3]);
+            qpoly._invoke1(caller3, [1, 2, 3]);
             t.strictEqual(called, 3);
-            qpoly._invoke(caller4, [1, 2, 3, 4]);
+            qpoly._invoke1(caller4, [1, 2, 3, 4]);
             t.strictEqual(called, 4);
             t.done();
         },
