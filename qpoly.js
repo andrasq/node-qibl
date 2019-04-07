@@ -100,7 +100,6 @@ function str_repeat( str, n ) {
 // Note that newer node can take a very large hit if the Buffer constructor is called from a helper function:
 // allocBuf() and fromBuf() will be fast on all versions, but newBuf() will be slow on new node.
 // see also sane-buffer, qbson/lib/new-buffer
-var nodeMajor = parseInt(process.versions.node);
 function saneBuf( ) {
     return {
         new:   eval('nodeMajor < 10 ? Buffer : function(a, b, c) { return typeof(a) === "number" ? Buffer.allocUnsafe(a) : Buffer.from(a, b, c) }'),
