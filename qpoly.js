@@ -136,7 +136,7 @@ function varargs( handler, self ) {
 
 // see also qinvoke
 function thunkify( func, self ) {
-    if (typeof func !== 'function') throw new Error('thunkify: not a function');
+    if (typeof func !== 'function') throw new TypeError('not a function');
     return varargs(function(argv) {
         return function(cb) {
             argv.push(cb);
