@@ -1,6 +1,6 @@
 {
   "name": "qpoly",
-  "varsion": "0.0.0",
+  "varsion": "0.1.0",
   "description": "handy polyfills I've needed over time",
   "keywords": [ "repeat", "fill", "assign", "merge", "polyfill" ],
   "main": "qpoly.js",
