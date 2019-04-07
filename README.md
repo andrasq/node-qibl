@@ -34,43 +34,72 @@ Fill the buffer or array with the value `ch` from starting offset `base` and up 
 ### qpoly.str_repeat( str, n )
 
 Repeat the string value `str` `n` times.  N should be non-negative, else node will run out
-of memory.  Uses an efficient binary subdivision approach.  Returns the repeated string.
+of memory.  Uses an efficient O(log n) string doubling approach.  Returns the repeated string.
 Similar to `String.prototype.repeat`.
 
-### qpoly.createBuffer( arg, encodingOrOffset, length )
+### qpoly.newBuf( arg, encodingOrOffset, length )
 
 Construct a Buffer like `new Buffer()` used to before it was deprecated.
 
-### qpoly.bufferFactory( )
+### qpoly.allocBuf( length )
 
-Return a hash with three functions `from`, `alloc` and `allocUnsafe` that can each create a
-new Buffer.  The implementation delegates to either the Buffer constructor or the Buffer
-class factory methods, as appropriate.
+Create a new Buffer having the given length, with contents uninitialized.
+
+### qpoly.fromBuf( contents )
+
+Create a new Buffer with its contents pre-initialized to the given string, array or buffer.
 
 ### qpoly.toStruct( hash )
 
 Convert the object from hashed accesses to an optimized mapped accesses analogous to `C`
-`struct`s.  This is a hidden internal language detail; V8 optimizes objects with a static
-layout for more efficient access.  Use over time can result in an object being optimized for
-mapped lookups or optimized for hashed lookups, but making an object into a prototype forces
-an immediate conversion to mapped lookups.  To retain the speedup, do not add new properties
-to structs.
+`struct`s.  This exposes a hidden internal language detail:  V8 optimizes objects with a static
+layout for more efficient access.
+
+Accessing an object can over time result in it being optimized for mapped lookups or
+optimized for hashed lookups, but making an object into a prototype forces an immediate
+conversion to mapped lookups.  To retain the speedup, do not add new properties.
 
 ### qpoly.varargs( handler(argv, self) [,self] )
 
 Return a function that when called will in turn call handler with all its arguments in an
 array.  This functionality is no longer really needed with ES6 rest args, but is useful for
-portability.
+portability.  It is not slower than rest args.
+
+### qpoly.thunkify( func [,self] )
+
+Split the method into two functions, one (the `thunk`) to partially apply the
+function to the arguments and to return the other (the `invoke`) that runs the
+function when called with a callback.  `thunkify` returns the thunk.
+
+For example, given a function `fn(a, b, cb)`:
+
+    function thunk(a, b) {
+        return function invoke(cb) {
+            return fn(a, b, cb);
+        }
+    }
+
+### qpoly.invoke( fn, argv )
+
+Call the function with the given argument vector.
+
+### qpoly.invoke2( fn, self, argv )
+
+Call the method on the object `self` with the given argument vector.
 
 ### qpoly.escapeRegex( str )
 
 Backslash-escape all characters in str that would act as metacharacters inside a regular
 expression.  Returns the string with escapes added.
 
-### selectField( arrayOfObjects, fieldName )
+### qpoly.values( object )
 
-Return an array with the values of the named property in each of the objects in the input
-array.
+Return an array with the own properties of the object.  Similar to `Object.values`.
+
+### selectField( arrayOfObjects, propertyName )
+
+Return an array with the values of the named property from each object in the input
+array.  The value is `undefined` if the property is not set.
 
 ### qpoly.vinterpolate( string, substring, argv [,addslashes] )
 

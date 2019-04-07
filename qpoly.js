@@ -16,8 +16,7 @@ var invoke2 = eval("(nodeVersion < 6) && _invoke2 || function(func, self, argv) 
 
 module.exports = {
     isHash: isHash,
-    assign: copyObject,
-    copyObject: copyObject,
+    copyObject: copyObject,     assign: copyObject,
     merge: merge,
     fill: fill,
     str_repeat: str_repeat,
@@ -27,8 +26,7 @@ module.exports = {
     toStruct: toStruct,
     varargs: varargs,
     thunkify: thunkify,
-    invoke: invoke1,
-    invoke1: invoke1,
+    invoke: invoke1,            invoke1: invoke1,
     invoke2: invoke2,
     _invoke1: _invoke1,
     _invoke2: _invoke2,
