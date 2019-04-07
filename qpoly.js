@@ -9,10 +9,12 @@
 
 'use strict';
 
-var nodeVersion = parseInt(process.version.slice(1));
+var nodeMajor = parseInt(process.versions.node);
 
-var invoke1 = eval("(nodeVersion < 6) && _invoke1 || function(func, argv) { func(...argv) }");
-var invoke2 = eval("(nodeVersion < 6) && _invoke2 || function(func, self, argv) { func.call(self, ...argv) }");
+var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { func(...argv) }')");
+var invoke2 = eval("(nodeMajor < 6) && _invoke2 || tryEval('function(func, self, argv) { func.call(self, ...argv) }')");
+
+function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
 
 module.exports = {
     isHash: isHash,

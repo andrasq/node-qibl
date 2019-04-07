@@ -6,6 +6,7 @@
 'use strict'
 
 var qpoly = require('./');
+var nodeMajor = parseInt(process.versions.node);
 
 module.exports = {
     'isHash should identify hashes': function(t) {
@@ -303,7 +304,7 @@ module.exports = {
             t.ok(!new RegExp(str).test(str));
             t.ok(new RegExp(qpoly.escapeRegex(str)).test(str));
 
-            var str = new Buffer(chars).toString('binary');
+            var str = qpoly.newBuf(chars).toString('binary');
             t.throws(function() { new RegExp(str) });
             t.ok(new RegExp(qpoly.escapeRegex(str)).test(str));
 
@@ -322,8 +323,11 @@ module.exports = {
 
     'values': {
         'should return values': function(t) {
-            t.deepEqual(qpoly.values(0), []);
-            t.deepEqual(qpoly.values("foo"), ['f', 'o', 'o']);
+            if (nodeMajor >= 4) {
+                // node-v0.12 and older throw if Object.keys given a non-object
+                t.deepEqual(qpoly.values(0), []);
+                t.deepEqual(qpoly.values("foo"), ['f', 'o', 'o']);
+            }
             t.deepEqual(qpoly.values({}), []);
             t.deepEqual(qpoly.values({a:1, b:"two"}), [1, "two"]);
             t.done();
