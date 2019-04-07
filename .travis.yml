@@ -1,0 +1,19 @@
+language: node_js
+node_js:
+  - 0.6
+  - 0.8
+  - 0.10
+  - 4
+  - 5.8.0
+  - 5.12.0
+  - 6
+  - 8
+  - 10
+  - 11
+before_install:
+  - npm install -g qnit
+after_success:
+  - if [ `node -p 'process.version.slice(0, 3)'` != "v8." ]; then exit; fi
+  - npm install -g nyc codecov coveralls
+  - nyc -r text --reporter lcov npm test && codecov
+  - nyc report -r text-lcov | coveralls

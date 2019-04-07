@@ -5,6 +5,7 @@
   "keywords": [ "repeat", "fill", "assign", "merge", "polyfill" ],
   "main": "qpoly.js",
   "license": "Apache-2.0",
+  "files": ["REAMDE.md", "qpoly.js"],
 
   "scripts": {
     "test": "qnit test-*",
