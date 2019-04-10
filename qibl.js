@@ -104,6 +104,7 @@ function saneBuf( ) {
     return {
         new:   eval('nodeMajor < 10 ? Buffer : function(a, b, c) { return typeof(a) === "number" ? Buffer.allocUnsafe(a) : Buffer.from(a, b, c) }'),
         alloc: eval('nodeMajor >= 6 ? Buffer.allocUnsafe : Buffer'),
+        // allocFill: function(n, ch) { var buf = qibl.allocBuf(n); if (ch !== undefined) qibl.fill(buf, ch); return buf },
         from:  eval('nodeMajor >= 6 ? Buffer.from : Buffer'),
     }
 }
