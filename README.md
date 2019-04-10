@@ -6,7 +6,7 @@ qibl
 Quick Itty-Bitty Library.
 
 A miscellaneous collection of small functions and polyfills I wrote that that I found myself
-needing again, gathered into a single place.  Most are pretty efficient, at times faster even
+reusing, gathered into a single place.  Most are pretty efficient, at times faster even
 than the equivalent built-in.
 
 To run the tests, check out the repo.
@@ -47,7 +47,7 @@ Accessing an object can over time result in it being optimized for mapped lookup
 optimized for hashed lookups, but making an object into a prototype forces an immediate
 conversion to mapped lookups.  To retain the speedup, do not add new properties.
 
-### selectField( arrayOfObjects, propertyName )
+### qibl.selectField( arrayOfObjects, propertyName )
 
 Return an array with the values of the named property from each object in the input
 array.  The value is `undefined` if the property is not set.
