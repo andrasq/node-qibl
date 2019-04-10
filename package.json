@@ -1,8 +1,8 @@
 {
   "name": "qibl",
   "varsion": "1.0.0",
-  "description": "handy polyfills I've needed over time",
-  "keywords": [ "repeat", "fill", "assign", "merge", "polyfill" ],
+  "description": "small functions I've found useful",
+  "keywords": [ "repeat", "fill", "assign", "merge", "polyfill", "toStruct" ],
   "main": "qibl.js",
   "license": "Apache-2.0",
   "files": ["REAMDE.md", "qpoly.js"],
