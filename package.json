@@ -1,11 +1,12 @@
 {
-  "name": "qpoly",
-  "varsion": "0.1.0",
+  "name": "qibl",
+  "varsion": "1.0.0",
   "description": "handy polyfills I've needed over time",
   "keywords": [ "repeat", "fill", "assign", "merge", "polyfill" ],
-  "main": "qpoly.js",
+  "main": "qibl.js",
   "license": "Apache-2.0",
   "files": ["REAMDE.md", "qpoly.js"],
+  "repository": { "type": "git", "url": "git://github.com/andrasq/node-qibl" },
 
   "scripts": {
     "test": "qnit test-*",
