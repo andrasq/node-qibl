@@ -1,11 +1,15 @@
 qibl
 ====
+[![Build Status](https://travis-ci.org/andrasq/node-qibl.svg?branch=master)](https://travis-ci.org/andrasq/node-qibl)
+[![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qibl/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qibl?branch=master)
 
 Quick Itty-Bitty Library.
 
 A miscellaneous collection of small functions and polyfills I wrote that that I found myself
 needing again, gathered into a single place.  Most are pretty efficient, at times faster even
 than the equivalent built-in.
+
+To run the tests, check out the repo.
 
     qibl = require('qibl');
 
@@ -43,7 +47,8 @@ Equivalent to `String.prototype.repeat`.
 
 ### qibl.newBuf( arg, encodingOrOffset, length )
 
-Construct a Buffer like `new Buffer()` used to before it was deprecated.
+Construct a Buffer like `new Buffer()` used to before it was deprecated.  Note that with
+newer node the constructor polyfill is slow compared to the `allocBuf` and `fromBuf` builders.
 
 ### qibl.allocBuf( length )
 
