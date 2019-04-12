@@ -358,5 +358,16 @@ module.exports = {
             t.equal(qpoly.addslashes("'", patt), "\\'");
             t.done();
         },
-    }
+    },
+
+    'tryRequire': {
+        'should require or return undefined': function(t) {
+            var pack = qibl.tryRequire('./package');
+            var empty = qibl.tryRequire('./nonesuch');
+            var version = require('./package').version;
+            t.equal(pack.version, version);
+            t.strictEqual(empty, undefined);
+            t.done();
+        }
+    },
 }

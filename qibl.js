@@ -32,6 +32,7 @@ module.exports = {
     invoke2: invoke2,
     _invoke1: _invoke1,
     _invoke2: _invoke2,
+    tryRequire: tryRequire,
     escapeRegex: escapeRegex,
     values: values,
     selectField: selectField,
@@ -165,6 +166,10 @@ function _invoke2( func, self, argv ) {
     case 3: return func.call(self, argv[0], argv[1], argv[2]);
     default: return func.apply(self, argv);
     }
+}
+
+function tryRequire( name ) {
+    try { return require(name) } catch (e) { }
 }
 
 /**
