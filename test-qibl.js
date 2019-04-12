@@ -5,7 +5,7 @@
 
 'use strict'
 
-var qpoly = require('./');
+var qibl = require('./');
 var nodeMajor = parseInt(process.versions.node);
 
 module.exports = {
@@ -32,7 +32,7 @@ module.exports = {
         ];
 
         for (var i=0; i<tests.length; i++) {
-            t.equal(qpoly.isHash(tests[i][0]), tests[i][1], 'test ' + i + ' ' + tests[i]);
+            t.equal(qibl.isHash(tests[i][0]), tests[i][1], 'test ' + i + ' ' + tests[i]);
         }
 
         t.done();
@@ -40,18 +40,18 @@ module.exports = {
 
     'copyObject': {
         'should copy properties': function(t) {
-            t.deepEqual(qpoly.copyObject({}), {});
-            t.deepEqual(qpoly.copyObject({a:1}), {a:1});
-            t.deepEqual(qpoly.copyObject({}, {a:1, b:2}), {a:1, b:2});
-            t.deepEqual(qpoly.copyObject({}, {a:1}, {b:2}), {a:1, b:2});
-            t.deepEqual(qpoly.copyObject({a:1}, {b:2}, {}), {a:1, b:2});
-            t.deepEqual(qpoly.copyObject({a:1, b:2}, {}), {a:1, b:2});
+            t.deepEqual(qibl.copyObject({}), {});
+            t.deepEqual(qibl.copyObject({a:1}), {a:1});
+            t.deepEqual(qibl.copyObject({}, {a:1, b:2}), {a:1, b:2});
+            t.deepEqual(qibl.copyObject({}, {a:1}, {b:2}), {a:1, b:2});
+            t.deepEqual(qibl.copyObject({a:1}, {b:2}, {}), {a:1, b:2});
+            t.deepEqual(qibl.copyObject({a:1, b:2}, {}), {a:1, b:2});
             t.done();
         },
 
         'should assign the properties directly': function(t) {
             var a = { a: new Date(), b: {c:{}} };
-            var b = qpoly.copyObject({}, a);
+            var b = qibl.copyObject({}, a);
             t.deepStrictEqual(b, a);
             t.strictEqual(b.a, a.a);
             t.strictEqual(b.b, a.b);
@@ -64,25 +64,25 @@ module.exports = {
             C.prototype.x = 1;
             var a = new C();
             a.a = 1;
-            t.deepEqual(qpoly.copyObject({}, a), {a:1});
+            t.deepEqual(qibl.copyObject({}, a), {a:1});
             t.done();
         },
     },
 
     'merge': {
         'should merge all properties': function(t) {
-            t.deepEqual(qpoly.merge({}), {});
-            t.deepEqual(qpoly.merge({}, {}), {});
-            t.deepEqual(qpoly.merge({}, {a:1}), {a:1});
-            t.deepEqual(qpoly.merge({}, {a:1}, {b:2}, {c:3}), {a:1, b:2, c:3});
-            t.deepEqual(qpoly.merge({}, {a: {b:2, c:3}}), {a: {b:2, c:3}});
-            t.deepEqual(qpoly.merge({a: {b:1}}, {a: {b:2, c:3}}), {a: {b:2, c:3}});
+            t.deepEqual(qibl.merge({}), {});
+            t.deepEqual(qibl.merge({}, {}), {});
+            t.deepEqual(qibl.merge({}, {a:1}), {a:1});
+            t.deepEqual(qibl.merge({}, {a:1}, {b:2}, {c:3}), {a:1, b:2, c:3});
+            t.deepEqual(qibl.merge({}, {a: {b:2, c:3}}), {a: {b:2, c:3}});
+            t.deepEqual(qibl.merge({a: {b:1}}, {a: {b:2, c:3}}), {a: {b:2, c:3}});
             t.done();
         },
 
         'should not share sub-objects': function(t) {
             var a = {a:{}}, b = {a:{b:2}}, c = {a:{c:3}};
-            var all = qpoly.merge(a, b, c);
+            var all = qibl.merge(a, b, c);
             t.equal(all.a, a.a);
             t.notEqual(all.a, b.a);
             t.notEqual(all.a, c.a);
@@ -94,16 +94,16 @@ module.exports = {
             C.prototype.x = 1;
             var a = new C();
             a.a = 1;
-            t.deepEqual(qpoly.merge({}, a), {a:1, x:1});
+            t.deepEqual(qibl.merge({}, a), {a:1, x:1});
             t.done();
         },
     },
 
     'fill should set array elements': function(t) {
         var arr = new Array(3);
-        t.deepEqual(qpoly.fill(arr, 3), [3, 3, 3]);
-        t.deepEqual(qpoly.fill(arr, 5, 2), [3, 3, 5]);
-        t.deepEqual(qpoly.fill(arr, 5, 3, 5), [3, 3, 5, 5, 5]);
+        t.deepEqual(qibl.fill(arr, 3), [3, 3, 3]);
+        t.deepEqual(qibl.fill(arr, 5, 2), [3, 3, 5]);
+        t.deepEqual(qibl.fill(arr, 5, 3, 5), [3, 3, 5, 5, 5]);
         t.done();
     },
 
@@ -122,7 +122,7 @@ module.exports = {
         ];
 
         for (var i=0; i<tests.length; i++) {
-            t.equal(qpoly.str_repeat(tests[i][0], tests[i][1]), tests[i][2]);
+            t.equal(qibl.str_repeat(tests[i][0], tests[i][1]), tests[i][2]);
         }
 
         t.done();
@@ -130,12 +130,12 @@ module.exports = {
 
     'saneBuf': {
         'newBuf should emulate legacy constructor': function(t) {
-            var buf = qpoly.newBuf("foo");
+            var buf = qibl.newBuf("foo");
             t.ok(Buffer.isBuffer(buf));
             t.equal(buf.length, 3);
             for (var i=0; i<3; i++) t.equal(buf[i], "foo".charCodeAt(i));
 
-            var buf = qpoly.newBuf(4);
+            var buf = qibl.newBuf(4);
             t.ok(Buffer.isBuffer(buf));
             t.equal(buf.length, 4);
 
@@ -143,7 +143,7 @@ module.exports = {
         },
 
         'should construct from string': function(t) {
-            var buf = qpoly.fromBuf("foobar");
+            var buf = qibl.fromBuf("foobar");
             t.ok(Buffer.isBuffer(buf));
             t.equal(buf.length, 6);
             for (var i=0; i<6; i++) t.equal(buf[i], "foobar".charCodeAt(i));
@@ -151,7 +151,7 @@ module.exports = {
         },
 
         'should construct from Buffer': function(t) {
-            var buf = qpoly.fromBuf(qpoly.fromBuf("foobar"));
+            var buf = qibl.fromBuf(qibl.fromBuf("foobar"));
             t.ok(Buffer.isBuffer(buf));
             t.equal(buf.length, 6);
             for (var i=0; i<6; i++) t.equal(buf[i], "foobar".charCodeAt(i));
@@ -159,7 +159,7 @@ module.exports = {
         },
 
         'should allocate by length': function(t) {
-            var buf = qpoly.allocBuf(7);
+            var buf = qibl.allocBuf(7);
             t.ok(Buffer.isBuffer(buf));
             t.equal(buf.length, 7);
             t.done();
@@ -168,7 +168,7 @@ module.exports = {
 
     'toStruct should return struct': function(t) {
         var hash = new Object({a:1});
-        t.equal(qpoly.toStruct(hash), hash);
+        t.equal(qibl.toStruct(hash), hash);
         t.done();
     },
 
@@ -177,13 +177,13 @@ module.exports = {
             var gotArgs;
             var obj = {};
             function handler(argv, self) { gotArgs = argv }
-            qpoly.varargs(handler)();
+            qibl.varargs(handler)();
             t.deepEqual(gotArgs, []);
-            qpoly.varargs(handler)(1);
+            qibl.varargs(handler)(1);
             t.deepEqual(gotArgs, [1]);
-            qpoly.varargs(handler)(1, "two");
+            qibl.varargs(handler)(1, "two");
             t.deepEqual(gotArgs, [1, "two"]);
-            qpoly.varargs(handler)(1, "two", obj);
+            qibl.varargs(handler)(1, "two", obj);
             t.deepEqual(gotArgs, [1, "two", obj]);
             t.done();
         },
@@ -195,7 +195,7 @@ module.exports = {
                 t.equal(self, myItem);
                 t.done();
             }
-            qpoly.varargs(handler, myItem)(1, 2, 3);
+            qibl.varargs(handler, myItem)(1, 2, 3);
         },
     },
 
@@ -204,7 +204,7 @@ module.exports = {
             var args;
             var cb = function() {};
             var func = function() { args = arguments };
-            var thunk = qpoly.thunkify(func);
+            var thunk = qibl.thunkify(func);
             t.equal(typeof thunk, 'function');
             t.equal(typeof thunk(), 'function');
             thunk(1, 2, 3)(cb);
@@ -216,11 +216,11 @@ module.exports = {
         },
 
         'should throw if not a function': function(t) {
-            t.throws(function() { qpoly.thunkify(3) }, /not a function/);
-            t.throws(function() { qpoly.thunkify({}) }, /not a function/);
-            t.throws(function() { qpoly.thunkify(false) }, /not a function/);
-            t.throws(function() { qpoly.thunkify(0) }, /not a function/);
-            t.throws(function() { qpoly.thunkify(null) }, /not a function/);
+            t.throws(function() { qibl.thunkify(3) }, /not a function/);
+            t.throws(function() { qibl.thunkify({}) }, /not a function/);
+            t.throws(function() { qibl.thunkify(false) }, /not a function/);
+            t.throws(function() { qibl.thunkify(0) }, /not a function/);
+            t.throws(function() { qibl.thunkify(null) }, /not a function/);
             t.done();
         },
 
@@ -231,7 +231,7 @@ module.exports = {
                 t.equal(this, myItem);
                 t.done();
             }
-            qpoly.thunkify(call, myItem)(1, 2, 3, 4)(null);
+            qibl.thunkify(call, myItem)(1, 2, 3, 4)(null);
         },
     },
 
@@ -242,15 +242,15 @@ module.exports = {
             var caller2 = function(a, b) { called = b };
             var caller3 = function(a, b, c) { called = c };
             var caller4 = function(a, b, c, d) { called = d };
-            qpoly._invoke1(caller1, []);
+            qibl._invoke1(caller1, []);
             t.strictEqual(called, undefined);
-            qpoly._invoke1(caller1, [1]);
+            qibl._invoke1(caller1, [1]);
             t.strictEqual(called, 1);
-            qpoly._invoke1(caller2, [1, 2]);
+            qibl._invoke1(caller2, [1, 2]);
             t.strictEqual(called, 2);
-            qpoly._invoke1(caller3, [1, 2, 3]);
+            qibl._invoke1(caller3, [1, 2, 3]);
             t.strictEqual(called, 3);
-            qpoly._invoke1(caller4, [1, 2, 3, 4]);
+            qibl._invoke1(caller4, [1, 2, 3, 4]);
             t.strictEqual(called, 4);
             t.done();
         },
@@ -263,15 +263,15 @@ module.exports = {
                 caller3: function(a, b, c) { this.called = c },
                 caller4: function(a, b, c, d) { this.called = d },
             };
-            qpoly._invoke2(object.caller1, object, []);
+            qibl._invoke2(object.caller1, object, []);
             t.strictEqual(object.called, undefined);
-            qpoly._invoke2(object.caller1, object, [1]);
+            qibl._invoke2(object.caller1, object, [1]);
             t.strictEqual(object.called, 1);
-            qpoly._invoke2(object.caller2, object, [1, 2]);
+            qibl._invoke2(object.caller2, object, [1, 2]);
             t.strictEqual(object.called, 2);
-            qpoly._invoke2(object.caller3, object, [1, 2, 3]);
+            qibl._invoke2(object.caller3, object, [1, 2, 3]);
             t.strictEqual(object.called, 3);
-            qpoly._invoke2(object.caller4, object, [1, 2, 3, 4]);
+            qibl._invoke2(object.caller4, object, [1, 2, 3, 4]);
             t.strictEqual(object.called, 4);
             t.done();
         },
@@ -279,7 +279,7 @@ module.exports = {
         'invoke should call function': function(t) {
             var called = false;
             var caller5 = function(a, b, c, d, e) { called = arguments[4] };
-            qpoly.invoke(caller5, [1, 2, 3, 4, 5]);
+            qibl.invoke(caller5, [1, 2, 3, 4, 5]);
             t.strictEqual(called, 5);
             t.done();
         },
@@ -289,7 +289,7 @@ module.exports = {
                 called: false,
                 caller5: function(a, b, c, d, e) { this.called = arguments[4] },
             };
-            qpoly.invoke2(object.caller5, object, [1, 2, 3, 4, 5]);
+            qibl.invoke2(object.caller5, object, [1, 2, 3, 4, 5]);
             t.strictEqual(object.called, 5);
             t.done();
         },
@@ -302,11 +302,11 @@ module.exports = {
 
             var str = ".[]+()*?";
             t.ok(!new RegExp(str).test(str));
-            t.ok(new RegExp(qpoly.escapeRegex(str)).test(str));
+            t.ok(new RegExp(qibl.escapeRegex(str)).test(str));
 
-            var str = qpoly.newBuf(chars).toString('binary');
+            var str = qibl.newBuf(chars).toString('binary');
             t.throws(function() { new RegExp(str) });
-            t.ok(new RegExp(qpoly.escapeRegex(str)).test(str));
+            t.ok(new RegExp(qibl.escapeRegex(str)).test(str));
 
             t.done();
         },
@@ -314,9 +314,9 @@ module.exports = {
 
     'selectField': {
         'should select column': function(t) {
-            t.deepEqual(qpoly.selectField([], 'k'), []);
-            t.deepEqual(qpoly.selectField([{a:1}, {k:2}, {c:3, k:4}, {d:5}], 'k'), [undefined, 2, 4, undefined]);
-            t.deepEqual(qpoly.selectField([null, undefined, 0, false], 'k'), [undefined, undefined, undefined, undefined]);
+            t.deepEqual(qibl.selectField([], 'k'), []);
+            t.deepEqual(qibl.selectField([{a:1}, {k:2}, {c:3, k:4}, {d:5}], 'k'), [undefined, 2, 4, undefined]);
+            t.deepEqual(qibl.selectField([null, undefined, 0, false], 'k'), [undefined, undefined, undefined, undefined]);
             t.done();
         },
     },
@@ -325,27 +325,27 @@ module.exports = {
         'should return values': function(t) {
             if (nodeMajor >= 4) {
                 // node-v0.12 and older throw if Object.keys given a non-object
-                t.deepEqual(qpoly.values(0), []);
-                t.deepEqual(qpoly.values("foo"), ['f', 'o', 'o']);
+                t.deepEqual(qibl.values(0), []);
+                t.deepEqual(qibl.values("foo"), ['f', 'o', 'o']);
             }
-            t.deepEqual(qpoly.values({}), []);
-            t.deepEqual(qpoly.values({a:1, b:"two"}), [1, "two"]);
+            t.deepEqual(qibl.values({}), []);
+            t.deepEqual(qibl.values({a:1, b:"two"}), [1, "two"]);
             t.done();
         },
     },
 
     'vinterpolate': {
         'should interpolate fields': function(t) {
-            t.equal(qpoly.vinterpolate("foobar", "o", []), "foobar");
-            t.equal(qpoly.vinterpolate("foobar", "o", [1]), "f1obar");
-            t.equal(qpoly.vinterpolate("foobar", "o", [1, 2.5]), "f12.5bar");
-            t.equal(qpoly.vinterpolate("foobar", "oob", [3]), "f3ar");
+            t.equal(qibl.vinterpolate("foobar", "o", []), "foobar");
+            t.equal(qibl.vinterpolate("foobar", "o", [1]), "f1obar");
+            t.equal(qibl.vinterpolate("foobar", "o", [1, 2.5]), "f12.5bar");
+            t.equal(qibl.vinterpolate("foobar", "oob", [3]), "f3ar");
 
-            t.equal(qpoly.vinterpolate("foobar", "boo", [1]), "foobar");
-            t.equal(qpoly.vinterpolate("foobar", "o", []), "foobar");
-            t.equal(qpoly.vinterpolate("oooo", "o", ['O', 'OO']), "OOOoo");
+            t.equal(qibl.vinterpolate("foobar", "boo", [1]), "foobar");
+            t.equal(qibl.vinterpolate("foobar", "o", []), "foobar");
+            t.equal(qibl.vinterpolate("oooo", "o", ['O', 'OO']), "OOOoo");
 
-            t.equal(qpoly.vinterpolate("o", "o", ['$ok ;|\' 3'], qpoly.addslashes), "$ok ;|\\\' 3");
+            t.equal(qibl.vinterpolate("o", "o", ['$ok ;|\' 3'], qibl.addslashes), "$ok ;|\\\' 3");
 
             t.done();
         },
@@ -354,8 +354,8 @@ module.exports = {
     'addslashes': {
         'should escape dangerous metacharacters': function(t) {
             var patt = /([\\"';|&$])/g;
-            t.equal(qpoly.addslashes(';|$"', patt), '\\;\\|\\$\\"');
-            t.equal(qpoly.addslashes("'", patt), "\\'");
+            t.equal(qibl.addslashes(';|$"', patt), '\\;\\|\\$\\"');
+            t.equal(qibl.addslashes("'", patt), "\\'");
             t.done();
         },
     },
