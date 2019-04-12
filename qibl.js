@@ -48,10 +48,10 @@ function isHash( obj ) {
 // transfer the own properties of src onto target
 // See also `qhash`.
 function copyObject( target /* ,VARARGS */ ) {
-    for (var src, i=1; i<arguments.length; i++) {
+    for (var src, i = 1; i < arguments.length; i++) {
         src = arguments[i];
         var keys = Object.keys(src);
-        for (var j=0; j<keys.length; j++) target[keys[j]] = src[keys[j]];
+        for (var j = 0; j < keys.length; j++) target[keys[j]] = src[keys[j]];
     }
     return target;
 }
@@ -59,7 +59,7 @@ function copyObject( target /* ,VARARGS */ ) {
 // recursively transfer all enumeriable properties of src(es) onto target
 // See also `qhash`.
 function merge( target /* ,VARARGS */ ) {
-    for (var src, i=1; i<arguments.length; i++) {
+    for (var src, i = 1; i < arguments.length; i++) {
         src = arguments[i];
         for (var key in src) {
             var val = src[key];
@@ -76,7 +76,7 @@ function fill( buf, ch, base, bound ) {
     // TODO: maybe support negative base/bound?
     base = base || 0;
     bound = bound || buf.length;
-    for (var i=base; i<bound; i++) buf[i] = ch;
+    for (var i = base; i < bound; i++) buf[i] = ch;
     return buf;
 }
 
@@ -117,12 +117,12 @@ function toStruct( obj ) {
 // See also `kubelogger`.
 function removeAllListeners( emitter, event ) {
     var listeners = emitter.listeners(event);
-    for (var i=0; i<listeners.length; i++) emitter.removeListener(event, listeners[i]);
+    for (var i = 0; i < listeners.length; i++) emitter.removeListener(event, listeners[i]);
     return listeners;
 }
 
 function addListeners( emitter, event, listeners ) {
-    for (var i=0; i<listeners.length; i++) emitter.on(event, listeners[i]);
+    for (var i = 0; i < listeners.length; i++) emitter.on(event, listeners[i]);
     return listeners;
 }
 **/
@@ -130,7 +130,7 @@ function addListeners( emitter, event, listeners ) {
 function varargs( handler, self ) {
     return function( /* VARARGS */ ) {
         var len = arguments.length, argv = new Array();
-        for (var i=0; i<len; i++) argv.push(arguments[i]);
+        for (var i = 0; i < len; i++) argv.push(arguments[i]);
         return handler(argv, self);
     }
 }
