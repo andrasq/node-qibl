@@ -151,3 +151,8 @@ For example, given a function `fn(a, b, cb)`:
             return fn(a, b, cb);
         }
     }
+
+### qibl.tryRequire( name )
+
+Suppress the error from `require(name)`.  Returns the module, or `undefined` if unable to
+load.
