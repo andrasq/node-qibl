@@ -156,3 +156,10 @@ For example, given a function `fn(a, b, cb)`:
 
 Suppress the error from `require(name)`.  Returns the module, or `undefined` if unable to
 load.
+
+
+Changelog
+---------
+
+- 1.1.0 - new `tryRequire`
+- 1.0.0 - first release
