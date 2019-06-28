@@ -75,7 +75,7 @@ Equivalent to `String.prototype.repeat`.
 Backslash-escape all characters in str that would act as metacharacters inside a regular
 expression.  Returns the string with escapes added.
 
-### qibl.vinterpolate( string, substring, argv [,addslashes] )
+### qibl.vinterpolate( string, substring, argv )
 
 Replace each occurrence of the substring in string with the next argument in the vector
 argv.  Substrings without a corresponding argument are not replaced.
@@ -111,13 +111,13 @@ newer node the constructor polyfill is slow compared to the `allocBuf` and `from
 ### qibl.allocBuf( length )
 
 Create a new Buffer having the given length, with contents uninitialized.  This builder is a
-pass-through to the native implementation (`Buffer.allocUnsafe` or `Buffer`) and always runs
+pass-through to the native implementation (`Buffer.allocUnsafe` or `new Buffer`) and always runs
 at full speed.
 
 ### qibl.fromBuf( contents )
 
 Create a new Buffer with its contents pre-initialized to the given string, array or buffer.
-This builder is a pass-through to the native implementation (`Buffer.from` or `Buffer`) and
+This builder is a pass-through to the native implementation (`Buffer.from` or `new Buffer`) and
 always runs at full speed.
 
 
@@ -161,5 +161,6 @@ load.
 Changelog
 ---------
 
+- 1.1.1 - un-document the `addslashes` hidden param of `vinterpolate`
 - 1.1.0 - new `tryRequire`
 - 1.0.0 - first release

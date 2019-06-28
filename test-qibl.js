@@ -345,6 +345,7 @@ module.exports = {
             t.equal(qibl.vinterpolate("foobar", "o", []), "foobar");
             t.equal(qibl.vinterpolate("oooo", "o", ['O', 'OO']), "OOOoo");
 
+            // should use the provided `addslashes` function to escape the args
             t.equal(qibl.vinterpolate("o", "o", ['$ok ;|\' 3'], qibl.addslashes), "$ok ;|\\\' 3");
 
             t.done();

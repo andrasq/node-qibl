@@ -46,7 +46,7 @@ function isHash( obj ) {
     return obj ? obj.constructor === Object : false;
 }
 
-// transfer the own properties of src onto target
+// transfer the own properties of src onto target, aka Object.assign
 // See also `qhash`.
 function copyObject( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
@@ -217,6 +217,7 @@ function values( object ) {
 }
 
 // replace each occurrence of patt in str with the next one of the args
+// If an `addslashes` function is provided, use it to escape the args.
 function vinterpolate( str, patt, args, addslashes ) {
     var prevPos = 0, pos, ret = "", argix = 0;
     while ((pos = str.indexOf(patt, prevPos)) >= 0 && argix < args.length) {
