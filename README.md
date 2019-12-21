@@ -84,6 +84,26 @@ Options:
 - `delta` - allow the string to exceed limit by a few characters. Default 0.
 - `ellipsis` - replacement for the truncated part of the string. Default `...`.
 
+### qibl.strtok( str, sep )
+
+Separate the string `str` into parts delimited by the separator `sep`.  When called with a
+non-null string, it returns the first delimited token contained in the string.  When called
+with a `null` string it returns the second, third, etc tokens.  The separator must be
+provided each time, and may change between calls.
+
+NOTE: this function is not reentrant, a second call with a non-null string will overwrite
+the previous state.  It behaves like to the `C` `strtok()` library function.
+
+    var str = "http://example.com/path/name";
+    qibl.strtok(str, '://');
+    // => 'http'
+    qibl.strtok(null, '/');
+    // => 'example.com'
+    qibl.strtok(null, null);
+    // => 'path/name'
+    qibl.strtok(null, null);
+    // => null
+
 ### qibl.escapeRegex( str )
 
 Backslash-escape all characters in str that would act as metacharacters inside a regular
@@ -179,7 +199,7 @@ load.
 Changelog
 ---------
 
-- 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`
+- 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`
 - 1.1.2 - fix invoke
 - 1.1.1 - un-document the `addslashes` hidden param of `vinterpolate`
 - 1.1.0 - new `tryRequire`

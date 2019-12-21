@@ -23,6 +23,7 @@ var qibl = module.exports = {
     fill: fill,
     str_repeat: str_repeat,
     str_truncate: str_truncate,
+    strtok: strtok,
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
@@ -113,6 +114,26 @@ function str_truncate( string, limit, opts ) {
     if (string.length <= limit) return string;
     if (opts && opts.delta > 0 && string.length <= limit + opts.delta) return string;
     return string.slice(0, limit) + ((opts && typeof opts.ellipsis === 'string') ? opts.ellipsis : '...');
+}
+
+// similar to strtok() and strsep() but empty strings are allowed
+// NOTE: this function is not reentrant
+// On first call the string is remembered, on subsequent calls it should be null.
+// Once the string is consumed the remembered string is cleared to null.
+var _strtokStr = null, _strtokBase = 0;
+function strtok( str, sep ) {
+    if (str != null) { _strtokStr = str; _strtokBase = 0 }
+    if (_strtokStr === null) return null;
+
+    var sepOffset = _strtokStr.indexOf(sep, _strtokBase);
+    if (sepOffset < 0) {
+        var ret = _strtokStr.slice(_strtokBase);
+        _strtokStr = null;
+    } else {
+        var ret = _strtokStr.slice(_strtokBase, sepOffset);
+        _strtokBase = sepOffset + sep.length;
+    }
+    return ret;
 }
 
 // test-coverage-proof efficient polyfills to allocate new Buffers on any version of node

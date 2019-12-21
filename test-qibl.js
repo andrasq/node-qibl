@@ -182,6 +182,59 @@ module.exports = {
         },
     },
 
+    'strtok': {
+        'should return null once string exhausted': function(t) {
+            t.equal(qibl.strtok('foo', '.'), 'foo');
+            t.strictEqual(qibl.strtok(null, '.'), null);
+            t.strictEqual(qibl.strtok(null, '.'), null);
+            t.done();
+        },
+
+        'should split on user-provided pattern': function(t) {
+            t.equal(qibl.strtok("fooxxbarx", 'xx'), 'foo');
+            t.equal(qibl.strtok(null, 'xx'), 'barx');
+            t.strictEqual(qibl.strtok(null, 'x'), null);
+            t.done();
+        },
+
+        'should tokenize strings': function(t) {
+            var tests = [
+                ["", [""]],
+                [".", ["", ""]],
+                ["..", ["", "", ""]],
+                ["a", ["a"]],
+                ["ab.c.", ["ab", "c", ""]],
+            ];
+            for (var i=0; i<tests.length; i++) {
+                var input = tests[i][0];
+                var str, parts = [];
+                parts.push(qibl.strtok(input, '.'));
+                while ((str = qibl.strtok(null, '.')) !== null) parts.push(str);
+                t.deepEqual(parts, tests[i][1]);
+            }
+            t.done();
+        },
+
+        'should be fast': function(t) {
+            var str = 'a.b.c.d.e';
+            var str = 'foo.bar.baz.bat.zed';
+            var parts, s, nloops = 1e6;
+            var t1 = Date.now();
+            for (var i=0; i<nloops; i++) {
+                //parts = new Array(qibl.strtok('a.b.c.d.e', '.'));
+                //while ((s = qibl.strtok(null, '.')) !== null) parts.push(s);
+                qibl.strtok(str, '.');
+                while (qibl.strtok(null, '.') !== null) ;
+                // 204ms v8, 110ms v13, 118ms v12, 90ms v10, 330ms v5
+                //parts = str.split('.');
+                // 76ms v8, 130ms v13, 140ms v12, 70ms v10, 92ms v5
+            }
+            var t2 = Date.now();
+            console.log("AR: strtok: %d in %d ms", nloops, t2 - t1);
+            t.done();
+        },
+    },
+
     'saneBuf': {
         'newBuf should emulate legacy constructor': function(t) {
             var buf = qibl.newBuf("foo");
