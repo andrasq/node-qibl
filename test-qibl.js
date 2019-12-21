@@ -143,6 +143,45 @@ module.exports = {
         t.done();
     },
 
+    'str_truncate': {
+        'should require string and limit': function(t) {
+            t.throws(function() { qibl.str_truncate() }, /required/);
+            t.throws(function() { qibl.str_truncate(1, 2) }, /required/);
+            t.throws(function() { qibl.str_truncate("one", "two") }, /required/);
+            t.done();
+        },
+
+        'should not trim short strings': function(t) {
+            t.equal(qibl.str_truncate("", 10), "");
+            t.equal(qibl.str_truncate("abc", 3), "abc");
+            t.equal(qibl.str_truncate("abc", 4), "abc");
+            t.equal(qibl.str_truncate("abc", 10), "abc");
+            t.equal(qibl.str_truncate("abcdefghij", 10), "abcdefghij");
+            t.done();
+        },
+
+        'should trim overlong strings': function(t) {
+            t.equal(qibl.str_truncate("abcdef", 4), "abcd...");
+            t.equal(qibl.str_truncate("abcd", 4), "abcd");
+            t.equal(qibl.str_truncate("abcdefghijklmnopqrstuvwxyz", 10), "abcdefghij...");
+            t.done();
+        },
+
+        'should not trim long strings within delta': function(t) {
+            t.equal(qibl.str_truncate("abcdefghijkl", 10, { delta: 2 }), "abcdefghijkl");
+            t.equal(qibl.str_truncate("abcdefghijkl", 10, { delta: 1 }), "abcdefghij...");
+            t.done();
+        },
+
+        'should append ellipsis': function(t) {
+            t.equal(qibl.str_truncate("abcdef", 4, { delta: 2, ellipsis: ' (etc)' }), "abcdef");
+            t.equal(qibl.str_truncate("abcdef", 4, { }), "abcd...");
+            t.equal(qibl.str_truncate("abcdef", 4, { ellipsis: ' (etc)' }), "abcd (etc)");
+            t.equal(qibl.str_truncate("abcdef", 4, { ellipsis: '......'}), "abcd......");
+            t.done();
+        },
+    },
+
     'saneBuf': {
         'newBuf should emulate legacy constructor': function(t) {
             var buf = qibl.newBuf("foo");

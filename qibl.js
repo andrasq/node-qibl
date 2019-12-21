@@ -22,6 +22,7 @@ var qibl = module.exports = {
     merge: merge,
     fill: fill,
     str_repeat: str_repeat,
+    str_truncate: str_truncate,
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
@@ -104,6 +105,14 @@ function str_repeat( str, n ) {
         n = n >>> 1;
     }
     return ret;
+}
+
+// trim the string to limit
+function str_truncate( string, limit, opts ) {
+    if (typeof string !== 'string' || typeof limit !== 'number') throw new Error('string and limit required');
+    if (string.length <= limit) return string;
+    if (opts && opts.delta > 0 && string.length <= limit + opts.delta) return string;
+    return string.slice(0, limit) + ((opts && typeof opts.ellipsis === 'string') ? opts.ellipsis : '...');
 }
 
 // test-coverage-proof efficient polyfills to allocate new Buffers on any version of node

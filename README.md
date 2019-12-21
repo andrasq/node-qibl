@@ -75,6 +75,15 @@ Repeat the string value `str` `n` times.  N should be non-negative, else node wi
 of memory.  Uses an efficient O(log n) string doubling approach.  Returns the repeated string.
 Equivalent to `String.prototype.repeat`.
 
+### qibl.str_truncate( str, limit, options )
+
+Shorten the string to not exceed `limit` characters by removing characters from the end.
+The truncated portion is replaced with `...` or the provided `options.ellipsis`.
+
+Options:
+- `delta` - allow the string to exceed limit by a few characters. Default 0.
+- `ellipsis` - replacement for the truncated part of the string. Default `...`.
+
 ### qibl.escapeRegex( str )
 
 Backslash-escape all characters in str that would act as metacharacters inside a regular
@@ -170,7 +179,7 @@ load.
 Changelog
 ---------
 
-- 1.2.0 - faster varargs, new `concat2`, `keys`
+- 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`
 - 1.1.2 - fix invoke
 - 1.1.1 - un-document the `addslashes` hidden param of `vinterpolate`
 - 1.1.0 - new `tryRequire`
