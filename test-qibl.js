@@ -107,6 +107,21 @@ module.exports = {
         t.done();
     },
 
+    'concat2 should concatenate arrays': function(t) {
+        t.deepEqual(qibl.concat2([], []), []);
+        t.deepEqual(qibl.concat2([1], []), [1]);
+        t.deepEqual(qibl.concat2([1], [2]), [1, 2]);
+        t.deepEqual(qibl.concat2([1, 2], [3]), [1, 2, 3]);
+        t.deepEqual(qibl.concat2([1], [2, 3]), [1, 2, 3]);
+        t.deepEqual(qibl.concat2([1], [2], [3]), [1, 2, 3]);
+        t.deepEqual(qibl.concat2([1], [2, 3], [4]), [1, 2, 3, 4]);
+        t.deepEqual(qibl.concat2([1], [2, 3], [4]), [1, 2, 3, 4]);
+        t.deepEqual(qibl.concat2([1], [2], [3, 4]), [1, 2, 3, 4]);
+        t.deepEqual(qibl.concat2([1, 2], [3], [4]), [1, 2, 3, 4]);
+        t.deepEqual(qibl.concat2([1, 2], [3, 4, 5], [6, 7]), [1, 2, 3, 4, 5, 6, 7]);
+        t.done();
+    },
+
     'str_repeat should repeat': function(t) {
         var tests = [
             [ "", 2, "" ],
@@ -319,6 +334,13 @@ module.exports = {
             t.deepEqual(qibl.selectField([null, undefined, 0, false], 'k'), [undefined, undefined, undefined, undefined]);
             t.done();
         },
+    },
+
+    'keys should use Object.keys': function(t) {
+        var spy = t.spyOnce(Object, 'keys');
+        t.deepEqual(qibl.keys({a:1, b:2}), ['a', 'b']);
+        t.ok(spy.called);
+        t.done();
     },
 
     'values': {

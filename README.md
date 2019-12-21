@@ -56,6 +56,11 @@ array.  The value is `undefined` if the property is not set.
         return array.map((item) => item[name]);
     }
 
+### qibl.keys( object)
+
+Return an array with the names of the own properties of the object.  Same as `Object.keys`,
+present for symmetry with `values()`.
+
 ### qibl.values( object )
 
 Return an array with the own properties of the object.  Equivalent to `Object.values`.
@@ -102,6 +107,10 @@ Buffers and Arrays
 
 Fill the buffer or array with the value `ch` from starting offset `base` and up to the limit
 `bound` (but not including `bound`).
+
+### qibl.concat2( target, arr1 [,arr2] )
+
+Concatenate one or two arrays into the target array.  Returns the target array.
 
 ### qibl.newBuf( arg, encodingOrOffset, length )
 
@@ -161,6 +170,8 @@ load.
 Changelog
 ---------
 
+- 1.2.0 - faster varargs, new `concat2`, `keys`
+- 1.1.2 - fix invoke
 - 1.1.1 - un-document the `addslashes` hidden param of `vinterpolate`
 - 1.1.0 - new `tryRequire`
 - 1.0.0 - first release

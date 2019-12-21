@@ -16,7 +16,7 @@ var invoke2 = eval("(nodeMajor < 6) && _invoke2 || tryEval('function(func, self,
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
 
-module.exports = {
+var qibl = module.exports = {
     isHash: isHash,
     copyObject: copyObject,     assign: copyObject,
     merge: merge,
@@ -32,8 +32,10 @@ module.exports = {
     invoke2: invoke2,
     _invoke1: _invoke1,
     _invoke2: _invoke2,
+    concat2: concat2,
     tryRequire: tryRequire,
     escapeRegex: escapeRegex,
+    keys: keys,
     values: values,
     selectField: selectField,
     vinterpolate: vinterpolate,
@@ -79,6 +81,13 @@ function fill( buf, ch, base, bound ) {
     bound = bound || buf.length;
     for (var i = base; i < bound; i++) buf[i] = ch;
     return buf;
+}
+
+// concatenate two arrays, much faster than [].concat
+function concat2( target, a1, a2 ) {
+    for (var len = a1.length, i = 0; i < len; i++) target.push(a1[i]);
+    if (a2) for (var len = a2.length, i = 0; i < len; i++) target.push(a2[i]);
+    return target;
 }
 
 // See also `qprintf`.
@@ -128,10 +137,18 @@ function addListeners( emitter, event, listeners ) {
 }
 **/
 
+// build a function that calls the handler with the arguments it was invoked with
 function varargs( handler, self ) {
     return function( /* VARARGS */ ) {
-        var len = arguments.length, argv = new Array();
-        for (var i = 0; i < len; i++) argv.push(arguments[i]);
+        var len = arguments.length;
+        var argv;
+        switch (arguments.length) {
+        case 0: argv = new Array(); break;
+        case 1: argv = [arguments[0]]; break;
+        // case 2: argv = [arguments[0], arguments[1]]; break;
+        // case 3: argv = [arguments[0], arguments[1], arguments[2]]; break;
+        default: argv = new Array(); for (var i = 0; i < len; i++) argv.push(arguments[i]); break;
+        }
         return handler(argv, self);
     }
 }
@@ -206,6 +223,11 @@ function selectField( arrayOfObjects, key ) {
         (obj == null) ? values.push(undefined) : values.push(obj[key]);
     }
     return values;
+}
+
+// Object.keys
+function keys( object ) {
+    return Object.keys(object);
 }
 
 // Object.values
