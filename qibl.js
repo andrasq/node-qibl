@@ -20,6 +20,7 @@ var qibl = module.exports = {
     isHash: isHash,
     copyObject: copyObject,     assign: copyObject,
     merge: merge,
+    inherits: inherits,
     fill: fill,
     str_repeat: str_repeat,
     str_truncate: str_truncate,
@@ -73,6 +74,21 @@ function merge( target /* ,VARARGS */ ) {
         }
     }
     return target;
+}
+
+// make the derived class inherit from the base
+function inherits( derived, base ) {
+    // static class properties
+    var keys = Object.keys(base);
+    for (var i = 0; i < keys.length; i++) derived[keys[i]] = base[keys[i]];
+
+    // set up constructor and prototype linkage
+    derived.prototype = { constructor: derived, __proto__: base.prototype };
+
+    // to avoid assigning __proto__, can use the typescript linkage, ie:
+    // function __() { this.constructor = derived }
+    // __.prototype = base.prototype;
+    // derived.prototype = new __();
 }
 
 // See also `sane-buffer`.

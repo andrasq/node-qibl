@@ -37,6 +37,11 @@ the `target` object.  All nested hashes are copied onto a new hash `{}` so the t
 will not share any sub-object with any of the sources.  Non-hash objects (ie instances of
 classes other than `Object`) are assigned by value.  Returns the `target`.
 
+### qibl.inherits( Derived, Base )
+
+Arrange for the Derived class to inherit class and instance methods and properties
+from the Base class, including inherited properties.  Equivalent to `util.inherits`.
+
 ### qibl.toStruct( hash )
 
 Convert the object from hashed accesses to an optimized mapped accesses analogous to `C`
@@ -199,7 +204,7 @@ load.
 Changelog
 ---------
 
-- 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`
+- 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`, `inherits`
 - 1.1.2 - fix invoke
 - 1.1.1 - un-document the `addslashes` hidden param of `vinterpolate`
 - 1.1.0 - new `tryRequire`

@@ -5,6 +5,7 @@
 
 'use strict'
 
+var util = require('util');
 var qibl = require('./');
 var nodeMajor = parseInt(process.versions.node);
 
@@ -95,6 +96,53 @@ module.exports = {
             var a = new C();
             a.a = 1;
             t.deepEqual(qibl.merge({}, a), {a:1, x:1});
+            t.done();
+        },
+    },
+
+    'inherits': {
+        'should inherit class properties': function(t) {
+            var Base = function() {};
+            Base.a = 1;
+            Base.b = 2;
+            var Derived = function() {};
+            qibl.inherits(Derived, Base);
+            t.equal(Derived.a, 1);
+            t.equal(Derived.b, 2);
+            t.done();
+        },
+
+        'should inherit methods': function(t) {
+            var Base = function() {};
+            Base.prototype.m = function() { return 1234 };
+            var Derived = function() {};
+            qibl.inherits(Derived, Base);
+            // prototype inherits from base prototype
+            t.equal(Derived.prototype.m, Base.prototype.m);
+            // object inherits
+            t.equal(new Derived().m, Base.prototype.m);
+            t.strictEqual(new Derived().m(), 1234);
+            t.done();
+        },
+
+        'should inherit inherited methods': function(t) {
+            var Old = function() {};
+            Old.prototype.m = function() { return 12345 };
+            var Base = function() {};
+            var Derived = function() {};
+            util.inherits(Base, Old);
+            qibl.inherits(Derived, Base);
+            t.equal(new Derived().m, new Old().m);
+            t.strictEqual(new Derived().m(), 12345);
+            t.done();
+        },
+
+        'should inherit from javascript classes': function(t) {
+            var Base;
+            try { eval("Base = class C { m() { return 123 } }") } catch (err) { return t.skip(); }
+            var Derived = function() {};
+            qibl.inherits(Derived, Base);
+            t.equal(new Derived().m(), 123);
             t.done();
         },
     },
