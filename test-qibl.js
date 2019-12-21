@@ -390,6 +390,65 @@ module.exports = {
         },
     },
 
+    'curry': {
+        'should throw if not a function': function(t) {
+            t.throws(function() { qibl.curry(132) }, /not a function/);
+            t.throws(function() { qibl.curry() }, /not a function/);
+            t.throws(function() { qibl.curry({}) }, /not a function/);
+            t.done();
+        },
+
+        'should return a function': function(t) {
+            t.equal(typeof qibl.curry(function() {}), 'function');
+            t.equal(typeof qibl.curry(function(a, b, c) {}), 'function');
+            t.done();
+        },
+
+        'should curry args': function(t) {
+            var fn = function(a, b, c) { return a + b + c };
+
+            var f0 = qibl.curry(fn);
+            t.equal(typeof f0(), 'function');
+            t.equal(typeof f0(1), 'function');
+            t.equal(typeof f0(1, 2), 'function');
+            t.equal(typeof f0(1, 2, 3), 'number');
+            t.equal(f0(1, 2, 3), 6);
+
+            var f1 = f0(1);
+            t.equal(typeof f1(), 'function');
+            t.equal(typeof f1(2), 'function');
+            t.equal(typeof f1(2, 3), 'number');
+            t.equal(f1(2, 3), 6);
+
+            var f1b = f0(11);
+            t.equal(typeof f1b(), 'function');
+            t.equal(typeof f1b(2), 'function');
+            t.equal(typeof f1b(2, 3), 'number');
+            t.equal(f1b(2, 3), 16);
+
+            var f2 = f1(2);
+            t.equal(typeof f2(), 'function');
+            t.equal(typeof f2(3), 'number');
+            t.equal(f2(3), 6);
+
+            var f2b = f1(22);
+            t.notEqual(f2, f2b);
+            t.notEqual(f2(), f2b());
+            t.equal(f2b(3), 26);
+
+            t.done();
+        },
+
+        'should curry like the readme example': function(t) {
+            function sum4(a, b, c, d) { return a + b + c + d };
+            t.equal(qibl.curry(sum4)(1, 2, 3, 4), 10);
+            t.equal(qibl.curry(sum4)(1, 2, 3, 4, 5), 10);
+            t.equal(qibl.curry(sum4)(1)(2)(3)(4), 10);
+            t.equal(qibl.curry(sum4)(1, 2)(3)(4, 5), 10);
+            t.done();
+        },
+    },
+
     'invoke': {
         '_invoke should call function and return result': function(t) {
             var called = false;

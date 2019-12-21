@@ -195,6 +195,22 @@ For example, given a function `fn(a, b, cb)`:
         }
     }
 
+### qibl.curry( func )
+
+Return a function that incrementally binds arguments and returns curried functions until all
+expected arguments have been gathered.  As soon as all arguments to `func` are present, `func`
+is invoked and its return value is returned.  The count of expected arguments is obtained
+from `func.length`.
+
+    function sum4(a, b, c, d) { return a + b + c  + d }
+    var f = qibl.curry(sum3);
+    // => [function]
+
+    f(1, 2, 3, 4)
+    f(1)(2)(3)(4)
+    f(1, 2)(3)(4, 5)
+    // => 10
+
 ### qibl.tryRequire( name )
 
 Suppress the error from `require(name)`.  Returns the module, or `undefined` if unable to
@@ -204,7 +220,7 @@ load.
 Changelog
 ---------
 
-- 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`, `inherits`
+- 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`, `inherits`, `curry`
 - 1.1.2 - fix invoke
 - 1.1.1 - un-document the `addslashes` hidden param of `vinterpolate`
 - 1.1.0 - new `tryRequire`

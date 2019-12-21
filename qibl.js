@@ -36,6 +36,7 @@ var qibl = module.exports = {
     _invoke1: _invoke1,
     _invoke2: _invoke2,
     concat2: concat2,
+    curry: curry,
     tryRequire: tryRequire,
     escapeRegex: escapeRegex,
     keys: keys,
@@ -208,6 +209,22 @@ function thunkify( func, self ) {
             self ? invoke2(func, self, argv) : invoke1(func, argv);
         }
     })
+}
+
+// build a function that incrementally binds partial arguments then calls fn with all expected args
+// see ramda.curry, thunkify
+function curry( fn ) {
+    if (typeof fn !== 'function') throw new TypeError('not a function');
+
+    // initial calls bind to partial arg lists and return a curried function
+    return qibl.varargs(partials, { fn: fn, argc: fn.length, argv: null, self: this });
+
+    function partials( av, state ) {
+        var argv = state.argv ? concat2(new Array(), state.argv, av) : av;
+        // once all expected args are present, invoke fn
+        if (argv.length >= state.argc) return qibl.invoke(state.fn, argv);
+        return qibl.varargs(partials, { fn: state.fn, argc: state.argc, argv: argv, self: state.self });
+    }
 }
 
 // see also qinvoke
