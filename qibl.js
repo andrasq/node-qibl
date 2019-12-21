@@ -11,8 +11,8 @@
 
 var nodeMajor = parseInt(process.versions.node);
 
-var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { func(...argv) }')");
-var invoke2 = eval("(nodeMajor < 6) && _invoke2 || tryEval('function(func, self, argv) { func.call(self, ...argv) }')");
+var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { return func(...argv) }')");
+var invoke2 = eval("(nodeMajor < 6) && _invoke2 || tryEval('function(func, self, argv) { return func.call(self, ...argv) }')");
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
 

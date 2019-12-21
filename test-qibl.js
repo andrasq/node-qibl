@@ -236,50 +236,50 @@ module.exports = {
     },
 
     'invoke': {
-        '_invoke should call function': function(t) {
+        '_invoke should call function and return result': function(t) {
             var called = false;
-            var caller1 = function(a) { called = a };
-            var caller2 = function(a, b) { called = b };
-            var caller3 = function(a, b, c) { called = c };
-            var caller4 = function(a, b, c, d) { called = d };
-            qibl._invoke1(caller1, []);
+            var caller1 = function(a) { return called = a };
+            var caller2 = function(a, b) { return called = b };
+            var caller3 = function(a, b, c) { return called = c };
+            var caller4 = function(a, b, c, d) { return called = d };
+            t.strictEqual(qibl._invoke1(caller1, []), undefined);
             t.strictEqual(called, undefined);
-            qibl._invoke1(caller1, [1]);
+            t.strictEqual(qibl._invoke1(caller1, [1]), 1);
             t.strictEqual(called, 1);
-            qibl._invoke1(caller2, [1, 2]);
+            t.strictEqual(qibl._invoke1(caller2, [1, 2]), 2);
             t.strictEqual(called, 2);
-            qibl._invoke1(caller3, [1, 2, 3]);
+            t.strictEqual(qibl._invoke1(caller3, [1, 2, 3]), 3);
             t.strictEqual(called, 3);
-            qibl._invoke1(caller4, [1, 2, 3, 4]);
+            t.strictEqual(qibl._invoke1(caller4, [1, 2, 3, 4]), 4);
             t.strictEqual(called, 4);
             t.done();
         },
 
-        '_invoke2 should call method': function(t) {
+        '_invoke2 should call method and return result': function(t) {
             var object = {
                 called: false,
-                caller1: function(a) { this.called = a },
-                caller2: function(a, b) { this.called = b },
-                caller3: function(a, b, c) { this.called = c },
-                caller4: function(a, b, c, d) { this.called = d },
+                caller1: function(a) { return this.called = a },
+                caller2: function(a, b) { return this.called = b },
+                caller3: function(a, b, c) { return this.called = c },
+                caller4: function(a, b, c, d) { return this.called = d },
             };
-            qibl._invoke2(object.caller1, object, []);
+            t.strictEqual(qibl._invoke2(object.caller1, object, []), undefined);
             t.strictEqual(object.called, undefined);
-            qibl._invoke2(object.caller1, object, [1]);
+            t.strictEqual(qibl._invoke2(object.caller1, object, [1]), 1);
             t.strictEqual(object.called, 1);
-            qibl._invoke2(object.caller2, object, [1, 2]);
+            t.strictEqual(qibl._invoke2(object.caller2, object, [1, 2]), 2);
             t.strictEqual(object.called, 2);
-            qibl._invoke2(object.caller3, object, [1, 2, 3]);
+            t.strictEqual(qibl._invoke2(object.caller3, object, [1, 2, 3]), 3);
             t.strictEqual(object.called, 3);
-            qibl._invoke2(object.caller4, object, [1, 2, 3, 4]);
+            t.strictEqual(qibl._invoke2(object.caller4, object, [1, 2, 3, 4]), 4);
             t.strictEqual(object.called, 4);
             t.done();
         },
 
-        'invoke should call function': function(t) {
+        'invoke should call function and return result': function(t) {
             var called = false;
-            var caller5 = function(a, b, c, d, e) { called = arguments[4] };
-            qibl.invoke(caller5, [1, 2, 3, 4, 5]);
+            var caller5 = function(a, b, c, d, e) { return called = arguments[4] };
+            t.strictEqual(qibl.invoke(caller5, [1, 2, 3, 4, 5]), 5);
             t.strictEqual(called, 5);
             t.done();
         },
@@ -287,9 +287,9 @@ module.exports = {
         'invoke2 should call method': function(t) {
             var object = {
                 called: false,
-                caller5: function(a, b, c, d, e) { this.called = arguments[4] },
+                caller5: function(a, b, c, d, e) { return this.called = arguments[4] },
             };
-            qibl.invoke2(object.caller5, object, [1, 2, 3, 4, 5]);
+            t.strictEqual(qibl.invoke2(object.caller5, object, [1, 2, 3, 4, 5]), 5);
             t.strictEqual(object.called, 5);
             t.done();
         },
