@@ -203,9 +203,12 @@ function varargs( handler, self ) {
 // see also qinvoke
 function thunkify( func, self ) {
     if (typeof func !== 'function') throw new TypeError('not a function');
-    return varargs(function(argv) {
-        return function(cb) {
-            argv.push(cb);
+    return varargs(function _gatherFuncArgs(argv) {
+        // reserve space for the callback
+        argv.push(null);
+        return function _invokeFunc(cb) {
+            // invoke the function on the curried args with this callback
+            argv[argv.length - 1] = cb;
             self ? invoke2(func, self, argv) : invoke1(func, argv);
         }
     })
