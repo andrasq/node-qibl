@@ -220,6 +220,7 @@ load.
 Changelog
 ---------
 
+- 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
 - 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`, `inherits`, `curry`
 - 1.1.2 - fix invoke

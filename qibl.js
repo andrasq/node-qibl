@@ -1,7 +1,8 @@
 /**
- * qpoly -- useful polyfills that at times I wished I had
+ * qibl -- quick itty-bitty library
+ * Small functions and polyfills that I found useful.
  *
- * Copyright (C) 2019 Andras Radics
+ * Copyright (C) 2019-2020 Andras Radics
  * Licensed under the Apache License, Version 2.0
  *
  * 2019-09-11 - AR.
@@ -11,6 +12,7 @@
 
 var nodeMajor = parseInt(process.versions.node);
 
+// use spread arguments if supported, is faster than .call or .apply
 var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { return func(...argv) }')");
 var invoke2 = eval("(nodeMajor < 6) && _invoke2 || tryEval('function(func, self, argv) { return func.call(self, ...argv) }')");
 
@@ -79,6 +81,8 @@ function merge( target /* ,VARARGS */ ) {
     }
     return target;
 }
+
+// TODO: clone(): kinda like merge, but duplicate array properties too
 
 /*
  * Get a nested property by dotted name, or return undefined if not set.
@@ -297,6 +301,7 @@ function curry( fn ) {
 }
 
 // see also qinvoke
+// _invoke1 and _invoke2 are used only if spread arguments are not supported
 function _invoke1( func, argv ) {
     switch (argv.length) {
     case 0: return func();
