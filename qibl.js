@@ -20,6 +20,8 @@ var qibl = module.exports = {
     isHash: isHash,
     copyObject: copyObject,     assign: copyObject,
     merge: merge,
+    getProperty: getProperty,
+    setProperty: setProperty,
     inherits: inherits,
     fill: fill,
     str_repeat: str_repeat,
@@ -37,6 +39,7 @@ var qibl = module.exports = {
     _invoke2: _invoke2,
     concat2: concat2,
     curry: curry,
+    once: once,
     tryRequire: tryRequire,
     escapeRegex: escapeRegex,
     keys: keys,
@@ -74,6 +77,64 @@ function merge( target /* ,VARARGS */ ) {
             else target[key] = val;
         }
     }
+    return target;
+}
+
+/*
+ * Get a nested property by dotted name, or return undefined if not set.
+ * Undefined properties and properties set to `undefined` return defaultValue.
+ * Adapted from qhash 1.3.0.
+ * node-v10 and up tokenize: 1.6m/s v8, 3.7m/s v13, 2.4m/s v0.10
+ * strtok: 2m/s v8, 4.4m/s v13, 2.47m/s v0.10
+ * note: defaultValue support makes it 15% slower
+ */
+function getProperty( target, dottedName, defaultValue ) {
+    if (typeof target !== 'object' && typeof target !== 'function') {
+        if (this !== qibl && typeof target === 'string') return getProperty(this, target, dottedName);
+    }
+
+    var path = dottedName.indexOf('.') < 0 ? [dottedName] : dottedName.split('.');
+    for (var item=target, i=0; i<path.length; i++) {
+        if (item == null) return defaultValue;
+        item = item[path[i]];
+    }
+    return item !== undefined ? item : defaultValue;
+}
+
+/*
+ * Set a nested property by dotted name.
+ * Adapted from qhash 1.3.0.
+ * mode is a string containing 'x' if the property is non-enumerable ("expunged"), 'r' if it is "readonly".
+ */
+function setProperty( target, dottedName, value, mode ) {
+    if (typeof target !== 'object' && typeof target !== 'function') {
+        if (this !== qibl && typeof target === 'string') return setProperty(this, target, dottedName, value);
+    }
+    if (target == null || typeof target !== 'object' && typeof target !== 'function') throw new Error('target not an object');
+
+    if (dottedName.indexOf('.') < 0 && !mode) {
+        target[dottedName] = value;
+        return target;
+    }
+
+    // note: split is much slower starting with node-v12
+    var path = dottedName.split('.');
+    for (var item=target, i=0; i<path.length-1; i++) {
+        var field = path[i];
+        if (!item[field] || typeof item[field] !== 'object') item[field] = {};
+        item = item[field];
+    }
+    if (!mode) {
+        item[path[path.length-1]] = value;
+        return target;
+    }
+
+    var name = path[path.length-1];
+    Object.defineProperty(item, name, {
+        value: value,
+        enumerable: mode.indexOf('x') < 0,
+        writable: mode.indexOf('r') < 0 || mode.indexOf('w') >= 0,      // 'r', 'w', 'rw', 'ro'
+    });
     return target;
 }
 
@@ -137,17 +198,18 @@ function str_truncate( string, limit, opts ) {
 // NOTE: this function is not reentrant
 // On first call the string is remembered, on subsequent calls it should be null.
 // Once the string is consumed the remembered string is cleared to null.
+// FIXME: getProperty runs 6x faster split to array than tokenized.
 var _strtokStr = null, _strtokBase = 0;
 function strtok( str, sep ) {
     if (str != null) { _strtokStr = str; _strtokBase = 0 }
-    if (_strtokStr === null) return null;
+    if ((str = _strtokStr) === null) return null;
 
-    var sepOffset = _strtokStr.indexOf(sep, _strtokBase);
+    var sepOffset = str.indexOf(sep, _strtokBase);
     if (sepOffset < 0) {
-        var ret = _strtokStr.slice(_strtokBase);
+        var ret = str.slice(_strtokBase);
         _strtokStr = null;
     } else {
-        var ret = _strtokStr.slice(_strtokBase, sepOffset);
+        var ret = str.slice(_strtokBase, sepOffset);
         _strtokBase = sepOffset + sep.length;
     }
     return ret;
@@ -249,6 +311,16 @@ function _invoke2( func, self, argv ) {
     case 3: return func.call(self, argv[0], argv[1], argv[2]);
     default: return func.apply(self, argv);
     }
+}
+
+// build a function just like fn but that only runs once
+function once( fn ) {
+    var called = false;
+    return qibl.varargs(function(av) {
+        if (called) return;
+        called = true;
+        return qibl.invoke2(fn, this, av);
+    })
 }
 
 function tryRequire( name ) {

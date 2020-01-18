@@ -100,6 +100,157 @@ module.exports = {
         },
     },
 
+    'getProperty': {
+        'should get property': function(t) {
+            var tests = [
+                [{}, 'a', undefined],
+                [{}, 'a.b.c', undefined],
+                [{a:1}, 'b', undefined],
+                [1, 'a', undefined],
+                ['a', 'a', undefined],
+
+                [{a:1}, 'a', 1],
+                [{a:1, b:2}, 'a', 1],
+                [{a:1, b:2}, 'b', 2],
+                [{a:1, b:2}, 'a.b', undefined],
+                [{a:1, b:2}, 'b.a', undefined],
+                [{a:1, b:{c:{d:2}}}, 'aa', undefined],
+                [{a:1, b:{c:{d:2}}}, 'a', 1],
+                [{a:1, b:{c:{d:2}}}, 'b', {c:{d:2}}],
+                [{a:1, b:{c:{d:2}}}, 'b.c', {d:2}],
+                [{a:1, b:{c:{d:2}}}, 'b.c.d', 2],
+                [{a:1, b:{c:{d:2}}}, 'b.c.d.e', undefined],
+            ];
+
+            for (var i=0; i<tests.length; i++) {
+                t.deepStrictEqual(qibl.getProperty(tests[i][0], tests[i][1]), tests[i][2], 'test ' + i);
+            }
+            t.done();
+        },
+
+        'should be a function': function(t) {
+            var get = qibl.getProperty;
+            t.deepEqual(get({a:{b:1}}, 'a.b'), 1);
+            t.done();
+        },
+
+        'should return defaultValue if property not set': function(t) {
+            var tests = [
+                [0, 'a'],
+                [{}, 'a'],
+                [{a:1}, 'b'],
+                [{a:1}, 'b.c.d'],
+                [{a:{b:1}}, 'b.a'],
+                [{a:{b:1}}, 'a.c'],
+                [{a:{b:1}}, 'a.a'],
+
+                [false, 'a'],
+                [null, 'a'],
+                [0, 'a'],
+                [undefined, 'a'],
+            ];
+
+            var defaultValue = 1234 + '.' + process.pid;
+            for (var i=0; i<tests.length; i++) {
+                t.deepStrictEqual(qibl.getProperty(tests[i][0], tests[i][1], defaultValue), defaultValue, 'test ' + i);
+            }
+            t.done();
+        },
+
+        'should return properties on `this`': function(t) {
+            var tests = [
+                [null, 'a', undefined],
+                [{a:1, b:{c:2}}, 'b', {c:2}],
+                [{a:1, b:{c:2}}, 'b.c', 2],
+            ];
+
+            for (var i=0; i<tests.length; i++) {
+                var obj = { get: qibl.getProperty, zz: 1 };
+                for (var k in tests[i][0]) obj[k] = tests[i][0][k];
+                t.deepStrictEqual(obj.get(tests[i][1]), tests[i][2], 'test ' + i);
+            }
+
+            var obj = { get: qibl.getProperty, a: {b: 2} };
+            t.deepStrictEqual(obj.get('a'), {b:2});
+            t.deepStrictEqual(obj.get('a.b'), 2);
+            t.deepStrictEqual(obj.get('a.b.c', 1234), 1234);
+            t.deepStrictEqual(obj.get('b', 1234), 1234);
+
+            t.done();
+        },
+    },
+
+    'setProperty': {
+        'should set property': function(t) {
+            var fn = function(){};
+            var tests = [
+                [{}, '', 1, {'': 1}],
+                [{}, 'a', 1, {a:1}],
+                [{}, 'a', 1.5, {a:1.5}],
+                [{}, 'a', 'one', {a:'one'}],
+                [{}, 'a', {b:1}, {a:{b:1}}],
+
+                [{}, 'a.b', 1, {a:{b:1}}],
+                [{}, 'a.b.c', 1, {a:{b:{c:1}}}],
+                [{a:{b:1}}, 'a', 1, {a:1}],
+                [{a:{b:1}}, 'a.b', 1, {a:{b:1}}],
+                [{a:{b:1}}, 'a.b.c', 1, {a:{b:{c:1}}}],
+            ];
+
+            for (var i=0; i< tests.length; i++) {
+                qibl.setProperty(tests[i][0], tests[i][1], tests[i][2]);
+                t.deepStrictEqual(tests[i][0], tests[i][3]);
+            }
+            t.done();
+        },
+
+        'should set property with mode': function(t) {
+            var ret;
+
+            // enumerable
+            ret = qibl.setProperty({a:1, b:2}, 'a', 10, 'x');
+            t.deepEqual(ret, {b:2});
+            t.deepEqual(ret.a, 10);
+
+            // writable
+            ret = qibl.setProperty({a:1, b:2}, 'a', 10, 'r');
+            t.deepEqual(ret, {a:10, b:2});
+            try { ret.a = 20; } catch (e) {}
+            t.deepEqual(ret.a, 10);
+
+            t.done();
+        },
+
+        'should be a function': function(t) {
+            var set = qibl.setProperty;
+            t.deepEqual(set({}, 'a.b', 1), {a:{b:1}});
+            t.done();
+        },
+
+        'should set property on this': function(t) {
+            var obj;
+
+            obj = { set: qibl.setProperty };
+            t.strictContains(obj.set('a.b', 1), {a:{b:1}});
+            t.strictContains(obj.set('b', 2), {a:{b:1}, b:2});
+            t.strictContains(obj.set('a', 3), {a:3, b:2});
+
+            t.done();
+        },
+
+        'should throw if setting invalid target': function(t) {
+            t.throws(function() { qibl.setProperty(1, 'a', 1) }, /not an object/);
+            t.throws(function() { qibl.setProperty(false, 'a', 1) }, /not an object/);
+            t.throws(function() { qibl.setProperty(null, 'a', 1) }, /not an object/);
+
+            // not throws
+            qibl.setProperty({}, 'a', 1);
+            qibl.setProperty(function(){}, 'a', 1);
+
+            t.done();
+        },
+    },
+
     'inherits': {
         'should inherit class properties': function(t) {
             var Base = function() {};
@@ -578,6 +729,26 @@ module.exports = {
             var patt = /([\\"';|&$])/g;
             t.equal(qibl.addslashes(';|$"', patt), '\\;\\|\\$\\"');
             t.equal(qibl.addslashes("'", patt), "\\'");
+            t.done();
+        },
+    },
+
+    'once': {
+        'should call once': function(t) {
+            var called = 0;
+            var fn = function() { called += 1 };
+
+            var o1 = qibl.once(fn);
+            o1();
+            t.equal(called, 1);
+            o1();
+            t.equal(called, 1);
+
+            var o2 = qibl.once(fn);
+            o2();
+            o2();
+            t.equal(called, 2);
+
             t.done();
         },
     },
