@@ -258,6 +258,7 @@ module.exports = {
             Base.b = 2;
             var Derived = function() {};
             qibl.inherits(Derived, Base);
+            t.ok(new Derived() instanceof Base);
             t.equal(Derived.a, 1);
             t.equal(Derived.b, 2);
             t.done();
@@ -268,6 +269,7 @@ module.exports = {
             Base.prototype.m = function() { return 1234 };
             var Derived = function() {};
             qibl.inherits(Derived, Base);
+            t.ok(new Derived() instanceof Base);
             // prototype inherits from base prototype
             t.equal(Derived.prototype.m, Base.prototype.m);
             // object inherits
@@ -283,6 +285,8 @@ module.exports = {
             var Derived = function() {};
             util.inherits(Base, Old);
             qibl.inherits(Derived, Base);
+            t.ok(new Derived() instanceof Base);
+            t.ok(new Derived() instanceof Old);
             t.equal(new Derived().m, new Old().m);
             t.strictEqual(new Derived().m(), 12345);
             t.done();
@@ -293,6 +297,7 @@ module.exports = {
             try { eval("Base = class C { m() { return 123 } }") } catch (err) { return t.skip(); }
             var Derived = function() {};
             qibl.inherits(Derived, Base);
+            t.ok(new Derived() instanceof Base);
             t.equal(new Derived().m(), 123);
             t.done();
         },
