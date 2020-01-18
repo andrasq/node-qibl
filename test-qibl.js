@@ -544,6 +544,30 @@ module.exports = {
             }
             qibl.thunkify(call, myItem)(1, 2, 3, 4)(null);
         },
+
+        'should invoke the function with the callback': function(t) {
+            var myCb = function(){};
+            function call(item, cb) {
+                t.equal(cb, myCb);
+                t.done();
+            }
+            qibl.thunkify(call)(1)(myCb);
+        },
+
+        'should invoke each callback': function(t) {
+            t.expect(2);
+            var called;
+            function call(a, b, cb) { called = a + b; cb() }
+            var thunk = qibl.thunkify(call)(1, 2);
+            thunk(function() {
+                t.equal(called, 3);
+                called = 0;
+                thunk(function() {
+                    t.equal(called, 3);
+                    t.done();
+                })
+            })
+        },
     },
 
     'curry': {
