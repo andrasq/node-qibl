@@ -73,8 +73,8 @@ Return an array with the own properties of the object.  Equivalent to `Object.va
 ### qibl.populate( target, val [,options ] )
 
 Similar to `fill()`, but can can fill with computed values and can also populate objects.
-If `val` is a function the array will be filled with the return values of `val(i)` when
-called with the array offset `i` being stored into.  Returns the target being populated.
+If `val` is a function the target will be filled with the return values of `val(i)` when
+called with the property names or offsets being set. Returns the target being populated.
 
     // generate 10 random numbers
     var rands = qibl.populate(new Array(10), Math.random);
