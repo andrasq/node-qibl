@@ -93,12 +93,16 @@ function getProperty( target, dottedName, defaultValue ) {
         if (this !== qibl && typeof target === 'string') return getProperty(this, target, dottedName);
     }
 
-    var path = dottedName.indexOf('.') < 0 ? [dottedName] : dottedName.split('.');
-    for (var item=target, i=0; i<path.length; i++) {
-        if (item == null) return defaultValue;
-        item = item[path[i]];
+    var first, path;
+    if (dottedName.indexOf('.') < 0) { first = dottedName; path = [] } else { path = dottedName.split('.'); first = dottedName[0] }
+
+    if (target == null) return defaultValue;
+    target = target[first];
+    for (var i = 1; i < path.length; i++) {
+        if (target == null) return defaultValue;
+        target = target[path[i]];
     }
-    return item !== undefined ? item : defaultValue;
+    return target !== undefined ? target : defaultValue;
 }
 
 /*
