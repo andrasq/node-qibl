@@ -70,6 +70,23 @@ present for symmetry with `values()`.
 
 Return an array with the own properties of the object.  Equivalent to `Object.values`.
 
+### qibl.populate( target, val [,options ] )
+
+Similar to `fill()`, but can can fill with computed values and can also populate objects.
+If `val` is a function the array will be filled with the return values of `val(i)` when
+called with the array offset `i` being stored into.  Returns the target being populated.
+
+    // generate 10 random numbers
+    var rands = qibl.populate(new Array(10), Math.random);
+
+    // function to generate the range [0..limit]
+    var range = (limit) => qibl.populate(new Array(limit), (i) => i);
+
+    // initialize properties a and c to 'a' and 'c', respectively
+    var obj = { a: 1, b: 2 }
+    qibl.populate(obj, (k) => k, { keys: ['a', 'c'] });
+    // => { a: 'a', b: 2, c: 'c' }
+
 
 Strings
 -------
@@ -141,23 +158,6 @@ Buffers and Arrays
 
 Fill the buffer or array with the value `ch` from starting offset `base` and up to the limit
 `bound` (but not including `bound`).  Returns the target being filled.
-
-### qibl.populate( target, val [,options ] )
-
-Similar to `fill()`, but can can fill with computed values and can also populate objects.
-If `val` is a function the array will be filled with the return values of `val(i)` when
-called with the array offset `i` being stored into.  Returns the target being populated.
-
-    // generate 10 random numbers
-    var rands = qibl.populate(new Array(10), Math.random);
-
-    // function to generate the range [0..limit]
-    var range = (limit) => qibl.populate(new Array(limit), (i) => i);
-
-    // initialize properties a and c to 'a' and 'c', respectively
-    var obj = { a: 1, b: 2 }
-    qibl.populate(obj, (k) => k, { keys: ['a', 'c'] });
-    // => { a: 'a', b: 2, c: 'c' }
 
 Options:
 - base - if target is an array, the starting offset to populate from.  Default `0`.
