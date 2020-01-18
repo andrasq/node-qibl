@@ -407,18 +407,20 @@ function addslashes( str, patt ) {
 }
 
 /**
+// gather and return the data emitted, default to '' if no data
 function readBody( emitter, cb ) {
-    var doneCount = 0, chunks = null;
+    var doneCount = 0, chunk1, chunks, data = '';
     emitter.on('data', function(chunk) {
-        if (!chunks) chunks = chunks;
-        else if (typeof chunks === 'string') chunks += chunk;
-        else if (Array.isArray(chunks)) chunks.push(chunk);
-        else chunks = new Array(chunks, chunk);
+        if (typeof chunk === 'string') data += chunk;
+        else if (!chunk1) chunk1 = chunk;
+        else if (!chunks) chunks = new Array(chunk1, chunk);
+        else chunks.push(chunk);
     })
     emitter.on('end', function() {
         if (doneCount++) return;
-        if (!chunks || !Array.isArray(chunks)) return cb(null, chunks);
-        cb(null, Buffer.concat(chunks));
+        if (!chunk1) return cb(null, data);
+        else if (!chunks) return cb(null, chunk1);
+        else cb(null, Buffer.concat(chunks));
     })
     emitter.on('error', function(err) {
         if (!doneCount++) cb(err);
