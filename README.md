@@ -140,7 +140,29 @@ Buffers and Arrays
 ### qibl.fill( buf, ch [,base] [,bound] )
 
 Fill the buffer or array with the value `ch` from starting offset `base` and up to the limit
-`bound` (but not including `bound`).
+`bound` (but not including `bound`).  Returns the target being filled.
+
+### qibl.populate( target, val [,options ] )
+
+Similar to `fill()`, but can can fill with computed values and can also populate objects.
+If `val` is a function the array will be filled with the return values of `val(i)` when
+called with the array offset `i` being stored into.  Returns the target being populated.
+
+    // generate 10 random numbers
+    var rands = qibl.populate(new Array(10), Math.random);
+
+    // function to generate the range [0..limit]
+    var range = (limit) => qibl.populate(new Array(limit), (i) => i);
+
+    // initialize properties a and c to 'a' and 'c', respectively
+    var obj = { a: 1, b: 2 }
+    qibl.populate(obj, (k) => k, { keys: ['a', 'c'] });
+    // => { a: 'a', b: 2, c: 'c' }
+
+Options:
+- base - if target is an array, the starting offset to populate from.  Default `0`.
+- bound - if target is an array, the limiting offset to populate to.  Default `target.length`.
+- keys - if target is an object, the names of the properties to populate.  Default all own properties.
 
 ### qibl.concat2( target, arr1 [,arr2] )
 
@@ -220,6 +242,7 @@ load.
 Changelog
 ---------
 
+- 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
 - 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`, `inherits`, `curry`

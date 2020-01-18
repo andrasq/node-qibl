@@ -26,6 +26,7 @@ var qibl = module.exports = {
     setProperty: setProperty,
     inherits: inherits,
     fill: fill,
+    populate: populate,
     str_repeat: str_repeat,
     str_truncate: str_truncate,
     strtok: strtok,
@@ -171,7 +172,32 @@ function fill( buf, ch, base, bound ) {
     return buf;
 }
 
+// similar to fill() but for objects
+function populate( target, val, options ) {
+    if (Array.isArray(target) || target instanceof Buffer) {
+        var base = options && options.base || 0;
+        var bound = options && options.bound || target.length;
+        if (typeof val === 'function') for (var i = base; i < bound; i++) target[i] = val(i);
+        else for (var i = base; i < bound; i++) target[i] = val;
+    }
+    else {
+        var keys = options && options.keys ? options.keys : Object.keys(target);
+        kfill(target, keys, typeof val === 'function' ? val : function(k) { return val });
+    }
+    return target;
+}
+
+// keyword fill
+function kfill( target, keys, fn ) {
+    for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        target[k] = fn(k);
+    }
+    return target;
+}
+
 // concatenate two arrays, much faster than [].concat
+// note that unlike [].concat, a1 and a2 must be arrays and are not flattened
 function concat2( target, a1, a2 ) {
     for (var len = a1.length, i = 0; i < len; i++) target.push(a1[i]);
     if (a2) for (var len = a2.length, i = 0; i < len; i++) target.push(a2[i]);

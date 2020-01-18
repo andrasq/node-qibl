@@ -308,7 +308,64 @@ module.exports = {
         t.deepEqual(qibl.fill(arr, 3), [3, 3, 3]);
         t.deepEqual(qibl.fill(arr, 5, 2), [3, 3, 5]);
         t.deepEqual(qibl.fill(arr, 5, 3, 5), [3, 3, 5, 5, 5]);
+        t.deepEqual(qibl.fill(arr, 7, 3, 5), [3, 3, 5, 7, 7]);
+        t.deepEqual(qibl.fill(arr, 9, 2, 4), [3, 3, 9, 9, 7]);
+
+        t.deepEqual(qibl.fill(new Array(10), 3, 3, 6), [,,,3,3,3,,,,,]);
+
         t.done();
+    },
+
+    'populate': {
+        'should set array elements': function(t) {
+            var arr = new Array(3);
+            t.deepEqual(qibl.populate(arr, 3), [3, 3, 3]);
+            t.deepEqual(qibl.populate(arr, 5, { base: 2 }), [3, 3, 5]);
+            t.deepEqual(qibl.populate(arr, 7, { base: 3, bound: 5 }), [3, 3, 5, 7, 7]);
+            t.deepEqual(qibl.populate(arr, 9, { base: 2, bound: 4 }), [3, 3, 9, 9, 7]);
+
+            t.done();
+        },
+
+        'should populate array elements': function(t) {
+            var a = new Array(10);
+
+            qibl.populate(a, 3, { base: 3, bound: 6 });
+            t.deepEqual(a, [,,,3,3,3,,,,,]);
+
+            var nextId = 101;
+            qibl.populate(a, function() { return nextId++ }, { base: 3, bound: 5 });
+            t.deepEqual(a, [,,,101,102,3,,,,,]);
+
+            qibl.populate(a, 1, { bound: 4 });
+            t.deepEqual(a, [1,1,1,1,102,3,,,,,]);
+
+            qibl.populate(a, 2, { base: 8 });
+            t.deepEqual(a, [1,1,1,1,102,3,,,2,2,]);
+
+            t.done();
+        },
+
+        'should populate object keys': function(t) {
+            var C = function() { this.a = 1; this.b = 2 };
+            C.prototype.x = 99;
+            var o = new C();
+
+            qibl.populate(o, 3);
+            t.deepEqual(o, {a:3, b:3});
+
+            var nextId = 101;
+            qibl.populate(o, function() { return nextId++ });
+            t.deepEqual(o, {a:101, b:102});
+
+            qibl.populate(o, 999, { keys: ['b'] });
+            t.deepEqual(o, {a:101, b:999});
+
+            qibl.populate(o, 2);
+            t.deepEqual(o, {a:2, b:2});
+
+            t.done();
+        },
     },
 
     'concat2 should concatenate arrays': function(t) {
