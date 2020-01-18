@@ -765,9 +765,12 @@ module.exports = {
 
     'selectField': {
         'should select column': function(t) {
-            t.deepEqual(qibl.selectField([], 'k'), []);
-            t.deepEqual(qibl.selectField([{a:1}, {k:2}, {c:3, k:4}, {d:5}], 'k'), [undefined, 2, 4, undefined]);
-            t.deepEqual(qibl.selectField([null, undefined, 0, false], 'k'), [undefined, undefined, undefined, undefined]);
+            t.deepStrictEqual(qibl.selectField([], 'k'), []);
+            t.deepStrictEqual(qibl.selectField([{a:1}, {k:2}, {c:3, k:4}, {d:5}], 'k'), [undefined, 2, 4, undefined]);
+            t.deepStrictEqual(qibl.selectField([null, undefined, 0, false], 'k'), [undefined, undefined, undefined, undefined]);
+            t.deepStrictEqual(qibl.selectField([{}], 'k'), [undefined]);
+            t.deepStrictEqual(qibl.selectField([{}, {}], 'k'), [undefined, undefined]);
+            t.deepStrictEqual(qibl.selectField([{}, {k:null}], 'k'), [undefined, null]);
             t.done();
         },
     },
