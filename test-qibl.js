@@ -825,6 +825,25 @@ module.exports = {
         },
     },
 
+    'mapById': {
+        'should map objects by id': function(t) {
+            t.deepEqual(qibl.mapById([{a:1}, {a:2}], 'a'), {1: {a:1}, 2: {a:2}});
+            t.deepEqual(qibl.mapById([{a:1}, {a:2, b:2}], 'a'), {1: {a:1}, 2: {a:2, b:2}});
+
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'a'), {1: {a:1}});
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'b'), {2: {b:2}});
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'c'), {});
+
+            t.deepEqual(qibl.mapById([], 'a'), {});
+            t.deepEqual(qibl.mapById([,,,null,undefined,,,7,false,0,"string"], 'a'), {});
+            t.deepEqual(qibl.mapById([,,{a:1}], 'a'), {1: {a:1}});
+
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'a', {x:9}), {x:9, 1: {a:1}});
+
+            t.done();
+        },
+    },
+
     'keys should use Object.keys': function(t) {
         var spy = t.spyOnce(Object, 'keys');
         t.deepEqual(qibl.keys({a:1, b:2}), ['a', 'b']);

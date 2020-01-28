@@ -49,6 +49,7 @@ var qibl = module.exports = {
     keys: keys,
     values: values,
     selectField: selectField,
+    mapById: mapById,
     vinterpolate: vinterpolate,
     addslashes: addslashes,
 };
@@ -419,6 +420,18 @@ function selectField( arrayOfObjects, key ) {
         (obj == null) ? values.push(undefined) : values.push(obj[key]);
     }
     return values;
+}
+
+// map the objects by a property value
+// see qhash
+function mapById( arrayOfObjects, id, target ) {
+    // array.reduce((t, e) => e && (t[e[id]] = e), target || {})
+    target = target || {};
+    for (var i = 0; i < arrayOfObjects.length; i++) {
+        var obj = arrayOfObjects[i];
+        if (obj != null && obj[id] !== undefined) target[obj[id]] = obj;
+    }
+    return target;
 }
 
 // Object.keys
