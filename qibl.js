@@ -27,6 +27,7 @@ var qibl = module.exports = {
     inherits: inherits,
     fill: fill,
     populate: populate,
+    omitUndefined: omitUndefined,
     str_repeat: str_repeat,
     str_truncate: str_truncate,
     strtok: strtok,
@@ -133,18 +134,26 @@ function setProperty( target, dottedName, value, mode ) {
         if (!item[field] || typeof item[field] !== 'object') item[field] = {};
         item = item[field];
     }
-    if (!mode) {
-        item[path[path.length-1]] = value;
-        return target;
-    }
 
-    var name = path[path.length-1];
-    Object.defineProperty(item, name, {
-        value: value,
-        enumerable: mode.indexOf('x') < 0,
-        writable: mode.indexOf('r') < 0 || mode.indexOf('w') >= 0,      // 'r', 'w', 'rw', 'ro'
-    });
+    if (mode) setPropertyMode(item, path[path.length-1], value, mode);
+    else item[path[path.length-1]] = value;
+
     return target;
+}
+
+function setPropertyMode( object, property, value, mode ) {
+    var isSetter = mode.indexOf('S') >= 0;
+    var isGetter = mode.indexOf('G') >= 0;
+    var isEnumerable = mode.indexOf('x') < 0;
+    var isWritable = mode.indexOf('r') >= 0 && mode.indexOf('w') < 0;
+    var isConfigurable = true;
+
+    var u = undefined;
+    var descriptor =
+        isSetter ? { set: value, enumerable: isEnumerable, configurable: isConfigurable } :
+        isGetter ? { get: value, enumerable: isEnumerable, configurable: isConfigurable } :
+                   { value: value, enumerable: isEnumerable, writable: isWritable, configurable: isConfigurable };
+    Object.defineProperty(object, property, descriptor);
 }
 
 // make the derived class inherit from the base
@@ -160,16 +169,6 @@ function inherits( derived, base ) {
     // function __() { this.constructor = derived }
     // __.prototype = base.prototype;
     // derived.prototype = new __();
-}
-
-// See also `sane-buffer`.
-function fill( buf, ch, base, bound ) {
-    // TODO: maybe typecheck args?
-    // TODO: maybe support negative base/bound?
-    base = base || 0;
-    bound = bound || buf.length;
-    for (var i = base; i < bound; i++) buf[i] = ch;
-    return buf;
 }
 
 // similar to fill() but for objects
@@ -194,6 +193,30 @@ function kfill( target, keys, fn ) {
         target[k] = fn(k);
     }
     return target;
+}
+
+// compact by squeezing out undefined elements
+function omitUndefined( item ) {
+    if (Array.isArray(item)) {
+        var val, ret = new Array();
+        for (var i=0; i<item.length; i++) if ((val = item[i]) !== undefined) ret.push(val);
+        return ret;
+    }
+    else {
+        var val, ret = {};
+        for (var k in item) if ((val = item[k]) !== undefined) ret[k] = val;
+        return ret;
+    }
+}
+
+// See also `sane-buffer`.
+function fill( buf, ch, base, bound ) {
+    // TODO: maybe typecheck args?
+    // TODO: maybe support negative base/bound?
+    base = base || 0;
+    bound = bound || buf.length;
+    for (var i = base; i < bound; i++) buf[i] = ch;
+    return buf;
 }
 
 // concatenate two arrays, much faster than [].concat

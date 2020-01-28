@@ -216,7 +216,16 @@ module.exports = {
             ret = qibl.setProperty({a:1, b:2}, 'a', 10, 'r');
             t.deepEqual(ret, {a:10, b:2});
             try { ret.a = 20; } catch (e) {}
-            t.deepEqual(ret.a, 10);
+            t.deepEqual(ret.a, 20);
+
+            // getter
+            ret = qibl.setProperty({a:1}, 'b.c', function() { return 123 }, 'G');
+            t.strictEqual(ret.b.c, 123);
+
+            // setter
+            ret = qibl.setProperty({a:1}, 'b.c', function(x) { this.a = x }, 'S');
+            ret.b.c = 123;
+            t.strictEqual(ret.b.a, 123);
 
             t.done();
         },
@@ -363,6 +372,47 @@ module.exports = {
 
             qibl.populate(o, 2);
             t.deepEqual(o, {a:2, b:2});
+
+            t.done();
+        },
+    },
+
+    'omitUndefined': {
+        'should compact arrays': function(t) {
+            var tests = [
+                [ [], [] ],
+                [ [1,2], [1,2] ],
+                [ [1,,2], [1,2] ],
+                [ [,,1], [1] ],
+                [ [1,,,], [1] ],
+                [ [,,,,,,,,,,,,,,,], [] ],
+                [ [,,,,,,,,,,,,,,,1,,,,,,,,,2,,,,,,], [1,2] ],
+            ];
+
+            for (var i=0; i<tests.length; i++) {
+                t.deepStrictEqual(qibl.omitUndefined(tests[i][0]), tests[i][1]);
+            }
+
+            t.done();
+        },
+
+        'should compact objects': function(t) {
+            var tests = [
+                [ {}, {} ],
+                [ null, {} ],
+                [ undefined, {} ],
+                [ 0, {} ],
+                [ 1, {} ],
+                [ false, {} ],
+                [ {a:1, b:2}, {a:1, b:2} ],
+                [ {a:undefined, b:2}, {b:2} ],
+                [ {a:1, b:undefined}, {a:1} ],
+                [ {a:undefined, b:undefined}, {} ],
+            ];
+
+            for (var i=0; i<tests.length; i++) {
+                t.deepStrictEqual(qibl.omitUndefined(tests[i][0]), tests[i][1]);
+            }
 
             t.done();
         },

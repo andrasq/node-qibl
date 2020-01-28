@@ -87,6 +87,11 @@ called with the property names or offsets being set. Returns the target being po
     qibl.populate(obj, (k) => k, { keys: ['a', 'c'] });
     // => { a: 'a', b: 2, c: 'c' }
 
+### qibl.omitUndefined( objectOrArray )
+
+Copy the object or array but omit properties that are `undefined`.
+`null` and other falsy properties are preserved in the output.
+Returns a new object or array with undefined elements removed.
 
 Strings
 -------
@@ -242,6 +247,7 @@ load.
 Changelog
 ---------
 
+- 1.4.0 - new function omitUndefined
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
