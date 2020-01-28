@@ -247,7 +247,7 @@ load.
 Changelog
 ---------
 
-- 1.4.0 - new function omitUndefined
+- 1.4.0 - new functions omitUndefined, mapById
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
