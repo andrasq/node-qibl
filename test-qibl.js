@@ -680,17 +680,17 @@ module.exports = {
     'event listeners': {
         'clearListeners should return functions': function(t) {
             var called = 0;
-            var listener = function() { called += 1 };
+            var listener = function f1() { called += 1 };
             var called2 = 0;
-            var listener2 = function() { called2 += 1 };
+            var listener2 = function f2() { called2 += 1 };
             var emitter = new events.EventEmitter();
-
-            t.deepEqual(qibl.clearListeners(emitter, 'test1'), []);
 
             emitter.on('test2', listener);
             emitter.on('test2', listener2);
             emitter.emit('test2');
             t.ok(called == 1 && called2 == 1);
+
+            t.deepEqual(qibl.clearListeners(emitter, 'test1'), []);
 
             var cleared = qibl.clearListeners(emitter, 'test2');
             t.deepEqual(emitter.listeners(), []);

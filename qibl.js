@@ -11,6 +11,7 @@
 'use strict';
 
 var nodeMajor = parseInt(process.versions.node);
+var nodeMinor = +process.versions.node.split('.')[1];
 
 // use spread arguments if supported, is faster than .call or .apply
 var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { return func(...argv) }')");
@@ -425,7 +426,9 @@ function tryRequire( name ) {
 // remove and return all listeners for the specified event.
 // See also `kubelogger`.
 function clearListeners( emitter, event ) {
-    var listeners = emitter.listeners(event);
+    // node-v0.8 returns the actual storage array whose contents will empty out
+    // after the removeListeners below, so make our own copy of the array
+    var listeners = emitter.listeners(event).slice(0);
     for (var i = 0; i < listeners.length; i++) emitter.removeListener(event, listeners[i]);
     return listeners;
 }
