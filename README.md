@@ -111,6 +111,12 @@ Examples:
 Copy the object or array but omit properties that are `undefined`.
 `null` and other falsy properties are preserved in the output.
 Returns a new object or array with undefined elements removed.
+Copies all enumerable properties, both own and inherited.
+
+This can be a handy way of garbage collecting objects `{}` that are used to cache values
+that on expiration are set to `undefined` instead of being deleted.  (It can be much faster
+to set to undefined than to delete.)
+
 
 Strings
 -------
