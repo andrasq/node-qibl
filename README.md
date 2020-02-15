@@ -304,7 +304,7 @@ This undoes a clearListeners().
 Changelog
 ---------
 
-- 1.4.0 - new functions omitUndefined, mapById, subsample, qsearch, sort3, clear/restoreListeners
+- 1.4.0 - new functions omitUndefined, fill, subsample, qsearch, sort3, clear/restoreListeners, mapById
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
