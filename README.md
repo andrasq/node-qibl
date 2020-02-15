@@ -274,13 +274,17 @@ is invoked and its return value is returned.  The count of expected arguments is
 from `func.length`.
 
     function sum4(a, b, c, d) { return a + b + c  + d }
-    var f = qibl.curry(sum3);
+    var f = qibl.curry(sum4);
     // => [function]
 
-    f(1, 2, 3, 4)
-    f(1)(2)(3)(4)
-    f(1, 2)(3)(4, 5)
-    // => 10
+    f(1, 2, 3, 4)       // => 10
+    f(1)(2)(3)(4)       // => 10
+    f(1, 2)(3)(4, 5)    // => 10
+    f(1, 2, 3, 4, 5)    // => 10
+
+    var f2 = f(1, 2)
+    f2(3, 4)            // => 10
+    f2(4, 5)            // => 12
 
 ### qibl.tryRequire( name )
 
