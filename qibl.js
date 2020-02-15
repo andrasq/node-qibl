@@ -35,6 +35,8 @@ var qibl = module.exports = {
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
     toStruct: toStruct,
+    clearListeners: clearListeners,
+    restoreListeners: restoreListeners,
     varargs: varargs,
     thunkify: thunkify,
     invoke: invoke1,            invoke1: invoke1,
@@ -337,19 +339,6 @@ function toStruct( obj ) {
     return toStruct.prototype = obj;
 }
 
-/**
-// See also `kubelogger`.
-function removeAllListeners( emitter, event ) {
-    var listeners = emitter.listeners(event);
-    for (var i = 0; i < listeners.length; i++) emitter.removeListener(event, listeners[i]);
-    return listeners;
-}
-
-function addListeners( emitter, event, listeners ) {
-    for (var i = 0; i < listeners.length; i++) emitter.on(event, listeners[i]);
-    return listeners;
-}
-**/
 
 // build a function that calls the handler with the arguments it was invoked with
 function varargs( handler, self ) {
@@ -433,6 +422,19 @@ function tryRequire( name ) {
     try { return require(name) } catch (e) { }
 }
 
+// remove and return all listeners for the specified event.
+// See also `kubelogger`.
+function clearListeners( emitter, event ) {
+    var listeners = emitter.listeners(event);
+    for (var i = 0; i < listeners.length; i++) emitter.removeListener(event, listeners[i]);
+    return listeners;
+}
+// add all the listeners in the array to listen for the event
+function restoreListeners( emitter, event, listeners ) {
+    for (var i = 0; i < listeners.length; i++) emitter.on(event, listeners[i]);
+    return listeners;
+}
+
 /**
 function _copyFunctionProperties( target, src ) {
     var name, names = Object.getOwnPropertyNames(src);
@@ -442,6 +444,7 @@ function _copyFunctionProperties( target, src ) {
     }
 }
 **/
+
 
 // backslash-escape the chars that have special meaning in regex strings
 // See also microrest, restiq.
@@ -514,6 +517,17 @@ function addslashes( str, patt ) {
     patt = patt || /([\'\"\\\x00])/g;
     return str.replace(patt, '\\$1');
 }
+
+/**
+var _warnings = {};
+function warnOnce( key, message ) {
+    if (key === undefined) throw new Error('missing key');
+    if (_warnings[key] === undefined) {
+        _warnings[key] = true;
+        console.warn(message);
+    }
+}
+**/
 
 /**
 // gather and return the data emitted, default to '' if no data

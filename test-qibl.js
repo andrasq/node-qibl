@@ -6,6 +6,7 @@
 'use strict'
 
 var util = require('util');
+var events = require('events');
 var qibl = require('./');
 var nodeMajor = parseInt(process.versions.node);
 
@@ -674,6 +675,53 @@ module.exports = {
         var hash = new Object({a:1});
         t.equal(qibl.toStruct(hash), hash);
         t.done();
+    },
+
+    'event listeners': {
+        'clearListeners should return functions': function(t) {
+            var called = 0;
+            var listener = function() { called += 1 };
+            var called2 = 0;
+            var listener2 = function() { called2 += 1 };
+            var emitter = new events.EventEmitter();
+
+            t.deepEqual(qibl.clearListeners(emitter, 'test1'), []);
+
+            emitter.on('test2', listener);
+            emitter.on('test2', listener2);
+            emitter.emit('test2');
+            t.ok(called == 1 && called2 == 1);
+
+            var cleared = qibl.clearListeners(emitter, 'test2');
+            t.deepEqual(emitter.listeners(), []);
+            t.equal(cleared.length, 2);
+            t.equal(typeof cleared[0], 'function');
+            t.equal(typeof cleared[1], 'function');
+            emitter.emit('test2');
+            t.ok(called == 1 && called2 == 1);
+
+            cleared[1]();
+            t.ok(called == 1 && called2 == 2);
+
+            t.done();
+        },
+
+        'restoreListeners should re-add the listeners': function(t) {
+            var emitter = new events.EventEmitter();
+            var called = 0;
+            emitter.on('test', function(){ called += 1 });
+
+            var cleared = qibl.clearListeners(emitter, 'test');
+            emitter.emit('test');
+            t.equal(called, 0);
+
+            qibl.restoreListeners(emitter, 'test', cleared);
+            emitter.emit('test');
+            emitter.emit('test');
+            t.equal(called, 2);
+
+            t.done();
+        },
     },
 
     'varargs': {

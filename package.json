@@ -1,8 +1,8 @@
 {
   "name": "qibl",
   "version": "1.4.0",
-  "description": "small functions I've found useful",
-  "keywords": [ "repeat", "fill", "assign", "merge", "polyfill", "toStruct" ],
+  "description": "many small useful functions",
+  "keywords": [ "repeat", "fill", "assign", "merge", "Buffer", "polyfill", "toStruct", "subsample" ],
   "main": "qibl.js",
   "license": "Apache-2.0",
   "files": ["REAMDE.md", "qibl.js"],

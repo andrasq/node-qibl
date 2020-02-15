@@ -9,9 +9,21 @@ A miscellaneous collection of small functions and polyfills I wrote that that I 
 reusing, gathered into a single place.  Most are pretty efficient, at times faster even
 than the equivalent built-in.
 
+If using the code cut-and-paste, include a comment line identifying the
+qibl source version that it came from, e.g.
+
+    // adapted from qibl@1.4.0
+    function subsample() { ... }
+
 To run the tests, check out the repo.
 
     qibl = require('qibl');
+
+Topics:
+- Objects
+- Strings
+- Arrays and Buffers
+- Functions
 
 
 API
@@ -262,11 +274,20 @@ from `func.length`.
 Suppress the error from `require(name)`.  Returns the module, or `undefined` if unable to
 load.
 
+### qibl.clearListeners( emitter, event )
+
+Remove all listeners that are listening for `event`, and return them in an array.
+
+### qibl.restoreListeners( emitter, event, listenersArray )
+
+Add all listeners in the array to be listening for the event.
+This undoes a clearListeners().
+
 
 Changelog
 ---------
 
-- 1.4.0 - new functions omitUndefined, mapById, subsample, qsearch, sort3
+- 1.4.0 - new functions omitUndefined, mapById, subsample, qsearch, sort3, clear/restoreListeners
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
