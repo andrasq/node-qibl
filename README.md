@@ -88,6 +88,13 @@ Similar to `fill()`, but can can fill with computed values and can also populate
 If `val` is a function the target will be filled with the return values of `val(i)` when
 called with the property names or offsets being set. Returns the target being populated.
 
+Options:
+- `base`: if filling an array, the starting address to fill from.  Default `0`.
+- `bound`: if filling an array, the limiting address to fill up to.  Default `target.length`.
+- `keys`: if filling an object, which propreties to set.  Default `Object.keys(target)`, all own properties.
+
+Examples:
+
     // generate 10 random numbers
     var rands = qibl.populate(new Array(10), Math.random);
 
