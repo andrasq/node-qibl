@@ -42,6 +42,9 @@ var qibl = module.exports = {
     _invoke1: _invoke1,
     _invoke2: _invoke2,
     concat2: concat2,
+    subsample: subsample,
+    qsearch: qsearch,
+    sort3: sort3,
     curry: curry,
     once: once,
     tryRequire: tryRequire,
@@ -226,6 +229,50 @@ function concat2( target, a1, a2 ) {
     for (var len = a1.length, i = 0; i < len; i++) target.push(a1[i]);
     if (a2) for (var len = a2.length, i = 0; i < len; i++) target.push(a2[i]);
     return target;
+}
+
+// return up to k randomly selected items from arr between base and bound,
+// fewer than k if there are not that many items.
+// see also qheap
+function subsample( k, arr, base, bound ) {
+    base = (base >= 0) ? base : 0;
+    bound = (bound >= 0) ? bound : arr.length;
+
+    if (bound > arr.length) bound = arr.length;
+    if (k > (bound - base)) k = bound - base;
+
+    var samples = new Array();
+    for (var i = 0; i < k; i++) samples.push(arr[i + base]);
+    for ( ; i < bound; i++) {
+        var j = Math.floor(Math.random() * (i - base + 1));
+        if (j < k) samples[j] = arr[i];
+    }
+    return samples;
+}
+
+// find the last location in the range [min..max] that still has the property.
+// Returs the largest index n >= min, n <= max where it holds, or (min - 1) if none do.
+// aka see absearch(), binsearch()
+function qsearch( min, max, probeProperty ) {
+    // bisection search while have a lot to examine
+    while ((max - min) > 3) {
+        var mid = min + Math.floor((max - min) / 2);
+        probeProperty(mid) ? min = mid + 1 : max = mid - 1;
+    }
+
+    // linear search once only a few possibilities left
+    for (var n = max; n >= min; n--) if (probeProperty(n)) return n;
+
+    // min-1 here is either the last n which probed ok, or the input min - 1
+    return min - 1;
+}
+
+// special-purpose sort of 3 items, 40m/s vs [].sort() 5m/s
+function sort3( a, b, c ) {
+    // ascending:
+    return (a <= b) ? (c <= a ? [c, a, b] : c <= b ? [a, c, b] : [a, b, c]) : sort3(b, a, c);
+    // descending:
+    // return (b > a) ? sort3(b, a, c) : (c > a ? [c, a, b] : c > b ? [a, c, b] : [a, b, c]);
 }
 
 // See also `qprintf`.

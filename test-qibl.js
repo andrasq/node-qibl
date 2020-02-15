@@ -433,6 +433,92 @@ module.exports = {
         t.done();
     },
 
+    'subsample': {
+        before: function(done) {
+            this.sampleit = function(t, limit, arr, length) {
+                var samp = qibl.subsample(limit, arr);
+                t.equal(samp.length, length, samp);
+                t.contains(arr, samp);
+            }
+            done();
+        },
+
+        'should subsample': function(t) {
+            this.sampleit(t, -1, [], 0);
+            this.sampleit(t, -1, [1, 2], 0);
+            this.sampleit(t, 0, [], 0);
+            this.sampleit(t, 0, [1], 0);
+
+            this.sampleit(t, 1, [], 0);
+            this.sampleit(t, 1, [1], 1);
+            this.sampleit(t, 1, [1, 2, 3], 1);
+            this.sampleit(t, 2, [1, 2, 3], 2);
+            this.sampleit(t, 3, [1, 2, 3], 3);
+            this.sampleit(t, 4, [1, 2, 3], 3);
+            this.sampleit(t, 99, [1, 2, 3], 3);
+
+            t.deepEqual(qibl.subsample(3, [3, 1, 2]), [3, 1, 2]);
+            t.deepEqual(qibl.subsample(7, [3, 1, 2]), [3, 1, 2]);
+
+            t.done();
+        },
+
+        'should subsample between base and bound': function(t) {
+            var arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            for (var base = 0; base < 10; base++) {
+                for (var bound = 0; bound < 10; bound++) {
+                    for (var i=0; i<100; i++) {
+                        var samp = qibl.subsample(4, arr, base, bound);
+                        for (var j=0; j<samp.length; j++) t.ok(samp[j] >= base && samp[j] < bound);
+                    }
+                }
+            }
+            t.done();
+        },
+
+        'should subsample fairly': function(t) {
+            var list = new Array(10);
+            var counts = new Array(10);
+            for (var i=0; i<10; i++) list[i] = i;
+
+            qibl.fill(counts, 0);
+            for (var i=0; i<100000; i++) {
+                var samp = qibl.subsample(2, list, 0, 11);
+                counts[samp[0]] += 1;
+                counts[samp[1]] += 1;
+            }
+
+            // no more than 1% difference over 100k
+            var min = Math.min.apply(null, counts);
+            var max = Math.max.apply(null, counts);
+            t.ok(max - min < 1000, "min-max spread too large");
+            t.done();
+        },
+    },
+
+    'qsearch': {
+        '': function(t) {
+            var arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+            t.equal(qibl.qsearch(0, 7, function(i) { return arr[i] <= 5 }), 5);
+            t.equal(qibl.qsearch(0, 5, function(i) { return arr[i] <= 5 }), 5);
+            t.equal(qibl.qsearch(0, 4, function(i) { return arr[i] <= 5 }), 4);
+            t.equal(qibl.qsearch(0, 9, function(i) { return arr[i] <= 2 }), 2);
+            t.equal(qibl.qsearch(0, 9, function(i) { return arr[i] <= 99 }), 9);
+            t.equal(qibl.qsearch(0, 9, function(i) { return arr[i] == 99 }), -1);
+            t.equal(qibl.qsearch(5, 9, function(i) { return arr[i] == 99 }), 4);
+
+            t.done();
+        },
+    },
+
+    'sort3': function(t) {
+        for (var i = 0; i < 1000; i++) {
+            var arr = qibl.sort3(Math.random(), Math.random(), Math.random());
+            t.ok(arr[0] <= arr[1] && arr[1] <= arr[2], "not sorted: " + arr);
+        }
+        t.done();
+    },
+
     'str_repeat should repeat': function(t) {
         var tests = [
             [ "", 2, "" ],

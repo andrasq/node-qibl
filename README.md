@@ -173,6 +173,25 @@ Options:
 
 Concatenate one or two arrays into the target array.  Returns the target array.
 
+### qibl.subsample( k, arr, [base, bound] )
+
+Return a uniformly distributed subsample of k items selected from the array between
+the specified base and bound.  Base and bound default to 0 and arr.length, respectively.
+Returns at most as many items as there are in the array (or in the specified range).
+
+### qibl.qsearch( min, max, probe(n) )
+
+Find the largest value n in the range [min..max] that still has the tested property,
+i.e. `probe(n)` returns truthy.  Returns the index `n` if found, or `min - 1` if not
+in the range.
+
+### qibl.sort3( a, b, c )
+
+Return an array containing the 3 items in ascending order.  Much faster than `[a, b, c].sort()`.
+
+    qibl.sort3(3, 1, 2);
+    // => [1, 2, 3]
+
 ### qibl.newBuf( arg, encodingOrOffset, length )
 
 Construct a Buffer like `new Buffer()` used to before it was deprecated.  Note that with
@@ -247,7 +266,7 @@ load.
 Changelog
 ---------
 
-- 1.4.0 - new functions omitUndefined, mapById
+- 1.4.0 - new functions omitUndefined, mapById, subsample, qsearch, sort3
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
