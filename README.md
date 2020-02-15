@@ -73,6 +73,12 @@ array.  The value is `undefined` if the property is not set.
         return array.map((item) => item[name]);
     }
 
+### qibl.mapById( arrayOfObjects, propertyName [,target] )
+
+Map the objects by a property value.  Returns a hash mapping each value to the
+object whose `propertyName` is set to that value.  Values should be strings or
+numbers.
+
 ### qibl.keys( object)
 
 Return an array with the names of the own properties of the object.  Same as `Object.keys`,
