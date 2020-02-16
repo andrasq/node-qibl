@@ -188,6 +188,13 @@ Options:
 - `delta` - allow the string to exceed limit by a few characters. Default 0.
 - `ellipsis` - replacement for the truncated part of the string. Default `...`.
 
+### qibl.str_random( n )
+
+Generate a random text exactly n characters long.  Uses the characters a-z and space ' '
+with a probability distribution similar to that of the qibl.js source file.
+
+    qibl.str_random(20)         // => 'etnq ss q t ae kmunl'
+
 ### qibl.strtok( str, sep )
 
 Separate the string `str` into parts delimited by the separator `sep`.  When called with a
@@ -356,7 +363,7 @@ This undoes a clearListeners().
 Changelog
 ---------
 
-- 1.4.0 - new functions omitUndefined, fill, subsample, qsearch, sort3, clear/restoreListeners, mapById
+- 1.4.0 - new functions omitUndefined, fill, subsample, qsearch, sort3, clear/restoreListeners, mapById, str_random
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify

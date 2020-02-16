@@ -636,6 +636,27 @@ module.exports = {
         },
     },
 
+    'str_random': {
+        'should return the right length': function(t) {
+            for (var i=0; i<100; i++) t.equal(qibl.str_random(i).length, i);
+            t.done();
+        },
+
+        'should use the common letters': function(t) {
+            var counts = {};
+            for (var i=0; i<1000; i++) {
+                var str = qibl.str_random(100);
+                for (var j=0; j<str.length; j++) {
+                    var ch = str[j];
+                    counts[ch] = (counts[ch] || 0) + 1;
+                }
+            }
+            t.contains(Object.keys(counts), 'etraunos'.split(''));
+            t.ok(Object.keys(counts).length > 24);
+            t.done();
+        },
+    },
+
     'saneBuf': {
         'newBuf should emulate legacy constructor': function(t) {
             var buf = qibl.newBuf("foo");

@@ -32,6 +32,7 @@ var qibl = module.exports = {
     str_repeat: str_repeat,
     str_truncate: str_truncate,
     strtok: strtok,
+    str_random: str_random,
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
@@ -297,6 +298,24 @@ function str_truncate( string, limit, opts ) {
     if (string.length <= limit) return string;
     if (opts && opts.delta > 0 && string.length <= limit + opts.delta) return string;
     return string.slice(0, limit) + ((opts && typeof opts.ellipsis === 'string') ? opts.ellipsis : '...');
+}
+
+// generate a random-ish string len chars long
+// letter frequencies counted in this file, padded with blanks:
+// var _random_charset = 'aaabccdeeeeeeffghiiijkllmnnnnooopqrrrrssstttttuuvwxyz           ';
+var _random_charset = 'aaabccdeeeee ffghiiijkllmnnn ooopqrrr ssstttt uuvwxyz           ';
+function str_random( len ) {
+    var s = '', ix = Math.floor(Math.random() * 64);
+
+    for (var i=0; i<len; i++) s += _random_charset[rand() & 0x3F];
+    return s;
+
+    function rand() {
+        // https://en.wikipedia.org/wiki/Linear_congruential_generator
+        // ix = (ix * 1103515245 + 12345) & 0x7FFFFFFF; // ANSI C mod 2^31, 10m/s; Math.random 10m/s
+        ix = (ix * 65793 + 4282663) & 0x7FFFFF; // cc65, mod 2^23 12m/s
+        return (ix >> 9); // bits 8..22 are usable
+    }
 }
 
 // similar to strtok() and strsep() but empty strings are allowed
