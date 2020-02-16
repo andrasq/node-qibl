@@ -12,6 +12,7 @@
 
 var nodeMajor = parseInt(process.versions.node);
 var nodeMinor = +process.versions.node.split('.')[1];
+var SymIterator = eval('typeof Symbol === "function" && Symbol.iterator || { iterator: "_iterator" }');
 
 // use spread arguments if supported, is faster than .call or .apply
 var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { return func(...argv) }')");
@@ -58,6 +59,9 @@ var qibl = module.exports = {
     selectField: selectField,
     mapById: mapById,
     groupById: groupById,
+    makeIterator: makeIterator,
+    setIterator: setIterator,
+    getIterator: getIterator,
     vinterpolate: vinterpolate,
     addslashes: addslashes,
 };
@@ -511,6 +515,37 @@ function mapById( items, idName, target ) {
 // group the objects by a property value
 function groupById( items, idName, target ) {
     return _mapById(items, idName, target || {}, true);
+}
+
+// given an traversal state update function that sets this.value and this.done,
+// install it on the protype to make instances iterable.
+// `step()` should update this.value or this.done as appropriate.
+// If this.done is true, this.value is not used.
+// see qdlist
+//
+// Convention: iterators that can be run only once return self,
+// those that can be run many times must return a new iterator each time.
+// The iterator object has a next() method that returns { value, done }.
+// It is faster to use one object for both the iterator and its return value.
+//
+// iterator() returns a traversal object with a method next().
+// next() returns a data wrapper with properties {value, done}.
+// If done is set then value is not to be used.
+function makeIterator( step ) {
+    return function() {
+        return {
+            value: null, done: false,
+            next: function() { this.__step(); return this; },
+            __step: step,
+        }
+    }
+}
+// install the iterator as Symbol.iterator if the node version supports symbols, else as ._iterator
+function setIterator( obj, iterator ) {
+    obj[SymIterator] = iterator;
+}
+function getIterator( obj ) {
+    return obj[SymIterator];
 }
 
 // Object.keys

@@ -1011,6 +1011,59 @@ module.exports = {
         },
     },
 
+    'makeIterator': {
+        'makeIterator should create an iterator function': function(t) {
+            var n = 0;
+            var iter = qibl.makeIterator(function() {
+                n++;
+                this.value = n;
+                this.done = n > 3;
+            });
+            t.equal(typeof iter, 'function');
+            t.equal(typeof iter().next, 'function');
+
+            var state = iter();
+            t.contains(state.next(), { value: 1, done: false });
+            t.contains(state.next(), { value: 2, done: false });
+            t.contains(state.next(), { value: 3, done: false });
+            t.contains(state.next(), { done: true });
+
+            t.done();
+        },
+
+        'get/setIterator should access the iterator function': function(t) {
+            var iter = qibl.makeIterator(function() {});
+
+            var obj = {};
+            qibl.setIterator(obj, iter);
+            t.equal(qibl.getIterator(obj), iter);
+
+            t.done();
+        },
+
+        'iterator should traverse the data': function(t) {
+            var n = 0;
+            var iter = qibl.makeIterator(function() {
+                this.value = ++n;
+                this.done = n > 5;
+            });
+
+            var obj = {};
+            qibl.setIterator(obj, iter);
+
+            if (typeof Symbol === 'undefined') {
+                // already tested above with state.next() etc
+                t.skip();
+            }
+            else {
+                // Array.from will traverse iterables
+                var data = Array.from(obj);
+                t.deepEqual(data, [1, 2, 3, 4, 5]);
+            }
+            t.done();
+        },
+    },
+
     'keys should use Object.keys': function(t) {
         var spy = t.spyOnce(Object, 'keys');
         t.deepEqual(qibl.keys({a:1, b:2}), ['a', 'b']);
