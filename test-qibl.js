@@ -464,6 +464,8 @@ module.exports = {
             t.deepEqual(qibl.subsample([3, 1, 2], 3), [3, 1, 2]);
             t.deepEqual(qibl.subsample([3, 1, 2], 7), [3, 1, 2]);
 
+            t.deepEqual(qibl.subsample([1, 2, 3], 2, 2, 10), [3]);
+
             t.done();
         },
 
@@ -1090,7 +1092,7 @@ module.exports = {
             qibl.setIterator(C.prototype, iter);
             var c = new C();
             t.deepEqual(qibl.toArray(c), [5,4,3,2,1]);
-            t.deepEqual(qibl.toArray(c), [3,2,1]);
+            t.deepEqual(qibl.toArray(c, function(v,i) { return 2 * v }), [6,4,2]);
 
             t.deepEqual(qibl.toArray(null), []);
             t.deepEqual(qibl.toArray({}), []);
