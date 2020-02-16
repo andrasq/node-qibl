@@ -273,7 +273,7 @@ Concatenate one or two arrays into the target array.  Returns the target array.
 
 ### qibl.subsample( items, k [,base, bound] )
 
-Return a uniformly distributed subsample of k of the items selected from the array between
+Return a uniformly distributed subsample of k items selected from the items array between
 the specified base and bound.  Base and bound default to 0 and items.length, respectively.
 Returns at most as many items as there are in the array (or in the bounded range).
 
