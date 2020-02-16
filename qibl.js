@@ -110,7 +110,6 @@ function getProperty( target, dottedName, defaultValue ) {
     var first, path;
     if (dottedName.indexOf('.') < 0) { first = dottedName; path = [] } else { path = dottedName.split('.'); first = dottedName[0] }
 
-    if (target == null) return defaultValue;
     target = target[first];
     for (var i = 1; i < path.length; i++) {
         if (target == null) return defaultValue;
@@ -236,18 +235,18 @@ function concat2( target, a1, a2 ) {
 // return up to k randomly selected items from arr between base and bound,
 // fewer than k if there are not that many items.
 // see also qheap
-function subsample( k, arr, base, bound ) {
+function subsample( k, items, base, bound ) {
     base = (base >= 0) ? base : 0;
-    bound = (bound >= 0) ? bound : arr.length;
+    bound = (bound >= 0) ? bound : items.length;
 
-    if (bound > arr.length) bound = arr.length;
+    if (bound > items.length) bound = items.length;
     if (k > (bound - base)) k = bound - base;
 
     var samples = new Array();
-    for (var i = 0; i < k; i++) samples.push(arr[i + base]);
+    for (var i = 0; i < k; i++) samples.push(items[i + base]);
     for ( ; i < bound; i++) {
         var j = Math.floor(Math.random() * (i - base + 1));
-        if (j < k) samples[j] = arr[i];
+        if (j < k) samples[j] = items[i];
     }
     return samples;
 }
