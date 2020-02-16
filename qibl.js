@@ -235,7 +235,7 @@ function concat2( target, a1, a2 ) {
 // return up to k randomly selected items from arr between base and bound,
 // fewer than k if there are not that many items.
 // see also qheap
-function subsample( k, items, base, bound ) {
+function subsample( items, k, base, bound ) {
     base = (base >= 0) ? base : 0;
     bound = (bound >= 0) ? bound : items.length;
 

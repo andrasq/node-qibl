@@ -440,7 +440,7 @@ module.exports = {
     'subsample': {
         before: function(done) {
             this.sampleit = function(t, limit, arr, length) {
-                var samp = qibl.subsample(limit, arr);
+                var samp = qibl.subsample(arr, limit);
                 t.equal(samp.length, length, samp);
                 t.contains(arr, samp);
             }
@@ -461,8 +461,8 @@ module.exports = {
             this.sampleit(t, 4, [1, 2, 3], 3);
             this.sampleit(t, 99, [1, 2, 3], 3);
 
-            t.deepEqual(qibl.subsample(3, [3, 1, 2]), [3, 1, 2]);
-            t.deepEqual(qibl.subsample(7, [3, 1, 2]), [3, 1, 2]);
+            t.deepEqual(qibl.subsample([3, 1, 2], 3), [3, 1, 2]);
+            t.deepEqual(qibl.subsample([3, 1, 2], 7), [3, 1, 2]);
 
             t.done();
         },
@@ -472,7 +472,7 @@ module.exports = {
             for (var base = 0; base < 10; base++) {
                 for (var bound = 0; bound < 10; bound++) {
                     for (var i=0; i<100; i++) {
-                        var samp = qibl.subsample(4, arr, base, bound);
+                        var samp = qibl.subsample(arr, 4, base, bound);
                         for (var j=0; j<samp.length; j++) t.ok(samp[j] >= base && samp[j] < bound);
                     }
                 }
@@ -487,7 +487,7 @@ module.exports = {
 
             qibl.fill(counts, 0);
             for (var i=0; i<100000; i++) {
-                var samp = qibl.subsample(2, list, 0, 11);
+                var samp = qibl.subsample(list, 2, 0, 11);
                 counts[samp[0]] += 1;
                 counts[samp[1]] += 1;
             }
