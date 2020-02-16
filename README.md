@@ -128,7 +128,7 @@ Id values should be strings or numbers.  Returns the target object, which is `{}
 
     var items = [{ id: 'a', v: 1 }, { id: 'b' }, { id: 'a', v: 2 }, { v: 3 }];
     qibl.mapById(items, 'id')
-    // => { a: {id: 'a'}, b: {id: 'b'} }
+    // => { a: {id: 'a'}, b: {id: 'b'}, 'undefined': {v: 3} }
 
 ### qibl.groupById( items, idName [,target] )
 
@@ -137,7 +137,7 @@ of ids to lists of objects.  Objects that do not have the `idName` property set 
 
     var items = [{ id: 'a', v: 1 }, { id: 'b' }, { id: 'a', v: 2 }, { v: 3 }];
     qibl.mapById(items, 'id')
-    // => { a: [{id: 'a', v: 1}, {id: 'a', v: 2}], b: [{id: 'b'}] }
+    // => { a: [{id: 'a', v: 1}, {id: 'a', v: 2}], b: [{id: 'b'}], 'undefined': [{v: 3}] }
 
 ### qibl.keys( object)
 
