@@ -102,9 +102,8 @@ function merge( target /* ,VARARGS */ ) {
  * note: defaultValue support makes it 15% slower
  */
 function getProperty( target, dottedName, defaultValue ) {
-    if (typeof target !== 'object' && typeof target !== 'function') {
-        if (this !== qibl && typeof target === 'string') return getProperty(this, target, dottedName);
-    }
+    if (this !== qibl && typeof target === 'string') return getProperty(this, target, dottedName);
+    if (!target) return defaultValue;
 
     var first, path;
     if (dottedName.indexOf('.') < 0) { first = dottedName; path = [] } else { path = dottedName.split('.'); first = dottedName[0] }
@@ -124,17 +123,12 @@ function getProperty( target, dottedName, defaultValue ) {
  * mode is a string containing 'x' if the property is non-enumerable ("expunged"), 'r' if it is "readonly".
  */
 function setProperty( target, dottedName, value, mode ) {
-    if (typeof target !== 'object' && typeof target !== 'function') {
-        if (this !== qibl && typeof target === 'string') return setProperty(this, target, dottedName, value);
-    }
-    if (target == null || typeof target !== 'object' && typeof target !== 'function') throw new Error('target not an object');
+    if (typeof target === 'string' && this !== qibl) return setProperty(this, target, dottedName, value);
+    if (!target || typeof target !== 'object' && typeof target !== 'function') return target;
 
-    if (dottedName.indexOf('.') < 0 && !mode) {
-        target[dottedName] = value;
-        return target;
-    }
+    if (dottedName.indexOf('.') < 0 && !mode) { target[dottedName] = value; return target; }
 
-    // note: split is much slower starting with node-v12
+    // note: split used to be much faster before node-v12
     var path = dottedName.split('.');
     for (var item=target, i=0; i<path.length-1; i++) {
         var field = path[i];
@@ -148,7 +142,10 @@ function setProperty( target, dottedName, value, mode ) {
     return target;
 }
 
-function setPropertyMode( object, property, value, mode ) {
+function setPropertyMode( target, property, value, mode ) {
+    // valid target is already checked for by setProperty
+    // if (!target || (typeof target !== 'object' && typeof target !== 'function')) return;
+
     var isSetter = mode.indexOf('S') >= 0;
     var isGetter = mode.indexOf('G') >= 0;
     var isEnumerable = mode.indexOf('x') < 0;
@@ -160,7 +157,7 @@ function setPropertyMode( object, property, value, mode ) {
         isSetter ? { set: value, enumerable: isEnumerable, configurable: isConfigurable } :
         isGetter ? { get: value, enumerable: isEnumerable, configurable: isConfigurable } :
                    { value: value, enumerable: isEnumerable, writable: isWritable, configurable: isConfigurable };
-    Object.defineProperty(object, property, descriptor);
+    Object.defineProperty(target, property, descriptor);
 }
 
 // make the derived class inherit from the base

@@ -248,14 +248,17 @@ module.exports = {
             t.done();
         },
 
-        'should throw if setting invalid target': function(t) {
-            t.throws(function() { qibl.setProperty(1, 'a', 1) }, /not an object/);
-            t.throws(function() { qibl.setProperty(false, 'a', 1) }, /not an object/);
-            t.throws(function() { qibl.setProperty(null, 'a', 1) }, /not an object/);
+        'should ignore invalid target': function(t) {
+            // lodash does not throw
+            qibl.setProperty(1, 'a', 1);
+            qibl.setProperty(false, 'a', 1);
+            qibl.setProperty(null, 'a', 1);
 
-            // not throws
+            // valid target, not throws
             qibl.setProperty({}, 'a', 1);
             qibl.setProperty(function(){}, 'a', 1);
+
+            qibl.setProperty(2, 'a', 1, 'x');
 
             t.done();
         },
