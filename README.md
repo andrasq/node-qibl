@@ -132,7 +132,7 @@ Id values should be strings or numbers.  Returns the target object, which is `{}
 
 ### qibl.groupById( items, idName [,target] )
 
-Similar to `mapById`, but group object by property value into arrays.  Returns a mapping
+Similar to `mapById`, but group objects by property value into arrays.  Returns a mapping
 of ids to lists of objects.  Objects that do not have the `idName` property set are omitted.
 
     var items = [{ id: 'a', v: 1 }, { id: 'b' }, { id: 'a', v: 2 }, { v: 3 }];
@@ -378,7 +378,7 @@ Changelog
 ---------
 
 - 1.4.0 - new functions omitUndefined, fill, subsample, qsearch, sort3, clear/restoreListeners, mapById, str_random;
-          document getProperty, setProperty; new undocumented toArray
+          document getProperty, setProperty; new undocumented toArray, distinct
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
