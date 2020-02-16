@@ -539,7 +539,7 @@ function makeIterator( step ) {
         return {
             value: null, done: false,
             next: function() { this.__step(); return this; },
-            __step: step,
+            __step: step, __self: this,
         }
     }
 }
