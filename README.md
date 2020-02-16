@@ -191,7 +191,7 @@ Options:
 ### qibl.str_random( n )
 
 Generate a random text exactly n characters long.  Uses the characters a-z and space ' '
-with a probability distribution similar to that of the qibl.js source file.
+with a frequency distribution similar to that of the qibl.js source file.
 
     qibl.str_random(20)         // => 'etnq ss q t ae kmunl'
 
@@ -363,7 +363,8 @@ This undoes a clearListeners().
 Changelog
 ---------
 
-- 1.4.0 - new functions omitUndefined, fill, subsample, qsearch, sort3, clear/restoreListeners, mapById, str_random
+- 1.4.0 - new functions omitUndefined, fill, subsample, qsearch, sort3, clear/restoreListeners, mapById, str_random;
+          document getProperty, setProperty
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
