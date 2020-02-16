@@ -534,6 +534,9 @@ function distinct( array ) {
 // If this.done is true, this.value is not used.
 // see qdlist
 //
+// NOTE: the step function _must_ be a function(), not a () => because
+// the latter does not associate with the instance and cannot set this.done.
+//
 // Convention: iterators that can be run only once return self,
 // those that can be run many times must return a new iterator each time.
 // The iterator object has a next() method that returns { value, done }.
@@ -542,19 +545,20 @@ function distinct( array ) {
 // iterator() returns a traversal object with a method next().
 // next() returns a data wrapper with properties {value, done}.
 // If done is set then value is not to be used.
-function makeIterator( step, state ) {
+function makeIterator( step, makeState ) {
     return function() {
         return {
             value: null, done: false,
             next: function() { this._step(this._state); return this; },
             _step: step,
-            _state: state || { self: this },
+            _state: makeState ? makeState(this) : {},
         }
     }
 }
 // install the iterator as Symbol.iterator if the node version supports symbols, else as ._iterator
 function setIterator( obj, iterator ) {
     obj[IteratorProperty] = iterator;
+    return obj;
 }
 // return the iterator.  Note that iterators have to be called as a method call, ie iter.call(obj),
 // to associate the iterator function with the instance being iterated.

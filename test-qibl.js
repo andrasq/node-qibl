@@ -1064,7 +1064,7 @@ module.exports = {
             var iter = qibl.makeIterator(function stepper(st) {
                 t.equal(st, state);
                 t.done();
-            }, state);
+            }, function() { return state });
 
             iter().next();
         },
@@ -1076,7 +1076,7 @@ module.exports = {
                 called += 1;
                 if (state.ix >= state.arr.length) this.done = true;
                 else this.value = state.arr[state.ix++];
-            }, { arr: a, ix: 0 });
+            }, function(self) { return { arr: self, ix: 0 } });
             qibl.setIterator(a, iter);
 
             if (typeof Array.from !== 'function') t.skip();
@@ -1084,6 +1084,10 @@ module.exports = {
             var b = Array.from(a);
             t.equal(called, a.length + 1);
             t.deepEqual(b, a);
+
+            var c = [2,4,6];
+            qibl.setIterator(c, iter);
+            t.deepEqual(Array.from(c), c);
 
             t.done();
         },
