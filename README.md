@@ -123,6 +123,7 @@ array.  The value is `undefined` if the property is not set.
 
 Map the objects by a property value.  Returns a hash mapping each value to the
 first object whose `idName` is set to that value.  Null and undefined objects are skipped.
+Objects that do not have that property are skipped.
 Id values should be strings or numbers.  Returns the target object, which is `{}` by default.
 
     var items = [{ id: 'a', v: 1 }, { id: 'b' }, { id: 'a', v: 2 }, { v: 3 }];
@@ -132,7 +133,7 @@ Id values should be strings or numbers.  Returns the target object, which is `{}
 ### qibl.groupById( items, idName [,target] )
 
 Similar to `mapById`, but group objects by property value into arrays.  Returns a mapping
-of ids to lists of objects.
+of ids to lists of objects.  Objects that do not have the `idName` property set are omitted.
 
     var items = [{ id: 'a', v: 1 }, { id: 'b' }, { id: 'a', v: 2 }, { v: 3 }];
     qibl.mapById(items, 'id')

@@ -999,15 +999,15 @@ module.exports = {
             t.deepEqual(qibl.mapById([{a:1}, {a:2}], 'a'), {1: {a:1}, 2: {a:2}});
             t.deepEqual(qibl.mapById([{a:1}, {a:2, b:2}], 'a'), {1: {a:1}, 2: {a:2, b:2}});
 
-            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'a'), {1: {a:1}, 'undefined': {b:2}});
-            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'b'), {2: {b:2}, 'undefined': {a:1}});
-            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'c'), {'undefined': {b:2}});
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'a'), {1: {a:1}});
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'b'), {2: {b:2}});
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'c'), {});
 
             t.deepEqual(qibl.mapById([], 'a'), {});
-            t.deepEqual(qibl.mapById([,,,null,undefined,,,7,false,0,"string"], 'a'), {'undefined': "string"});
+            t.deepEqual(qibl.mapById([,,,null,undefined,,,7,false,0,"string"], 'a'), {});
             t.deepEqual(qibl.mapById([,,{a:1}], 'a'), {1: {a:1}});
 
-            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'a', {x:9}), {x:9, 1: {a:1}, 'undefined': {b:2}});
+            t.deepEqual(qibl.mapById([{a:1}, {b:2}], 'a', {x:9}), {x:9, 1: {a:1}});
 
             t.done();
         },
@@ -1016,8 +1016,8 @@ module.exports = {
     'groupById': {
         'should return arrays of objects': function(t) {
             var a1 = {a:1}, a2 = {a:2}, b1 = {b:1};
-            t.deepEqual(qibl.groupById([a1, a2, a1, b1], 'a'), {1: [a1, a1], 2: [a2], 'undefined': [b1]});
-            t.deepEqual(qibl.groupById([a1, b1], 'c'), {'undefined': [a1, b1]});
+            t.deepEqual(qibl.groupById([a1, a2, a1, b1], 'a'), {1: [a1, a1], 2: [a2]});
+            t.deepEqual(qibl.groupById([a1, b1], 'c'), {});
             t.done();
         },
     },

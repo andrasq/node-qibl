@@ -509,6 +509,7 @@ function _mapById( arrayOfObjects, idName, target, all ) {
         var obj = arrayOfObjects[i];
         if (obj == undefined) continue;
         var key = obj[idName];
+        if (key === undefined) continue;
         (!all) ? target[key] = obj : (target[key]) ? target[key].push(obj) : target[key] = new Array(obj);
     }
     return target;
