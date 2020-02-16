@@ -534,12 +534,13 @@ function groupById( items, idName, target ) {
 // iterator() returns a traversal object with a method next().
 // next() returns a data wrapper with properties {value, done}.
 // If done is set then value is not to be used.
-function makeIterator( step ) {
+function makeIterator( step, state ) {
     return function() {
         return {
             value: null, done: false,
-            next: function() { this.__step(); return this; },
-            __step: step, __self: this,
+            next: function() { this._step(this._state); return this; },
+            _step: step,
+            _state: state || { self: this },
         }
     }
 }

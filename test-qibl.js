@@ -1042,6 +1042,16 @@ module.exports = {
             t.done();
         },
 
+        'iterator stepper should receive the state object': function(t) {
+            var state = {};
+            var iter = qibl.makeIterator(function stepper(st) {
+                t.equal(st, state);
+                t.done();
+            }, state);
+
+            iter().next();
+        },
+
         'get/setIterator should access the iterator function': function(t) {
             var iter = qibl.makeIterator(function() {});
 
