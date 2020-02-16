@@ -1022,6 +1022,23 @@ module.exports = {
         },
     },
 
+    'distinct': {
+        'should return unique values': function(t) {
+            var tests = [
+                [ [], [] ],
+                [ [1,2,3], ['1','2','3'] ],
+                [ [1,2,2,3,2], ['1','2','3'] ],
+                [ ['a', 'b', 'a', 'c', 'a', 'd'], ['a', 'b', 'c', 'd'] ],
+                // note: object keys are displayed numbers first
+                [ [{}, 2, {}], ['2', '[object Object]'] ],
+            ];
+            for (var i = 0; i < tests.length; i++) {
+                t.deepStrictEqual(qibl.distinct(tests[i][0]), tests[i][1]);
+            }
+            t.done();
+        },
+    },
+
     'makeIterator': {
         'makeIterator should create an iterator function': function(t) {
             var n = 0;

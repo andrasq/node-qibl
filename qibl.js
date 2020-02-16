@@ -59,6 +59,7 @@ var qibl = module.exports = {
     selectField: selectField,
     mapById: mapById,
     groupById: groupById,
+    distinct: distinct,
     makeIterator: makeIterator,
     setIterator: setIterator,
     getIterator: getIterator,
@@ -518,6 +519,13 @@ function mapById( items, idName, target ) {
 // group the objects by a property value
 function groupById( items, idName, target ) {
     return _mapById(items, idName, target || {}, true);
+}
+
+function distinct( array ) {
+    var found = {};
+    for (var i = 0; i < array.length; i++) found[array[i]] = true;
+    // note: object keys are displayed numbers first
+    return Object.keys(found);
 }
 
 // given an traversal state update function that sets this.value and this.done,
