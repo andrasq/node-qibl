@@ -49,6 +49,52 @@ the `target` object.  All nested hashes are copied onto a new hash `{}` so the t
 will not share any sub-object with any of the sources.  Non-hash objects (ie instances of
 classes other than `Object`) are assigned by value.  Returns the `target`.
 
+### qibl.getProperty( target, dottedName [,defaultValue] )
+
+Retrieve the value of the named property of the target object.  Dots `.` in the property name
+are interpreted as referring to nested sub-objects or sub-sub-objects etc.
+Returns the named value, else either `defaultValue` if provided or `undefined` if not.
+
+    var obj = { a: { b: 1 } }
+
+    qibl.getProperty(obj, 'a')          // => { b: 1 }
+    qibl.getProperty(obj, 'a.b')        // => 1
+    qibl.getProperty(obj, 'a.c')        // => undefined
+
+    qibl.getProperty(obj, 'a.b', 3)     // => 1
+    qibl.getProperty(obj, 'a.c', 3)     // => 3
+
+As a special case, if `target` is omitted and getProperty is invoked as a method off
+an object other than `qibl`, it will look up values on that instance.
+
+    var obj = { a: { b: 1 } }
+    obj.get = qibl.getProperty;
+
+    obj.get('a')                        // { b: 1 }
+    obj.get('a.b')                      // 1
+
+### qibl.setProperty( target, dottedName, value )
+
+Set a nested property by dotted name.  Dots `.` in the name imply nested objects,
+which will be traversed or created until the actual target is reached.
+Returns the target object.
+
+    var obj = {}
+
+    qibl.setProperty(obj, 'a', 1)       // { a: 1 }
+    qibl.setProprety(obj, 'a.b', 2)     // { a: { b: 2 } }
+    qibl.setProperty(obj, 'c')          // { a: { b: 2 }, c: undefined }
+
+As a special case, if `target` is omitted and setProperty is invoked as a method off
+an object other than `qibl`, it will set properties on that instance.
+
+    var obj = { a: 1 }
+    obj.set = qibl.setProperty
+
+    obj.set('a.b', 1)                   // { a: { b: 1 } }
+    obj.set('b', 2)                     // { a: { b: 1 }, b: 2 }
+    obj                                 // { a: { b: 1 }, b: 2 }
+
 ### qibl.inherits( Derived, Base )
 
 Arrange for the Derived class to inherit class and instance methods and properties
