@@ -1071,6 +1071,32 @@ module.exports = {
             }
             t.done();
         },
+
+        'toArray should capture data into array': function(t) {
+            t.deepEqual(qibl.toArray([]), []);
+            t.deepEqual(qibl.toArray([1,2,3]), [1,2,3]);
+            t.deepEqual(qibl.toArray({length: 2, 0: 1, 1: 2, 2: 3}), [1,2]);
+            t.deepEqual(qibl.toArray({length: 2, 0: 1, 1: 2, 2: 3}, function(v, i) { return 10*v + i }), [10,21]);
+            t.deepEqual(qibl.toArray([1,2], function(v, i) { return 10*v + i }), [10,21]);
+
+            var n = 5;
+            var iter = qibl.makeIterator(function() {
+                this.value = n;
+                this.done = --n < 0;
+                if (n < 0) n = 3;
+            });
+
+            function C() {};
+            qibl.setIterator(C.prototype, iter);
+            var c = new C();
+            t.deepEqual(qibl.toArray(c), [5,4,3,2,1]);
+            t.deepEqual(qibl.toArray(c), [3,2,1]);
+
+            t.deepEqual(qibl.toArray(null), []);
+            t.deepEqual(qibl.toArray({}), []);
+
+            t.done();
+        },
     },
 
     'keys should use Object.keys': function(t) {

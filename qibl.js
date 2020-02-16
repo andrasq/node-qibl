@@ -12,7 +12,7 @@
 
 var nodeMajor = parseInt(process.versions.node);
 var nodeMinor = +process.versions.node.split('.')[1];
-var SymIterator = eval('typeof Symbol === "function" && Symbol.iterator || { iterator: "_iterator" }');
+var IteratorProperty = eval('typeof Symbol === "function" && Symbol.iterator || { iterator: "_iterator" }');
 
 // use spread arguments if supported, is faster than .call or .apply
 var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { return func(...argv) }')");
@@ -62,6 +62,7 @@ var qibl = module.exports = {
     makeIterator: makeIterator,
     setIterator: setIterator,
     getIterator: getIterator,
+    toArray: toArray,
     vinterpolate: vinterpolate,
     addslashes: addslashes,
 };
@@ -544,10 +545,29 @@ function makeIterator( step ) {
 }
 // install the iterator as Symbol.iterator if the node version supports symbols, else as ._iterator
 function setIterator( obj, iterator ) {
-    obj[SymIterator] = iterator;
+    obj[IteratorProperty] = iterator;
 }
+// return the iterator.  Note that iterators have to be called as a method call, ie iter.call(obj),
+// to associate the iterator function with the instance being iterated.
 function getIterator( obj ) {
-    return obj[SymIterator];
+    return obj[IteratorProperty];
+}
+function toArray( obj, filter ) {
+    var val, state, arr = new Array();
+    var isIterable = obj && obj[IteratorProperty] && (state = obj[IteratorProperty]()) && typeof state.next === 'function';
+
+    if (isIterable && !Array.isArray(obj)) {
+        for (var i = 0, val = state.next(); !val.done; val = state.next(), i++) {
+            arr.push(filter ? filter(val.value, i) : val.value);
+        }
+    } else if (obj && obj.length > 0) {
+        // this loop mimics Array.from, but quite a bit faster (8x node-v10.15, 14x node-v12)
+        for (var i = 0; i < obj.length; i++) {
+            arr.push(filter ? filter(obj[i], i) : obj[i]);
+        }
+    }
+
+    return arr;
 }
 
 // Object.keys
