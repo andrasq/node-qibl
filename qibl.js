@@ -238,6 +238,8 @@ function concat2( target, a1, a2 ) {
 
 // return up to k randomly selected items from arr between base and bound,
 // fewer than k if there are not that many items.
+// Eg: pick 2 of [1,2,3,4]: get [1,2], replace 3 with 2/3 probability into slot [0] or [1],
+// then replace 4 with 2/4 probability into slot [0], [1] or [2] (use i-th item with k/i odds).
 // see also qheap
 function subsample( items, k, base, bound ) {
     base = (base >= 0) ? base : 0;
@@ -248,9 +250,9 @@ function subsample( items, k, base, bound ) {
 
     var samples = new Array();
     for (var i = 0; i < k; i++) samples.push(items[i + base]);
-    for ( ; i < bound; i++) {
-        var j = Math.floor(Math.random() * (i - base + 1));
-        if (j < k) samples[j] = items[i];
+    for ( ; i < bound - base; i++) {
+        var j = Math.floor(Math.random() * (i + 1));
+        if (j < k) samples[j] = items[i + base];
     }
     return samples;
 }

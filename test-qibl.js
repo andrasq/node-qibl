@@ -487,15 +487,24 @@ module.exports = {
 
             qibl.fill(counts, 0);
             for (var i=0; i<100000; i++) {
-                var samp = qibl.subsample(list, 2, 0, 11);
-                counts[samp[0]] += 1;
-                counts[samp[1]] += 1;
+                var nsamples = 3;
+                var samp = qibl.subsample(list, nsamples, 2, 9);
+                t.equal(samp.length, nsamples);
+                samp.sort();
+                for (var j=1; j<samp.length; j++) t.ok(samp[j-1] < samp[j]);    // all distinct
+                for (var j=0; j<samp.length; j++) counts[samp[j]] += 1;         // count how many times seen
             }
 
-            // no more than 1% difference over 100k
-            var min = Math.min.apply(null, counts);
-            var max = Math.max.apply(null, counts);
+            // what fell outside base/bounds should not be picked
+            t.equal(counts[0], 0);
+            t.equal(counts[1], 0);
+            t.equal(counts[9], 0);
+
+            // of eligible range, no more than 1% difference over 100k
+            var min = Math.min.apply(null, counts.slice(2, -1));
+            var max = Math.max.apply(null, counts.slice(2, -1));
             t.ok(max - min < 1000, "min-max spread too large");
+
             t.done();
         },
     },
