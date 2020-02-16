@@ -1052,6 +1052,25 @@ module.exports = {
             iter().next();
         },
 
+        'iterator should be compatible with Array.from': function(t) {
+            var called = 0;
+            var a = [1,2,3,4,5];
+            var iter = qibl.makeIterator(function(state) {
+                called += 1;
+                if (state.ix >= state.arr.length) this.done = true;
+                else this.value = state.arr[state.ix++];
+            }, { arr: a, ix: 0 });
+            qibl.setIterator(a, iter);
+
+            if (typeof Array.from !== 'function') t.skip();
+
+            var b = Array.from(a);
+            t.equal(called, a.length + 1);
+            t.deepEqual(b, a);
+
+            t.done();
+        },
+
         'get/setIterator should access the iterator function': function(t) {
             var iter = qibl.makeIterator(function() {});
 
