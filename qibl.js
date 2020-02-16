@@ -57,6 +57,7 @@ var qibl = module.exports = {
     values: values,
     selectField: selectField,
     mapById: mapById,
+    groupById: groupById,
     vinterpolate: vinterpolate,
     addslashes: addslashes,
 };
@@ -491,16 +492,26 @@ function selectField( arrayOfObjects, key ) {
     return values;
 }
 
-// map the objects by a property value
+// map or group the objects by a property value
 // see qhash
-function mapById( arrayOfObjects, id, target ) {
-    // array.reduce((t, e) => e && (t[e[id]] = e), target || {})
+function _mapById( arrayOfObjects, idName, target, all ) {
+    // array.reduce((t, e) => e && (t[e[idName]] = e), target || {})
     target = target || {};
+    all = all || false;
     for (var i = 0; i < arrayOfObjects.length; i++) {
         var obj = arrayOfObjects[i];
-        if (obj != null && obj[id] !== undefined) target[obj[id]] = obj;
+        if (obj == undefined) continue;
+        var key = obj[idName];
+        (!all) ? target[key] = obj : (target[key]) ? target[key].push(obj) : target[key] = new Array(obj);
     }
     return target;
+}
+function mapById( items, idName, target ) {
+    return _mapById(items, idName, target, false);
+}
+// group the objects by a property value
+function groupById( items, idName, target ) {
+    return _mapById(items, idName, target || {}, true);
 }
 
 // Object.keys
