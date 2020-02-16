@@ -554,21 +554,28 @@ function getIterator( obj ) {
     return obj[IteratorProperty];
 }
 function toArray( obj, filter ) {
-    var val, state, arr = new Array();
+    return _traverse(obj, filter, new Array());
+}
+// function arrayMap(arr, fn) { return _traverse(arr, fn, new Array()) }
+// function arrayEach(arr, fn) { _traverse(arr, fn, { push: function(){} }) }
+// function arrayFilter(arr, fn) { var ret = new Array(); _traverse(arr, fn, { push: function(x) { if (fn(x)) ret.push(x) } }); return ret }
+function _traverse( obj, transform, target ) {
+    var val, state;
     var isIterable = obj && obj[IteratorProperty] && (state = obj[IteratorProperty]()) && typeof state.next === 'function';
 
     if (isIterable && !Array.isArray(obj)) {
         for (var i = 0, val = state.next(); !val.done; val = state.next(), i++) {
-            arr.push(filter ? filter(val.value, i) : val.value);
+            target.push(transform ? transform(val.value, i) : val.value);
         }
     } else if (obj && obj.length > 0) {
-        // this loop mimics Array.from, but quite a bit faster (8x node-v10.15, 14x node-v12)
+        // this loop mimics Array.from, but transforms quite a bit faster (8x node-v10.15, 14x node-v12)
+        // testing transform? in the loop is faster than using two custom functions
         for (var i = 0; i < obj.length; i++) {
-            arr.push(filter ? filter(obj[i], i) : obj[i]);
+            target.push(transform ? transform(obj[i], i) : obj[i]);
         }
     }
 
-    return arr;
+    return target;
 }
 
 // Object.keys
