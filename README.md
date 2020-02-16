@@ -378,7 +378,7 @@ Changelog
 ---------
 
 - 1.4.0 - new functions omitUndefined, fill, subsample, qsearch, sort3, clear/restoreListeners, mapById, str_random;
-          document getProperty, setProperty; new undocumented toArray, distinct
+          document getProperty, setProperty; new undocumented makeIterator, toArray, distinct
 - 1.3.0 - new function populate()
 - 1.2.2 - new undocumented functions getProperty, setProperty, once
 - 1.2.1 - fix thunkify
