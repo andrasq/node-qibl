@@ -114,11 +114,10 @@ the `parent` on `this` with the received constructor arguments.
 If an optional prototype object is provided, its properties will be added to
 the other inherited properties.
 
-If an optional constructor function is provided, a default constructor will not be created,
-the provided constructor will be used instead to initialize new instances.  The `constructor`
-needs to call `parent.call(this, ...args)` to initialize the superclass.  The `constructor`
-can be provided either as a  function or source form as a string.  Constructors must be
-`function` functions, not `() => ` arrow functions.
+If an optional constructor function is provided, the default constructor will call `constructor`
+instead of `parent` to initialize the new instance.  `constructor` must call `parent.call(this,
+...args)` to initialize the superclass as needed.  Constructors need to be `function` functions, not `()
+=> ` arrow functions.
 
 ### qibl.toStruct( hash )
 
