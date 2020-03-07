@@ -848,6 +848,96 @@ module.exports = {
 
             t.done();
         },
+
+        'readBody': {
+            'returns empty string if no body': function(t) {
+                var emitter = new events.EventEmitter();
+                qibl.readBody(emitter, function(err, body) {
+                    t.ifError(err);
+                    t.strictEqual(body, '');
+                    t.done();
+                })
+                emitter.emit('end');
+            },
+
+            'returns only once': function(t) {
+                var emitter = new events.EventEmitter();
+                var doneCount = 0;
+                qibl.readBody(emitter, function(err, body) {
+                    t.ifError(err);
+                    doneCount += 1;
+                    setTimeout(function() { t.equal(doneCount, 1); t.done(); });
+                })
+                emitter.emit('end');
+                emitter.emit('end');
+                emitter.emit('error', new Error());
+                emitter.emit('end');
+                emitter.emit('error', new Error());
+            },
+
+            'returns emitted error': function(t) {
+                var obj = {};
+                var emitter = new events.EventEmitter();
+                qibl.readBody(emitter, function(err, body) {
+                    t.equal(err, obj);
+                    t.done();
+                })
+                emitter.emit('error', obj);
+                emitter.emit('error', {});
+            },
+
+            'concatenates string data': function(t) {
+                var emitter = new events.EventEmitter();
+                qibl.readBody(emitter, function(err, body) {
+                    t.ifError(err);
+                    t.equal(body, 'this is a test');
+                    t.done();
+                });
+                emitter.emit('data', 'this');
+                emitter.emit('data', ' is a ');
+                emitter.emit('data', 'test');
+                emitter.emit('end');
+            },
+
+            'returns Buffer data in Buffer': function(t) {
+                var emitter = new events.EventEmitter();
+                qibl.readBody(emitter, function(err, body) {
+                    t.ifError(err);
+                    t.ok(Buffer.isBuffer(body));
+                    t.equal(String(body), 'this');
+                    t.done();
+                });
+                emitter.emit('data', qibl.fromBuf('this'));
+                emitter.emit('end');
+            },
+
+            'concatenates two data buffers': function(t) {
+                var emitter = new events.EventEmitter();
+                qibl.readBody(emitter, function(err, body) {
+                    t.ifError(err);
+                    t.ok(Buffer.isBuffer(body));
+                    t.equal(String(body), 'this is a ');
+                    t.done();
+                });
+                emitter.emit('data', qibl.fromBuf('this'));
+                emitter.emit('data', qibl.fromBuf(' is a '));
+                emitter.emit('end');
+            },
+
+            'concatenates three data buffers': function(t) {
+                var emitter = new events.EventEmitter();
+                qibl.readBody(emitter, function(err, body) {
+                    t.ifError(err);
+                    t.ok(Buffer.isBuffer(body));
+                    t.equal(String(body), 'this is a test');
+                    t.done();
+                });
+                emitter.emit('data', qibl.fromBuf('this'));
+                emitter.emit('data', qibl.fromBuf(' is a '));
+                emitter.emit('data', qibl.fromBuf('test'));
+                emitter.emit('end');
+            },
+        },
     },
 
     'varargs': {

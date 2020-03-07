@@ -49,6 +49,7 @@ var qibl = module.exports = {
     toStruct: toStruct,
     clearListeners: clearListeners,
     restoreListeners: restoreListeners,
+    readBody: readBody,
     varargs: varargs,
     _varargs: _varargs,
     varargsRenamed: varargsRenamed,
@@ -510,6 +511,26 @@ function restoreListeners( emitter, event, listeners ) {
     return listeners;
 }
 
+// gather and return the data emitted, default to '' if no data
+function readBody( emitter, cb ) {
+    var doneCount = 0, chunk1, chunks, data = '';
+    emitter.on('data', function(chunk) {
+        if (typeof chunk === 'string') data += chunk;
+        else if (!chunk1) chunk1 = chunk;
+        else if (!chunks) chunks = new Array(chunk1, chunk);
+        else chunks.push(chunk);
+    })
+    emitter.on('end', function() {
+        if (doneCount++) return;
+        if (!chunk1) return cb(null, data);
+        else if (!chunks) return cb(null, chunk1);
+        else cb(null, Buffer.concat(chunks));
+    })
+    emitter.on('error', function(err) {
+        if (!doneCount++) cb(err);
+    })
+}
+
 /**
 function _copyFunctionProperties( target, src ) {
     var name, names = Object.getOwnPropertyNames(src);
@@ -681,27 +702,5 @@ function warnOnce( key, message ) {
         _warnings[key] = true;
         console.warn(message);
     }
-}
-**/
-
-/**
-// gather and return the data emitted, default to '' if no data
-function readBody( emitter, cb ) {
-    var doneCount = 0, chunk1, chunks, data = '';
-    emitter.on('data', function(chunk) {
-        if (typeof chunk === 'string') data += chunk;
-        else if (!chunk1) chunk1 = chunk;
-        else if (!chunks) chunks = new Array(chunk1, chunk);
-        else chunks.push(chunk);
-    })
-    emitter.on('end', function() {
-        if (doneCount++) return;
-        if (!chunk1) return cb(null, data);
-        else if (!chunks) return cb(null, chunk1);
-        else cb(null, Buffer.concat(chunks));
-    })
-    emitter.on('error', function(err) {
-        if (!doneCount++) cb(err);
-    })
 }
 **/

@@ -405,7 +405,8 @@ This undoes a clearListeners().
 Changelog
 ---------
 
-- 1.5.0 - new functions derive, varargsRenamed, isMethodContext; make varargs attach the instance `this` if no `self` given
+- 1.5.0 - new functions derive, varargsRenamed, isMethodContext; make varargs attach the instance `this` if no `self` given,
+          new undocumented readBody
 - 1.4.0 - new functions fill, subsample, omitUndefined, qsearch, sort3, clear/restoreListeners, str_random,
           mapById, groupByid; document getProperty, setProperty; new undocumented makeIterator, toArray, distinct
 - 1.3.0 - new function populate()
