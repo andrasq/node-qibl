@@ -86,7 +86,7 @@ function isHash( obj ) {
 }
 
 function isMethodContext( self ) {
-    return self && self !== qibl && self !== global || false;
+    return self && typeof self === 'object' && self !== qibl && self !== global || false;
 }
 
 // transfer the own properties of src onto target, aka Object.assign

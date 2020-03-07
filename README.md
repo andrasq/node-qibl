@@ -37,6 +37,11 @@ Objects
 Test whether the object is a generic hash `{}` ie `new Object()`, or is an instance of some
 class.  Tests the object constructor.
 
+### qibl.isMethodContext( _this )
+
+Test whether the given `this` is from a global (function call) context or a method call context.
+Method calls have a `this` object that is not `global` and not `qibl`.
+
 ### qibl.copyObject( target, src1, ... )
 
 Assign all enumerable own properties of the sources `src` onto `target`, and return

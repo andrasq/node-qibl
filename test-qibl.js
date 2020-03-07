@@ -50,6 +50,8 @@ module.exports = {
         t.equal(qibl.isMethodContext(qibl), false);
         t.equal(qibl.isMethodContext(global), false);
         t.equal(qibl.isMethodContext({}), true);
+        t.equal(qibl.isMethodContext(123), false);
+        t.equal(qibl.isMethodContext("string"), false);
 
         var isMc = qibl.isMethodContext;
         t.equal(isMc(), false);
