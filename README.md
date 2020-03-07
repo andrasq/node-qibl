@@ -100,6 +100,21 @@ an object other than `qibl`, it will set properties on that instance.
 Arrange for the Derived class to inherit class and instance methods and properties
 from the Base class, including inherited properties.  Equivalent to `util.inherits`.
 
+### qibl.derive( className, parent, [,prototype] [,constructor] )
+
+Create a derived class from the parent.  Returns the constructor.
+The new class constructor's name will be className, the default constructor will call
+the `parent` on `this` with the received constructor arguments.
+
+If an optional prototype object is provided, its properties will be added to
+the other inherited properties.
+
+If an optional constructor function is provided, a default constructor will not be created,
+the provided constructor will be used instead to initialize new instances.  The `constructor`
+needs to call `parent.call(this, ...args)` to initialize the superclass.  The `constructor`
+can be provided either as a  function or source form as a string.  Constructors must be
+`function` functions, not `() => ` arrow functions.
+
 ### qibl.toStruct( hash )
 
 Convert the object from hashed accesses to an optimized mapped accesses analogous to `C`
@@ -317,6 +332,15 @@ Return a function that when called will in turn call handler with all its argume
 array (an "argument vector").  This functionality is no longer really needed with ES6 rest
 args, but is useful for portability.  It is not slower than rest args.
 
+If no `self` is given (or is `undefined`), varargs() will call `handler` with `self` set to
+the current `this`, to allow varargs functions to be used as methods or constructors.  If
+called as a function or as `qibl.varargs`, `self` will be undefined.
+
+### qibl.varargsRenamed( handler(argv, self), funcName [,self] )
+
+Return a function like varargs but constructed with the given function name.  If no `self`
+is provided, the current `this` is used or `undefined` if running in a function context.
+
 ### qibl.invoke( fn, argv )
 
 Call the function with the given argument vector.
@@ -377,6 +401,7 @@ This undoes a clearListeners().
 Changelog
 ---------
 
+- 1.5.0 - new functions derive, varargsRenamed, isMethodContext; make varargs attach the instance `this` if no `self` given
 - 1.4.0 - new functions fill, subsample, omitUndefined, qsearch, sort3, clear/restoreListeners, str_random,
           mapById, groupByid; document getProperty, setProperty; new undocumented makeIterator, toArray, distinct
 - 1.3.0 - new function populate()
