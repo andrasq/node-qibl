@@ -401,6 +401,12 @@ Remove all listeners that are listening for `event`, and return them in an array
 Add all listeners in the array to be listening for the event.
 This undoes a clearListeners().
 
+### qibl.readBody( emitter, callback(err, body) )
+
+Listen for 'data' events from the emitter and gather them together into the returned `body`.
+Data may be either all strings or all Buffers.  The returned body is a string for string data,
+else a Buffer for Buffer data.  The callback is invoked when the 'end' event is received.
+
 
 Changelog
 ---------
