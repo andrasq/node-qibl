@@ -335,6 +335,76 @@ module.exports = {
         },
     },
 
+    'derive': {
+        'returns a constructor': function(t) {
+            function Foo() {};
+            var Bar = qibl.derive('Bar', Foo);
+            t.equal(typeof Bar, 'function');
+            t.equal(new Bar().constructor, Bar);
+            t.done();
+        },
+
+        'creates instances of the parent': function(t) {
+            function Foo() {};
+            var Bar = qibl.derive('Bar', Foo);
+            t.ok(new Bar() instanceof Bar);
+            t.ok(new Bar() instanceof Foo);
+            t.equal(Bar.prototype.constructor, Bar);
+            t.done();
+        },
+
+        'adds to the prototype': function(t) {
+            function Foo() {};
+            Foo.prototype.a = 1;
+            var Bar = qibl.derive('Bar', Foo, { b: 2 });
+            t.equal(Bar.prototype.a, 1);
+            t.equal(Bar.prototype.b, 2);
+            t.done();
+        },
+
+        'prototype can follow the parent': function(t) {
+            function Foo() {}
+            var Bar = qibl.derive('Bar', Foo, function() { return new Date() });
+            t.ok(new Bar() instanceof Date);
+            t.done();
+        },
+
+        'uses the provided constructor': function(t) {
+            function Foo() {};
+            Foo.prototype.a = 1;
+            function Dar() { return new Date() }
+            var Bar = qibl.derive('Bar', Foo, null, Dar);
+            t.equal(Bar.prototype.a, 1);
+            t.ok(new Bar() instanceof Date);
+            t.done();
+        },
+
+        'invokes the provided constructor': function(t) {
+            var called = false;
+            function Foo() {};
+            var val = Math.random();
+            function Dar() { called = true; this.a = val }
+            var Bar = qibl.derive('Bar', Foo, null, Dar);
+            t.notEqual(Bar.prototype.constructor, Dar);
+            var x = new Bar();
+            t.equal(called, true);
+            t.equal(x.a, val);
+            t.done();
+        },
+
+        'errors': {
+            'throws if constructor is not a function': function(t) {
+                t.throws(function() { qibl.derive('Bar', Date, {}, 123) }, /not a function/);
+                t.done();
+            },
+
+            'throws if parent is not a function': function(t) {
+                t.throws(function() { qibl.derive('Bar', 123) }, /not a function/);
+                t.done();
+            },
+        },
+    },
+
     'fill should set array elements': function(t) {
         var arr = new Array(3);
         t.deepEqual(qibl.fill(arr, 3), [3, 3, 3]);
@@ -848,6 +918,23 @@ module.exports = {
             tmpVarargs(handler)(3);
             t.deepStrictEqual(called, [[3], undefined]);
 
+            t.done();
+        },
+
+        'varargsRenamed returns a function by the given name': function(t) {
+            var name = 'foo_bar_zed';
+            var expectPrefix = 'function foo_bar_zed(';
+            var fn = qibl.varargsRenamed(function(){}, name);
+            t.equal(fn.name, name);
+            t.equal(String(fn).slice(0, 21), expectPrefix);
+            t.done();
+        },
+
+        'varargsRenamed passes the given self': function(t) {
+            var obj = {};
+            var self;
+            qibl.varargsRenamed(function(args, _this) { self = _this }, 'foo', obj)(1, 2);
+            t.equal(self, obj);
             t.done();
         },
     },

@@ -35,6 +35,7 @@ var qibl = module.exports = {
     getProperty: getProperty,
     setProperty: setProperty,
     inherits: inherits,
+    derive: derive,
     fill: fill,
     populate: populate,
     omitUndefined: omitUndefined,
@@ -50,6 +51,7 @@ var qibl = module.exports = {
     restoreListeners: restoreListeners,
     varargs: varargs,
     _varargs: _varargs,
+    varargsRenamed: varargsRenamed,
     thunkify: thunkify,
     invoke: invoke1,            invoke1: invoke1,
     invoke2: invoke2,
@@ -193,6 +195,34 @@ function inherits( derived, base ) {
     // function __() { this.constructor = derived }
     // __.prototype = base.prototype;
     // derived.prototype = new __();
+}
+
+// derive a subclass that inherits from the parent but customizes its own prototype
+// note that is very slow to set-and-call a method in the constructor
+// note that _invoke2 is faster than (...argv) spread args (instance creation overhead is < 85%)
+// % timeit node -p 'function Foo(a,b,c){}; Bar = require("./").derive("Bar", Foo, {x: 1}); for (i=0; i<10000000; i++) x = new Bar(1,2,3); x.x'
+// nb: v10 1e6 new Foo() .13, v11 .24; new Zed() that invokes Foo() .13
+// nb: functions built with a scope run abysmally slow! (10x slower in node-v10)
+//                      v10     v11
+//   .invoke2           .34     .43
+//   ._invoke2          .30     .40
+//   .call(1,2,3)       .30     .41
+//   .apply             .33     .36
+//   .call(...av)       6.3     .46
+function derive( className, parent, proto, constructor ) {
+    if (typeof proto === 'function') { var tmp = constructor; constructor = proto; proto = tmp }
+    if (typeof parent !== 'function') throw new Error('parent not a function');
+    if (constructor && typeof constructor !== 'function') throw new Error('constructor not a function');
+
+    constructor = constructor || parent;
+    var handler = function(args, self) { return invoke2(constructor, self, args) };
+    var subclass = varargsRenamed(handler, className);
+
+    qibl.inherits(subclass, parent);
+    for (var k in proto) subclass.prototype[k] = proto[k];
+    subclass.prototype = qibl.toStruct(subclass.prototype);
+
+    return subclass;
 }
 
 // similar to fill() but for objects
@@ -396,6 +426,16 @@ function _varargs( handler, self ) {
 }
 function _activeThis( self, _this ) {
     return self !== undefined ? self : isMethodContext(_this) ? _this : undefined;
+}
+
+// like varargs, but create the varargs function with the given name
+// nb: `handler` and `self` must be named the same in the funtion returned by varargs()
+// because the built function will be bound to args in the current context when eval-d.
+// nb: because of this, also no need to pass args to varargs()
+function varargsRenamed( handler, funcName, self ) {
+    var func = varargs();
+    var src = String(func).replace(/^(function[\s]*[^\( ]*\s*\()/, 'function ' + funcName + '(');
+    return eval('1 && ' + src);
 }
 
 // see also qinvoke
