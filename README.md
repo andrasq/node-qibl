@@ -112,7 +112,7 @@ The new class constructor's name will be className, the default constructor will
 the `parent` on `this` with the received constructor arguments.
 
 If an optional prototype object is provided, its properties will be added to
-the other inherited properties.
+the inheritable properties of the derived class.
 
 If an optional constructor function is provided, the default constructor will call `constructor`
 instead of `parent` to initialize the new instance.  `constructor` must call `parent.call(this,
