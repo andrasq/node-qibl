@@ -26,10 +26,10 @@ var invoke2 = eval("(nodeMajor < 8) && _invoke2 || tryEval('function(func, self,
 var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
-function isMethodContext(self) { return self && self !== qibl && self !== global }
 
 var qibl = module.exports = {
     isHash: isHash,
+    isMethodContext: isMethodContext,
     copyObject: copyObject,     assign: copyObject,
     merge: merge,
     getProperty: getProperty,
@@ -83,6 +83,10 @@ function isHash( obj ) {
     return obj ? obj.constructor === Object : false;
 }
 
+function isMethodContext( self ) {
+    return self && self !== qibl && self !== global || false;
+}
+
 // transfer the own properties of src onto target, aka Object.assign
 // See also `qhash`.
 function copyObject( target /* ,VARARGS */ ) {
@@ -119,7 +123,7 @@ function merge( target /* ,VARARGS */ ) {
  * note: defaultValue support makes it 15% slower
  */
 function getProperty( target, dottedName, defaultValue ) {
-    if (this !== qibl && typeof target === 'string') return getProperty(this, target, dottedName);
+    if (typeof target === 'string' && isMethodContext(this)) return getProperty(this, target, dottedName);
     if (!target) return defaultValue;
 
     var first, path;
@@ -139,7 +143,7 @@ function getProperty( target, dottedName, defaultValue ) {
  * mode is a string containing 'x' if the property is non-enumerable ("expunged"), 'r' if it is "readonly".
  */
 function setProperty( target, dottedName, value, mode ) {
-    if (typeof target === 'string' && this !== qibl) return setProperty(this, target, dottedName, value);
+    if (typeof target === 'string' && isMethodContext(this)) return setProperty(this, target, dottedName, value);
     if (!target || typeof target !== 'object' && typeof target !== 'function') return target;
 
     if (dottedName.indexOf('.') < 0 && !mode) { target[dottedName] = value; return target; }

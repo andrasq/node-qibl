@@ -42,6 +42,23 @@ module.exports = {
         t.done();
     },
 
+    'isMethodContext should return true if called as a method': function(t) {
+        var obj = { isMc: function() { return qibl.isMethodContext(this) } };
+        t.equal(obj.isMc(), true);
+
+        t.equal(qibl.isMethodContext(), false);
+        t.equal(qibl.isMethodContext(qibl), false);
+        t.equal(qibl.isMethodContext(global), false);
+        t.equal(qibl.isMethodContext({}), true);
+
+        var isMc = qibl.isMethodContext;
+        t.equal(isMc(), false);
+        t.equal(isMc(null), false);
+        t.equal(isMc({}), true);
+
+        t.done();
+    },
+
     'copyObject': {
         'should copy properties': function(t) {
             t.deepEqual(qibl.copyObject({}), {});
