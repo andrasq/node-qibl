@@ -236,7 +236,7 @@ with a `null` string it returns the second, third, etc tokens.  The separator mu
 provided each time, and may change between calls.
 
 NOTE: this function is not reentrant, a second call with a non-null string will overwrite
-the previous state.  It behaves like to the `C` `strtok()` library function.
+the previous state.  It behaves like the `C` `strtok()` library function.
 
     var str = "http://example.com/path/name";
     qibl.strtok(str, '://');
