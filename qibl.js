@@ -16,9 +16,17 @@ var IteratorProperty = eval('typeof Symbol === "function" && Symbol.iterator || 
 
 // use spread arguments if supported, is faster than .call or .apply
 var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { return func(...argv) }')");
-var invoke2 = eval("(nodeMajor < 6) && _invoke2 || tryEval('function(func, self, argv) { return func.call(self, ...argv) }')");
+
+// update 2020-03-06: am seeing _invoke2 as faster (as used in derive)
+// call() is faster than apply() in node v0.10, v4.4.0, v6.11.1, v7.8.0; same speed in v8.11.1
+// nb node-v10 is very slow to run .call with spread args
+var invoke2 = eval("(nodeMajor < 8) && _invoke2 || tryEval('function(func, self, argv) { return func.apply(self, argv) }')");
+
+// rest arguments are faster starting with node-v8
+var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
+function isMethodContext(self) { return self && self !== qibl && self !== global }
 
 var qibl = module.exports = {
     isHash: isHash,
@@ -41,6 +49,7 @@ var qibl = module.exports = {
     clearListeners: clearListeners,
     restoreListeners: restoreListeners,
     varargs: varargs,
+    _varargs: _varargs,
     thunkify: thunkify,
     invoke: invoke1,            invoke1: invoke1,
     invoke2: invoke2,
@@ -366,8 +375,8 @@ function toStruct( obj ) {
 
 
 // build a function that calls the handler with the arguments it was invoked with
-function varargs( handler, self ) {
-    return function( /* VARARGS */ ) {
+function _varargs( handler, self ) {
+    var func = function( /* VARARGS */ ) {
         var len = arguments.length;
         var argv;
         switch (arguments.length) {
@@ -377,8 +386,12 @@ function varargs( handler, self ) {
         // case 3: argv = [arguments[0], arguments[1], arguments[2]]; break;
         default: argv = new Array(); for (var i = 0; i < len; i++) argv.push(arguments[i]); break;
         }
-        return handler(argv, self);
+        return handler(argv, _activeThis(self, this));
     }
+    return func;
+}
+function _activeThis( self, _this ) {
+    return self !== undefined ? self : isMethodContext(_this) ? _this : undefined;
 }
 
 // see also qinvoke

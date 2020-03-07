@@ -10,6 +10,8 @@ var events = require('events');
 var qibl = require('./');
 var nodeMajor = parseInt(process.versions.node);
 
+var tmpVarargs;
+
 module.exports = {
     'isHash should identify hashes': function(t) {
         var tests = [
@@ -760,21 +762,6 @@ module.exports = {
     },
 
     'varargs': {
-        'should call handler with the call args in an array': function(t) {
-            var gotArgs;
-            var obj = {};
-            function handler(argv, self) { gotArgs = argv }
-            qibl.varargs(handler)();
-            t.deepEqual(gotArgs, []);
-            qibl.varargs(handler)(1);
-            t.deepEqual(gotArgs, [1]);
-            qibl.varargs(handler)(1, "two");
-            t.deepEqual(gotArgs, [1, "two"]);
-            qibl.varargs(handler)(1, "two", obj);
-            t.deepEqual(gotArgs, [1, "two", obj]);
-            t.done();
-        },
-
         'should pass along the provided self': function(t) {
             var myItem = {};
             function handler(argv, self) {
@@ -783,6 +770,68 @@ module.exports = {
                 t.done();
             }
             qibl.varargs(handler, myItem)(1, 2, 3);
+        },
+
+        'varargs and _varargs invoke handler with call args in an array': function(t) {
+            var tests = [
+                [],
+                [1],
+                [1, "two"],
+                [1, "two", {}],
+                [1, "two", {}, 4.5],
+            ];
+
+            var gotArgs;
+            function handler(args, self) { gotArgs = args };
+
+            for (var i = 0; i < tests.length; i++) {
+                qibl._varargs(handler, this).apply(null, tests[i]);
+                t.deepEqual(gotArgs, tests[i]);
+                t.deepEqual((qibl.varargs(handler, this).apply(null, tests[i]), gotArgs), tests[i]);
+                t.deepEqual((qibl._varargs(handler, this).apply(null, tests[i]), gotArgs), tests[i]);
+            }
+
+            t.done();
+        },
+
+        'varargs sets self to the current object': function(t) {
+            var obj = {
+                get: qibl.varargs(function(args, self) { self.callArgs = args }, undefined, 'get'),
+                _get: qibl._varargs(function(args, self) { self.callArgs = args }, undefined, 'get'),
+            };
+
+            obj.get(1, "two", 3);
+            t.deepEqual(obj.callArgs, [1, "two", 3]);
+
+            obj._get(3, "two", 1);
+            t.deepEqual(obj.callArgs, [3, "two", 1]);
+
+            t.done();
+        },
+
+        'varargs sets self to undefined if called as a function': function(t) {
+            var called;
+            var handler = function(args, self) { called = [args, self] };
+
+            qibl.varargs(handler)(1);
+            t.deepStrictEqual(called, [[1], undefined]);
+
+            qibl._varargs(handler)(1);
+            t.deepStrictEqual(called, [[1], undefined]);
+
+            var varargs = qibl.varargs;
+            varargs(handler)(2, 3);
+            t.deepStrictEqual(called, [[2, 3], undefined]);
+
+            var varargs = qibl._varargs;
+            varargs(handler)(2, 3);
+            t.deepStrictEqual(called, [[2, 3], undefined]);
+
+            tmpVarargs = qibl._varargs;
+            tmpVarargs(handler)(3);
+            t.deepStrictEqual(called, [[3], undefined]);
+
+            t.done();
         },
     },
 
