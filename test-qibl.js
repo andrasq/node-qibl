@@ -1357,7 +1357,7 @@ module.exports = {
             var obj = {};
             qibl.setIterator(obj, iter);
 
-            if (typeof Symbol === 'undefined') {
+            if (typeof Symbol === 'undefined' || typeof Array.from !== 'function') {
                 // already tested above with state.next() etc
                 t.skip();
             }
