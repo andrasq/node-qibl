@@ -119,6 +119,19 @@ instead of `parent` to initialize the new instance.  `constructor` must call `pa
 ...args)` to initialize the superclass as needed.  Constructors need to be `function` functions, not `()
 => ` arrow functions.
 
+    function Foo() {}
+    Foo.prototype.a = 1;
+
+    const Bar = qibl.derive('Bar', Foo, { b: 2 });
+
+    let b = new Bar();
+    console.log(b)      // => "Bar {}"
+    b instanceof Foo    // => true
+    Object.keys(b)      // => []
+    b.a                 // => 1
+    b.b                 // => 2
+
+
 ### qibl.toStruct( hash )
 
 Convert the object from hashed accesses to an optimized mapped accesses analogous to `C`
@@ -403,7 +416,7 @@ This undoes a clearListeners().
 
 ### qibl.readBody( emitter, callback(err, body) )
 
-Listen for 'data' events from the emitter and gather them together into the returned `body`.
+Listen for 'data' events from the emitter and assemble the data chunks into the returned `body`.
 Data may be either all strings or all Buffers.  The returned body is a string for string data,
 else a Buffer for Buffer data.  The callback is invoked when the 'end' event is received.
 
@@ -411,12 +424,12 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
-- 1.5.0 - new functions derive, varargsRenamed, isMethodContext; make varargs attach the instance `this` if no `self` given,
-          new undocumented readBody
-- 1.4.0 - new functions fill, subsample, omitUndefined, qsearch, sort3, clear/restoreListeners, str_random,
-          mapById, groupByid; document getProperty, setProperty; new undocumented makeIterator, toArray, distinct
-- 1.3.0 - new function populate()
-- 1.2.2 - new undocumented functions getProperty, setProperty, once
+- 1.5.0 - new functions `derive`, `varargsRenamed`, `isMethodContext`, `readBody`;
+          make varargs attach the instance `this` if no `self` given,
+- 1.4.0 - new functions `fill`, `subsample`, `omitUndefined`, `qsearch`, `sort3`, `clear`/`restoreListeners`, `str_random`,
+          `mapById`, `groupByid`; document getProperty, setProperty; new undocumented `makeIterator`, `toArray`, `distinct`
+- 1.3.0 - new function `populate()`
+- 1.2.2 - new undocumented functions `getProperty`, `setProperty`, `once`
 - 1.2.1 - fix thunkify
 - 1.2.0 - faster varargs, new `concat2`, `keys`, `str_truncate`, `strtok`, `inherits`, `curry`
 - 1.1.2 - fix invoke
