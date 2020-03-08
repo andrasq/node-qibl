@@ -521,13 +521,12 @@ function readBody( emitter, cb ) {
         else chunks.push(chunk);
     })
     emitter.on('end', function() {
-        if (doneCount++) return;
         if (!chunk1) return cb(null, data);
         else if (!chunks) return cb(null, chunk1);
         else cb(null, Buffer.concat(chunks));
     })
     emitter.on('error', function(err) {
-        if (!doneCount++) cb(err);
+        cb(err);
     })
 }
 

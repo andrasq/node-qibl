@@ -860,14 +860,14 @@ module.exports = {
                 emitter.emit('end');
             },
 
-            'returns only once': function(t) {
+            'returns only once if wrapped in once()': function(t) {
                 var emitter = new events.EventEmitter();
                 var doneCount = 0;
-                qibl.readBody(emitter, function(err, body) {
+                qibl.readBody(emitter, qibl.once(function(err, body) {
                     t.ifError(err);
                     doneCount += 1;
-                    setTimeout(function() { t.equal(doneCount, 1); t.done(); });
-                })
+                    setTimeout(function() { t.equal(doneCount, 1); t.done(); }, 2);
+                }))
                 emitter.emit('end');
                 emitter.emit('end');
                 emitter.emit('error', new Error());
@@ -883,7 +883,6 @@ module.exports = {
                     t.done();
                 })
                 emitter.emit('error', obj);
-                emitter.emit('error', {});
             },
 
             'concatenates string data': function(t) {
