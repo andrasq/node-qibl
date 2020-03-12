@@ -132,6 +132,7 @@ module.exports = {
                 ['a', 'a', undefined],
 
                 [{a:1}, 'a', 1],
+                [{foo:{bar:1}}, 'foo.bar', 1],
                 [{a:1, b:2}, 'a', 1],
                 [{a:1, b:2}, 'b', 2],
                 [{a:1, b:2}, 'a.b', undefined],
@@ -183,7 +184,7 @@ module.exports = {
             var tests = [
                 [null, 'a', undefined],
                 [{a:1, b:{c:2}}, 'b', {c:2}],
-                [{a:1, b:{c:2}}, 'b.c', 2],
+                [{foo:1, bar:{c:2}}, 'bar.c', 2],
             ];
 
             for (var i=0; i<tests.length; i++) {

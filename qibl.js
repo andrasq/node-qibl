@@ -130,7 +130,7 @@ function getProperty( target, dottedName, defaultValue ) {
     if (!target) return defaultValue;
 
     var first, path;
-    if (dottedName.indexOf('.') < 0) { first = dottedName; path = [] } else { path = dottedName.split('.'); first = dottedName[0] }
+    if (dottedName.indexOf('.') < 0) { first = dottedName; path = [] } else { path = dottedName.split('.'); first = path[0] }
 
     target = target[first];
     for (var i = 1; i < path.length; i++) {
