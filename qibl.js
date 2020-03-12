@@ -242,16 +242,16 @@ function kfill( target, keys, fn ) {
 
 // compact by squeezing out undefined elements
 function omitUndefined( item ) {
+    var val, ret;
     if (Array.isArray(item)) {
-        var val, ret = new Array();
+        ret = new Array();
         for (var i=0; i<item.length; i++) if ((val = item[i]) !== undefined) ret.push(val);
-        return ret;
     }
     else {
-        var val, ret = {};
+        ret = {};
         for (var k in item) if ((val = item[k]) !== undefined) ret[k] = val;
-        return ret;
     }
+    return ret;
 }
 
 // See also `sane-buffer`.
