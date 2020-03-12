@@ -424,8 +424,10 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
+- 1.5.1 - fix getProperty, do not prevent multiple callbacks from readBody
 - 1.5.0 - new functions `derive`, `varargsRenamed`, `isMethodContext`, `readBody`;
           make varargs attach the instance `this` if no `self` given,
+          faster invoke2, faster varargs
 - 1.4.0 - new functions `fill`, `subsample`, `omitUndefined`, `qsearch`, `sort3`, `clear`/`restoreListeners`, `str_random`,
           `mapById`, `groupByid`; document getProperty, setProperty; new undocumented `makeIterator`, `toArray`, `distinct`
 - 1.3.0 - new function `populate()`
