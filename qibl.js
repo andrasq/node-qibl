@@ -450,13 +450,13 @@ function curry( fn ) {
     if (typeof fn !== 'function') throw new TypeError('not a function');
 
     // initial calls bind to partial arg lists and return a curried function
-    return qibl.varargs(partials, { fn: fn, argc: fn.length, argv: null, self: this });
+    return varargs(partials, { fn: fn, argc: fn.length, argv: null, self: this });
 
     function partials( av, state ) {
         var argv = state.argv ? concat2(new Array(), state.argv, av) : av;
         // once all expected args are present, invoke fn
         if (argv.length >= state.argc) return qibl.invoke(state.fn, argv);
-        return qibl.varargs(partials, { fn: state.fn, argc: state.argc, argv: argv, self: state.self });
+        return varargs(partials, { fn: state.fn, argc: state.argc, argv: argv, self: state.self });
     }
 }
 
@@ -485,7 +485,7 @@ function _invoke2( func, self, argv ) {
 // build a function just like fn but that only runs once
 function once( fn ) {
     var called = false;
-    return qibl.varargs(function(av) {
+    return varargs(function(av) {
         if (called) return;
         called = true;
         return qibl.invoke2(fn, this, av);
