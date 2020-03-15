@@ -185,6 +185,8 @@ function setPropertyMode( target, property, value, mode ) {
 }
 
 // make the derived class inherit from the base
+// NOTE: util.inherits does not inherit static class methods/properties,
+// but qibl.inherits does, as does `class ... extends`
 function inherits( derived, base ) {
     // static class properties
     var keys = Object.keys(base);
