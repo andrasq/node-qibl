@@ -424,7 +424,8 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
-- 1.6.0 - new function `entries`, new undocumented function `str_locate`, fix get/setIterator property name
+- 1.6.0 - new function `entries`, new undocumented function `str_locate`, fix get/setIterator property name,
+          speed up iterators
 - 1.5.1 - fix getProperty, do not prevent multiple callbacks from readBody
 - 1.5.0 - new functions `derive`, `varargsRenamed`, `isMethodContext`, `readBody`;
           make varargs attach the instance `this` if no `self` given,

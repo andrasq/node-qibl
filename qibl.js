@@ -611,13 +611,13 @@ function distinct( array ) {
 }
 
 // given an traversal state update function that sets this.value and this.done,
-// install it on the protype to make instances iterable.
-// `step()` should update this.value or this.done as appropriate.
-// If this.done is true, this.value is not used.
+// create a nodejs iterator to make the instance iterable.
+// `step(state, ret)` should set `ret.value` or `ret.done` as appropriate.
+// If ret.done is true, ret.value should not be used.
 // see qdlist
 //
-// NOTE: the step function _must_ be a function(), not a () => because
-// the latter does not associate with the instance and cannot set this.done.
+// NOTE: the step function _must_ be a function() function, not an () => arrow function,
+// because the latter does not associate with the instance and cannot set this.done.
 //
 // Convention: iterators that can be run only once return self,
 // those that can be run many times must return a new iterator each time.
@@ -628,14 +628,18 @@ function distinct( array ) {
 // next() returns a data wrapper with properties {value, done}.
 // If done is set then value is not to be used.
 function makeIterator( step, makeState ) {
-    return function() {
+    return function iterator() {
+        // makeState is passed the object the iterator function is attached to
+        var state = makeState && makeState(this) || {};
         return {
-            value: null, done: false,
-            next: function() { this._step(this._state); return this; },
-            _step: step,
-            _state: makeState ? makeState(this) : {},
-        }
+            value: 0,
+            done: false,
+            next: stepIterator,
+            __step: step,
+            __state: state,
+        };
     }
+    function stepIterator() { this.__step(this.__state, this); return this; }
 }
 // install the iterator as Symbol.iterator if the node version supports symbols, else as ._iterator
 function setIterator( obj, iterator ) {
@@ -662,7 +666,7 @@ function _traverse( obj, transform, target ) {
             target.push(transform ? transform(val.value, i) : val.value);
         }
     } else if (obj && obj.length > 0) {
-        // this loop mimics Array.from, but transforms quite a bit faster (8x node-v10.15, 14x node-v12)
+        // this loop mimics Array.from, but transforms quite a bit faster (13x node-v10.15, 15x node-v12)
         // testing transform? in the loop is faster than using two custom functions
         for (var i = 0; i < obj.length; i++) {
             target.push(transform ? transform(obj[i], i) : obj[i]);

@@ -1337,10 +1337,12 @@ module.exports = {
             t.done();
         },
 
-        'iterator stepper should receive the state object': function(t) {
+        'iterator stepper should receive the state object and self': function(t) {
             var state = {};
-            var iter = qibl.makeIterator(function stepper(st) {
+            var iter = qibl.makeIterator(function stepper(st, self) {
                 t.equal(st, state);
+                // the self is the same as the function invocation `this`
+                t.equal(self, this);
                 t.done();
             }, function() { return state });
 
@@ -1350,11 +1352,16 @@ module.exports = {
         'iterator should be compatible with Array.from': function(t) {
             var called = 0;
             var a = [1,2,3,4,5];
-            var iter = qibl.makeIterator(function(state) {
-                called += 1;
-                if (state.ix >= state.arr.length) this.done = true;
-                else this.value = state.arr[state.ix++];
-            }, function(self) { return { arr: self, ix: 0 } });
+            var iter = qibl.makeIterator(
+                function step(state) {
+                    called += 1;
+                    if (state.ix >= state.arr.length) this.done = true;
+                    else this.value = state.arr[state.ix++];
+                },
+                function makeState(array) {
+                    return { arr: array, ix: 0 }
+                }
+            );
             qibl.setIterator(a, iter);
 
             if (typeof Array.from !== 'function') t.skip();
@@ -1362,10 +1369,13 @@ module.exports = {
             var b = Array.from(a);
             t.equal(called, a.length + 1);
             t.deepEqual(b, a);
+            t.equal(called, 6);
 
+            called = 0;
             var c = [2,4,6];
             qibl.setIterator(c, iter);
             t.deepEqual(Array.from(c), c);
+            t.equal(called, 4);
 
             t.done();
         },
@@ -1376,6 +1386,11 @@ module.exports = {
             var obj = {};
             qibl.setIterator(obj, iter);
             t.equal(qibl.getIterator(obj), iter);
+
+            var iter1 = qibl.getIterator([]);
+            var iter2 = qibl.getIterator([]);
+            t.equal(iter1, iter2);
+            if (typeof Array.from === 'function') t.equal(typeof iter1, 'function');
 
             t.done();
         },
