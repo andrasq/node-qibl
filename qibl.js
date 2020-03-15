@@ -12,7 +12,7 @@
 
 var nodeMajor = parseInt(process.versions.node);
 var nodeMinor = +process.versions.node.split('.')[1];
-var IteratorProperty = eval('typeof Symbol === "function" && Symbol.iterator || { iterator: "_iterator" }');
+var IteratorProperty = eval('typeof Symbol === "function" && Symbol.iterator || "_iterator"');
 
 // use spread arguments if supported, is faster than .call or .apply
 var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv) { return func(...argv) }')");
