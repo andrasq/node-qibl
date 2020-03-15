@@ -302,6 +302,7 @@ Options:
 ### qibl.concat2( target, arr1 [,arr2] )
 
 Concatenate one or two arrays into the target array.  Returns the target array.
+Faster than `Array.concat`, much faster for short arrays.
 
 ### qibl.subsample( items, k [,base, bound] )
 
