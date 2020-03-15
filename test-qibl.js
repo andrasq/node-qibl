@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Andras Radics
+ * Copyright (C) 2019-2020 Andras Radics
  * Licensed under the Apache License, Version 2.0
  */
 
@@ -1396,22 +1396,30 @@ module.exports = {
         },
     },
 
-    'keys should use Object.keys': function(t) {
-        var spy = t.spyOnce(Object, 'keys');
-        t.deepEqual(qibl.keys({a:1, b:2}), ['a', 'b']);
-        t.ok(spy.called);
-        t.done();
-    },
+    'Object polyfills': {
+        'keys returns enumerable own properties': function(t) {
+            var obj= {a:1, c:3};
+            Object.defineProperty(obj, 'b', {value: 2, enumerable: false});
+            t.deepEqual(qibl.keys(obj), ['a', 'c']);
+            t.done();
+        },
 
-    'values': {
-        'should return values': function(t) {
+        'values returns values': function(t) {
             if (nodeMajor >= 4) {
                 // node-v0.12 and older throw if Object.keys given a non-object
+
                 t.deepEqual(qibl.values(0), []);
                 t.deepEqual(qibl.values("foo"), ['f', 'o', 'o']);
             }
             t.deepEqual(qibl.values({}), []);
             t.deepEqual(qibl.values({a:1, b:"two"}), [1, "two"]);
+            t.done();
+        },
+
+        'entries returns key-value tuples': function(t) {
+            t.deepEqual(qibl.entries({}), []);
+            t.deepEqual(qibl.entries({a:1}), [['a', 1]]);
+            t.deepEqual(qibl.entries({a:1, b:2}), [['a', 1], ['b', 2]]);
             t.done();
         },
     },
