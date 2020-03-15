@@ -334,8 +334,8 @@ function swapi( a, i, j ) {
 // See also `qprintf`.
 function str_repeat( str, n ) {
 
-    if (typeof str !== 'string') str = String(str);
-    // if (n <= 2) return (n === 2) ? str + str : (n === 1) ? str : '';
+    str = '' + str;
+    if (n <= 2) return (n === 2) ? str + str : (n === 1) ? str : '';
 
     // 20m x20 in 0.86s, vs 1.23s for self-recursive switch
     var ret = '';
