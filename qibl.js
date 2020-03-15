@@ -63,6 +63,7 @@ var qibl = module.exports = {
     subsample: subsample,
     qsearch: qsearch,
     sort3: sort3,
+    sort3i: sort3i,
     curry: curry,
     once: once,
     tryRequire: tryRequire,
@@ -320,6 +321,14 @@ function sort3( a, b, c ) {
     return (a <= b) ? (c <= a ? [c, a, b] : c <= b ? [a, c, b] : [a, b, c]) : sort3(b, a, c);
     // descending:
     // return (b > a) ? sort3(b, a, c) : (c > a ? [c, a, b] : c > b ? [a, c, b] : [a, b, c]);
+}
+function sort3i( arr, i, j, k ) {
+    if (arr[j] < arr[i]) { swapi(arr, i, j); sort3i(arr, i, j, k) }
+    if (arr[k] < arr[i]) { var t = arr[k]; arr[k] = arr[j]; arr[j] = arr[i]; arr[i] = t; return }
+    if (arr[k] < arr[j]) swapi(arr, j, k);
+}
+function swapi( a, i, j ) {
+    var t = a[i]; a[i] = a[j]; a[j] = t;
 }
 
 // See also `qprintf`.

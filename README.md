@@ -322,6 +322,11 @@ Return an array containing the 3 items in ascending order.  Much faster than `[a
     qibl.sort3(3, 1, 2);
     // => [1, 2, 3]
 
+### qibl.sort3i( array, i, j, k )
+
+Rearrange the array contents at offsets i, j and k so that array[i], array[j] and array[k]
+are in ascending order.
+
 ### qibl.newBuf( arg, encodingOrOffset, length )
 
 Construct a Buffer like `new Buffer()` used to before it was deprecated.  Note that with
@@ -424,7 +429,7 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
-- 1.6.0 - new function `entries`, new undocumented function `str_locate`, fix get/setIterator property name,
+- 1.6.0 - new function `entries`, `sort3i`, new undocumented function `str_locate`, fix get/setIterator property name,
           speed up iterators
 - 1.5.1 - fix getProperty, do not prevent multiple callbacks from readBody
 - 1.5.0 - new functions `derive`, `varargsRenamed`, `isMethodContext`, `readBody`;

@@ -626,6 +626,17 @@ module.exports = {
         t.done();
     },
 
+    'sort3i': function(t) {
+        for (var i = 0; i < 1000; i++) {
+            var arr = [Math.random(), Math.random(), Math.random()];
+            qibl.sort3i(arr, 0, 1, 2);
+            t.ok(arr[0] <= arr[1] && arr[1] <= arr[2], "not sorted: " + arr);
+            qibl.sort3i(arr, 2, 1, 0);
+            t.ok(arr[0] >= arr[1] && arr[1] >= arr[2], "not sorted: " + arr);
+        }
+        t.done();
+    },
+
     'str_repeat should repeat': function(t) {
         var tests = [
             [ "", 2, "" ],
