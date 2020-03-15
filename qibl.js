@@ -683,13 +683,15 @@ function entries( object ) {
 // replace each occurrence of patt in str with the next one of the args
 // If an `addslashes` function is provided, use it to escape the args.
 function vinterpolate( str, patt, args, addslashes ) {
-    var prevPos = 0, pos, ret = "", argix = 0;
+    // older node is faster using split(), but split is much slower starting with node-v12,
+    // so node-v12 100% faster and node-v13 25% faster with indexOf()
+    var prevPos = 0, pos, ret = "", argix = 0, pattLen = patt.length;
     while ((pos = str.indexOf(patt, prevPos)) >= 0 && argix < args.length) {
         if (pos > prevPos) ret += str.slice(prevPos, pos);
         ret += typeof args[argix] === 'number' ? args[argix++]
-            : addslashes ? addslashes(String(args[argix++]))
-            : String(args[argix++]);
-        prevPos = pos + patt.length;
+            : addslashes ? addslashes('' + (args[argix++]))
+            : '' + args[argix++];
+        prevPos = pos + pattLen;
     }
     if (prevPos < str.length) ret += str.slice(prevPos);
     return ret;
