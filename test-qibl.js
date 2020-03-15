@@ -760,6 +760,39 @@ module.exports = {
         },
     },
 
+    'str_locate': {
+        'passes the argument on every call to the handler': function(t) {
+            var args = [];
+            var arg = {};
+            qibl.str_locate('foo', 'o', function(offset, arg) { args.push(arg) }, arg);
+            t.deepEqual(args, [arg, arg]);
+            t.done();
+        },
+
+        'invokes the handler on every pattern found': function(t) {
+            var offsets = [];
+            var handler = function(offs, arr) { arr.push(offs) };
+
+            offsets = [];
+            qibl.str_locate('foobar boofar', 'foof', handler, offsets);
+            t.deepEqual(offsets, []);
+
+            offsets = [];
+            qibl.str_locate('foobar boofar', 'boo', handler, offsets);
+            t.deepEqual(offsets, [7]);
+
+            offsets = [];
+            qibl.str_locate('foobar boofar', 'oo', handler, offsets);
+            t.deepEqual(offsets, [1, 8]);
+
+            offsets = [];
+            qibl.str_locate('foobar boofar', 'o', handler, offsets);
+            t.deepEqual(offsets, [1, 2, 8, 9]);
+
+            t.done();
+        },
+    },
+
     'saneBuf': {
         'newBuf should emulate legacy constructor': function(t) {
             var buf = qibl.newBuf("foo");

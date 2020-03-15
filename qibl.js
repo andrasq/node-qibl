@@ -43,6 +43,7 @@ var qibl = module.exports = {
     str_truncate: str_truncate,
     strtok: strtok,
     str_random: str_random,
+    str_locate: str_locate,
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
@@ -360,6 +361,15 @@ function str_random( len ) {
         // ix = (ix * 1103515245 + 12345) & 0x7FFFFFFF; // ANSI C mod 2^31, 10m/s; Math.random 10m/s
         ix = (ix * 65793 + 4282663) & 0x7FFFFF; // cc65, mod 2^23 12m/s
         return (ix >> 9); // bits 8..22 are usable
+    }
+}
+
+// locate all substrings patt in string str, and call handler with their offsets
+function str_locate( str, patt, handler, arg ) {
+    var pos = 0;
+    for (var pos = 0; pos < str.length; pos += patt.length) {
+        if ((pos = str.indexOf(patt, pos)) >= 0) handler(pos, arg);
+        else break;
     }
 }
 
@@ -698,6 +708,15 @@ function vinterpolate( str, patt, args, addslashes ) {
     if (prevPos < str.length) ret += str.slice(prevPos);
     return ret;
 }
+
+/**
+// return array with all locations of patt in str
+function offsetsOf( str, patt ) {
+    var offsets = new Array();
+    str_locate(str, patt, function gather(ix, arr) { arr.push(ix) }, offsets);
+    return offsets;
+}
+**/
 
 function addslashes( str, patt ) {
     // TODO: default to escaping only \' \" \\ \0, pass them in for escapeshellcmd()
