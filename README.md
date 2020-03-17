@@ -105,6 +105,9 @@ an object other than `qibl`, it will set properties on that instance.
 Arrange for the Derived class to inherit class and instance methods and properties
 from the Base class, including inherited properties.  Equivalent to `util.inherits`.
 
+Note that static class methods and constructor properties are not inherited with
+`util.inherits`, but are with `class ... extends` and with `qibl.inherits`.
+
 ### qibl.derive( className, parent, [,prototype] [,constructor] )
 
 Create a derived class from the parent.  Returns the constructor.

@@ -281,7 +281,7 @@ function concat2( target, a1, a2 ) {
 // fewer than k if there are not that many items.
 // Eg: pick 2 of [1,2,3,4]: get [1,2], replace 3 with 2/3 probability into slot [0] or [1],
 // then replace 4 with 2/4 probability into slot [0], [1] or [2] (use i-th item with k/i odds).
-// see also qheap
+// see also qheap, https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_R
 function subsample( items, k, base, bound ) {
     base = (base >= 0) ? base : 0;
     bound = (bound >= 0) ? bound : items.length;
