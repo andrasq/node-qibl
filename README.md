@@ -183,6 +183,10 @@ present for symmetry with `values()`.
 
 Return an array with the own properties of the object.  Equivalent to `Object.values`.
 
+### qibl.entries( object )
+
+Return an array of key-value pairs of the own properties of the object.  Equivalent to `Object.entries`.
+
 ### qibl.populate( target, val [,options ] )
 
 Similar to `fill()`, but can can fill with computed values and can also populate objects.
