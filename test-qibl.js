@@ -1350,14 +1350,34 @@ module.exports = {
 
         'iterator stepper should receive the state object and self': function(t) {
             var state = {};
-            var iter = qibl.makeIterator(function stepper(st, self) {
+            var callArgs = null;
+            function makeState(instance) { return state };
+            function stepIterator(st, instance, tuple) {
+                callArgs = arguments;
+                // stepper passed in state created by 
                 t.equal(st, state);
+                // the instance is the object on which the iterator was invoked
+                if (instance) t.equal(instance, obj);
                 // the self is the same as the function invocation `this`
-                t.equal(self, this);
-                t.done();
-            }, function() { return state });
+                t.equal(this, tuple);
+                this.done = true;
+            }
+            var iter = qibl.makeIterator(stepIterator, makeState);
 
-            iter().next();
+            var tuple = iter().next();
+            t.deepEqual(qibl.toArray(callArgs), [state, undefined, tuple]);
+
+            var obj = {};
+            qibl.setIterator(obj, iter);
+            qibl.toArray(obj);
+            t.deepEqual(Object.keys(callArgs[2]), Object.keys(tuple));
+            t.equal(callArgs[0], state);
+            t.equal(callArgs[1], obj);
+            t.equal(callArgs[2].__state, state);
+            t.equal(callArgs[2].__step, stepIterator);
+            t.equal(callArgs[2].__instance, obj);
+
+            t.done();
         },
 
         'iterator should be compatible with Array.from': function(t) {

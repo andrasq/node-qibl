@@ -78,6 +78,7 @@ var qibl = module.exports = {
     makeIterator: makeIterator,
     setIterator: setIterator,
     getIterator: getIterator,
+    IteratorProperty: IteratorProperty,
     toArray: toArray,
     vinterpolate: vinterpolate,
     addslashes: addslashes,
@@ -638,7 +639,7 @@ function distinct( array ) {
 // If done is set then value is not to be used.
 function makeIterator( step, makeState ) {
     return function iterator() {
-        // makeState is passed the object the iterator function is attached to
+        // makeState is passed the object instance on which the iterator was called
         var state = makeState && makeState(this) || {};
         return {
             value: 0,
@@ -646,9 +647,10 @@ function makeIterator( step, makeState ) {
             next: stepIterator,
             __step: step,
             __state: state,
+            __instance: this,
         };
     }
-    function stepIterator() { this.__step(this.__state, this); return this; }
+    function stepIterator() { this.__step(this.__state, this.__instance, this); return this; }
 }
 // install the iterator as Symbol.iterator if the node version supports symbols, else as ._iterator
 function setIterator( obj, iterator ) {
