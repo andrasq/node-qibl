@@ -22,6 +22,8 @@ var invoke1 = eval("(nodeMajor < 6) && _invoke1 || tryEval('function(func, argv)
 // nb node-v10 is very slow to run .call with spread args
 var invoke2 = eval("(nodeMajor < 8) && _invoke2 || tryEval('function(func, self, argv) { return func.apply(self, argv) }')");
 
+var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.Map : _Hashmap");
+
 // rest arguments are faster starting with node-v8
 var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
@@ -613,12 +615,23 @@ function groupById( items, idName, target ) {
     return _mapById(items, idName, target || {}, true);
 }
 
-function distinct( array ) {
-    var found = {};
-    for (var i = 0; i < array.length; i++) found[array[i]] = true;
-    // note: object keys are displayed numbers first
-    return Object.keys(found);
+function distinct( items, getKey ) {
+    // with lots of duplicates (say 50+%) hashing strings is close competitive with Map()
+    // With no duplicates Map is faster.
+    getKey = getKey || _toString;
+    var found = new Hashmap();
+    for (var i = 0; i < items.length; i++) { var k = getKey(items[i]); if (found.get(k) === undefined) found.set(k, items[i]) }
+    var vals = found.values();
+    return Array.isArray(vals) ? vals : toArray(vals);
 }
+// function _identity(x) { return x }
+function _toString(x) { return typeof x === 'string' ? x : '' + x }     // TODO: time '' + x vs typeof
+// quick-and-dirty Map polyfill to use where needed, works for strings and numbers
+function _Hashmap() {};
+_Hashmap.prototype.set = function(k, v) { this[k] = v; return this }
+_Hashmap.prototype.get = function(k) { return this[k] }
+_Hashmap.prototype.values = function() { return qibl.values(this) }
+
 
 // given an traversal state update function that sets this.value and this.done,
 // create a nodejs iterator to make the instance iterable.
