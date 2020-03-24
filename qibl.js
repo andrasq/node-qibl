@@ -101,7 +101,7 @@ function isMethodContext( self ) {
 function copyObject( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
         src = arguments[i];
-        var keys = Object.keys(src);
+        var keys = qibl.keys(src);
         for (var j = 0; j < keys.length; j++) target[keys[j]] = src[keys[j]];
     }
     return target;
@@ -194,7 +194,7 @@ function setPropertyMode( target, property, value, mode ) {
 // but qibl.inherits does, as does `class ... extends`
 function inherits( derived, base ) {
     // static class properties
-    var keys = Object.keys(base);
+    var keys = qibl.keys(base);
     for (var i = 0; i < keys.length; i++) derived[keys[i]] = base[keys[i]];
 
     // set up constructor and prototype linkage
@@ -237,7 +237,7 @@ function populate( target, val, options ) {
         else for (var i = base; i < bound; i++) target[i] = val;
     }
     else {
-        var keys = options && options.keys ? options.keys : Object.keys(target);
+        var keys = options && options.keys ? options.keys : qibl.keys(target);
         kfill(target, keys, typeof val === 'function' ? val : function(k) { return val });
     }
     return target;
@@ -702,19 +702,22 @@ function _traverse( obj, transform, target ) {
 
 // Object.keys
 function keys( object ) {
-    return Object.keys(object);
+    if (object.constructor !== Object) return Object.keys(object);
+    var keys = new Array();
+    for (var k in object) keys.push(k);
+    return keys;
 }
 
 // Object.values
 function values( object ) {
-    var keys = Object.keys(object);
+    var keys = qibl.keys(object);
     var ret = new Array();
     for (var i = 0; i < keys.length; i++) ret.push(object[keys[i]]);
     return ret;
 }
 // Object.entries
 function entries( object ) {
-    var ks = keys(object);
+    var ks = qibl.keys(object);
     var ret = new Array();
     for (var i = 0; i < ks.length; i++) ret.push([ks[i], object[ks[i]]]);
     return ret;
