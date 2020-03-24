@@ -76,6 +76,8 @@ var qibl = module.exports = {
     selectField: selectField,
     mapById: mapById,
     groupById: groupById,
+    groupBy: groupBy,
+    sortBy: sortBy,
     distinct: distinct,
     makeIterator: makeIterator,
     setIterator: setIterator,
@@ -631,6 +633,20 @@ function _Hashmap() {};
 _Hashmap.prototype.set = function(k, v) { this[k] = v; return this }
 _Hashmap.prototype.get = function(k) { return this[k] }
 _Hashmap.prototype.values = function() { return qibl.values(this) }
+
+function groupBy( items, getKey, target ) {
+    target = target || {};
+    for (var i = 0; i < items.length; i++) {
+        var item = items[i], key = getKey(item);
+        var list = target[key] || (target[key] = new Array());
+        list.push(item);
+    }
+    return target;
+}
+
+function sortBy( items, getMetric ) {
+    return items.sort(function(a, b) { return getMetric(a) - getMetric(b) });
+}
 
 
 // given an traversal state update function that sets this.value and this.done,

@@ -1311,6 +1311,31 @@ module.exports = {
         },
     },
 
+    'sortBy': {
+        'sorts by metric returned by the provided function': function(t) {
+            t.deepEqual(qibl.sortBy([], function(e) { return -e }), []);
+            t.deepEqual(qibl.sortBy([1,2,3], function(e) { return e }), [1,2,3]);
+            t.deepEqual(qibl.sortBy([1,2,3], function(e) { return -e }), [3,2,1]);
+            t.done();
+        },
+    },
+
+    'groupBy': {
+        'groups by keys from the provided function': function(t) {
+            t.deepEqual(qibl.groupBy([], function(){ return 1 }), []);
+            t.deepEqual(qibl.groupBy([1,2,3], function(e) { return e }), { 1: [1], 2: [2], 3: [3] });
+            t.deepEqual(qibl.groupBy([1,2,3], function(e) { return 2*e }), { 2: [1], 4: [2], 6: [3] });
+            t.deepEqual(qibl.groupBy([1,2,3], function(e) { return e & 1 }), { 1: [1, 3], 0: [2] });
+            t.deepEqual(qibl.groupBy([{}], function(e) { return e.a }), { 'undefined': [{}] });
+            t.done();
+        },
+
+        'adds to provided target': function(t) {
+            t.deepEqual(qibl.groupBy([1,2], function(e) { return e }, { a: 1 }), { a: 1, 1: [1], 2: [2] });
+            t.done();
+        },
+    },
+
     'distinct': {
         'returns unique values': function(t) {
             var tests = [
