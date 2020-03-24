@@ -9,8 +9,8 @@ A miscellaneous collection of small functions and polyfills I wrote that that I 
 reusing, gathered into a single place.  Most are pretty efficient, at times faster even
 than the equivalent built-in.
 
-If using the code cut-and-paste, include a comment line identifying the
-qibl source version that it came from, e.g.
+Use either directly as a dependency, or as a library of cut-and-paste functions.  If using cut-and-paste,
+add an attribution comment line identifying the qibl source version that it came from, e.g.
 
     // adapted from qibl@1.4.0
     function subsample() { ... }
