@@ -114,8 +114,7 @@ function copyObject( target /* ,VARARGS */ ) {
 // See also `qhash`.
 function merge( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
-        src = arguments[i];
-        for (var key in src) {
+        for (var key in (src = arguments[i])) {
             var val = src[key];
             if (isHash(val)) { if (!isHash(target[key])) target[key] = merge({}, val); else merge(target[key], val) }
             else target[key] = val;
@@ -323,10 +322,8 @@ function qsearch( min, max, probeProperty ) {
 
 // special-purpose sort of 3 items, 40m/s vs [].sort() 5m/s
 function sort3( a, b, c ) {
-    // ascending:
-    return (a <= b) ? (c <= a ? [c, a, b] : c <= b ? [a, c, b] : [a, b, c]) : sort3(b, a, c);
-    // descending:
-    // return (b > a) ? sort3(b, a, c) : (c > a ? [c, a, b] : c > b ? [a, c, b] : [a, b, c]);
+    return (a <= b) ? (c <= a ? [c, a, b] : c <= b ? [a, c, b] : [a, b, c]) : sort3(b, a, c); // ascending
+    // return (b > a) ? sort3(b, a, c) : (c > a ? [c, a, b] : c > b ? [a, c, b] : [a, b, c]); // descending
 }
 function sort3i( arr, i, j, k ) {
     if (arr[j] < arr[i]) { swapi(arr, i, j); sort3i(arr, i, j, k) }
