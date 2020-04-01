@@ -437,8 +437,8 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
-- 1.6.0 - new function `entries`, `sort3i`, new undocumented function `str_locate`, `randomize`, `interleave2`, `groupBy`, `sortBy`,
-          fix get/setIterator property name, speed up iterators, change makeIterator step func args, faster str_random
+- 1.6.0 - new function `entries`, `sort3i`; new undocumented function `str_locate`, `randomize`, `interleave2`, `groupBy`, `sortBy`, `range`;
+          fix get/setIterator property name; speed up iterators, change makeIterator step func args; faster str_random
 - 1.5.1 - fix getProperty, do not prevent multiple callbacks from readBody
 - 1.5.0 - new functions `derive`, `varargsRenamed`, `isMethodContext`, `readBody`;
           make varargs attach the instance `this` if no `self` given,

@@ -66,6 +66,7 @@ var qibl = module.exports = {
     qsearch: qsearch,
     sort3: sort3,
     sort3i: sort3i,
+    range: range,
     curry: curry,
     once: once,
     tryRequire: tryRequire,
@@ -335,6 +336,27 @@ function sort3i( arr, i, j, k ) {
 function swapi( a, i, j ) {
     var t = a[i]; a[i] = a[j]; a[j] = t;
 }
+
+/*
+ * return an iterable object that will enumerate the values in the range [first..last]
+ */
+function range( first, last, stepBy ) {
+    if (last == undefined) { last = first; first = 1 }
+    if (stepBy && typeof stepBy !== 'function') throw new Error('stepBy is not a function');
+
+    return qibl.setIterator({}, qibl.makeIterator(step, makeState));
+
+    function makeState() { return stepBy
+        ? { n: first, last: last, stepBy: stepBy, step: first <= last ? +1 : -1 }
+        : { n: first, last: last, stepBy: null, step: first <= last ? +1 : -1 }}
+
+    function step(state) {
+        this.value = state.n;
+        this.done = (state.step > 0 ? state.n > state.last : state.n < state.last);
+        state.stepBy ? state.n = state.stepBy(state.n) : state.n += state.step;
+    }
+}
+
 
 // See also `qprintf`.
 function str_repeat( str, n ) {

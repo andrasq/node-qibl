@@ -637,6 +637,66 @@ module.exports = {
         t.done();
     },
 
+    'range': {
+        'returns an iterable': function(t) {
+            var range = qibl.range(3, 5);
+            t.ok(!Array.isArray(range));
+            t.deepEqual(qibl.toArray(range), [3, 4, 5]);
+            t.done();
+        },
+
+        'can be iterated by nodejs': function(t) {
+            try {
+                for (var x of [1, 2, 3]) ;
+                var range = qibl.range(1, 8, function(x) { return x + 3 });
+                var vals = [];
+                for (var val of range) { vals.push(val); }
+                t.deepEqual(vals, [1, 4, 7]);
+                t.done();
+            }
+            catch (err) {
+                t.skip();
+            }
+        },
+
+        'throws if stepBy is not a function': function(t) {
+            t.throws(function() { qibl.range(1, 10, +1) }, /not a function/);
+            t.done();
+        },
+
+        'returns a range to': function(t) {
+            t.deepEqual(qibl.toArray(qibl.range(3)), [1, 2, 3]);
+            t.deepEqual(qibl.toArray(qibl.range(5)), [1, 2, 3, 4, 5]);
+            t.done();
+        },
+
+        'steps by the increment': function(t) {
+            var range = qibl.range(1, 5, function(x) { return x + 2 });
+            t.deepEqual(qibl.toArray(range), [1, 3, 5]);
+            t.done();
+        },
+
+        'returns a non-linear range': function(t) {
+            var arr = qibl.toArray(qibl.range(1, 1e4, function(x) { return x * 10 }));
+            t.deepEqual(arr, [1, 10, 100, 1000, 10000]);
+            t.done();
+        },
+
+        'returns negative ranges': function(t) {
+            var range = qibl.range(10, 5);
+            t.deepEqual(qibl.toArray(range), [10, 9, 8, 7, 6, 5]);
+            t.done();
+        },
+
+        'returns negative non-sequential ranges': function(t) {
+            var range = qibl.range(10, 5, function(x) { return x - 2 });
+            t.deepEqual(qibl.toArray(range), [10, 8, 6]);
+            t.done();
+        }
+    },
+
+    'strings': {
+
     'str_repeat should repeat': function(t) {
         var tests = [
             [ "", 2, "" ],
@@ -802,6 +862,8 @@ module.exports = {
 
             t.done();
         },
+    },
+
     },
 
     'saneBuf': {
