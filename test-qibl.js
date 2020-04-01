@@ -646,18 +646,16 @@ module.exports = {
         },
 
         'can be iterated by nodejs': function(t) {
-            try {
-                if (nodeMajor < 1) t.skip();
-                // node-v0.8 and v0.10 die on "Unexpected identifier", later node throw
-                var range = qibl.range(1, 8, function(x) { return x + 3 });
-                var vals = [];
-                eval("for (var val of range) { vals.push(val); }");
-                t.deepEqual(vals, [1, 4, 7]);
-                t.done();
-            }
-            catch (err) {
-                t.skip();
-            }
+            // node-v0.8 and v0.10 die on "Unexpected identifier", later node throw
+            if (nodeMajor < 1) t.skip();
+
+            var range = qibl.range(1, 8, function(x) { return x + 3 });
+            var vals = [];
+            mapOf(range, function(val) { vals.push(val) });
+            t.deepEqual(vals, [1, 4, 7]);
+            t.done();
+
+            function mapOf(iter, fn) { eval("for (var val of iter) fn(val);") }
         },
 
         'throws if stepBy is not a function': function(t) {
