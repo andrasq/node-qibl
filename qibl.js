@@ -387,7 +387,9 @@ function str_truncate( string, limit, opts ) {
 // var _random_charset = 'aaabccdeeeeeeffghiiijkllmnnnnooopqrrrrssstttttuuvwxyz           ';
 // var _random_charset = 'aaabccdeeeee ffghiiijkllmnnn ooopqrrr ssstttt uuvwxyz           ';
 var _random_charset = 'aaab ccde eeee ffgh iiij kllm nnn ooop qrrr ssst ttt uuvw xyz   ';
-function str_random( len ) {
+var hex_charset = '0123456789abcdef01234567-9abcdef0123456789a-cdef0123456789abcdef';
+function str_random( len, charset ) {
+    charset = charset || _random_charset;
     var s = '';
 
     while (len > 0) {
