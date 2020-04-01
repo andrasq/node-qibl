@@ -647,10 +647,11 @@ module.exports = {
 
         'can be iterated by nodejs': function(t) {
             try {
-                for (var x of [1, 2, 3]) ;
+                if (nodeMajor < 1) t.skip();
+                // node-v0.8 and v0.10 die on "Unexpected identifier", later node throw
                 var range = qibl.range(1, 8, function(x) { return x + 3 });
                 var vals = [];
-                for (var val of range) { vals.push(val); }
+                eval("for (var val of range) { vals.push(val); }");
                 t.deepEqual(vals, [1, 4, 7]);
                 t.done();
             }
