@@ -687,7 +687,7 @@ function sortBy( items, getMetric ) {
 }
 
 
-// given an traversal state update function that sets this.value and this.done,
+// given a traversal state update function that sets this.value and this.done,
 // create a nodejs iterator to make the instance iterable.
 // `step(state, ret)` should set `ret.value` or `ret.done` as appropriate.
 // If ret.done is true, ret.value should not be used.
@@ -705,7 +705,7 @@ function sortBy( items, getMetric ) {
 // next() returns a data wrapper with properties {value, done}.
 // If done is set then value is not to be used.
 function makeIterator( step, makeState ) {
-    return function iterator() {
+    return function qiblIterator() {
         // makeState is passed the object instance on which the iterator was called
         var state = makeState && makeState(this) || {};
         return {
@@ -746,6 +746,7 @@ function _traverse( obj, transform, target ) {
     } else if (obj && obj.length > 0) {
         // this loop mimics Array.from, but transforms quite a bit faster (13x node-v10.15, 15x node-v12)
         // testing transform? in the loop is faster than using two custom functions
+        // NOTE: node-v12 and up Array.from[1000] is 500k/s (vs node-v11 and under 9k/s), but we fill into target[]
         for (var i = 0; i < obj.length; i++) {
             target.push(transform ? transform(obj[i], i) : obj[i]);
         }
