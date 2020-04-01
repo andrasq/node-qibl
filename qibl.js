@@ -363,19 +363,33 @@ function str_truncate( string, limit, opts ) {
 // generate a random-ish string len chars long
 // letter frequencies counted in this file, padded with blanks:
 // var _random_charset = 'aaabccdeeeeeeffghiiijkllmnnnnooopqrrrrssstttttuuvwxyz           ';
-var _random_charset = 'aaabccdeeeee ffghiiijkllmnnn ooopqrrr ssstttt uuvwxyz           ';
+// var _random_charset = 'aaabccdeeeee ffghiiijkllmnnn ooopqrrr ssstttt uuvwxyz           ';
+var _random_charset = 'aaab ccde eeee ffgh iiij kllm nnn ooop qrrr ssst ttt uuvw xyz   ';
 function str_random( len ) {
-    var s = '', ix = Math.floor(Math.random() * 64);
+    var s = '';
 
-    for (var i=0; i<len; i++) s += _random_charset[rand() & 0x3F];
+    while (len > 0) {
+        // var v = (Math.random() * 0x10000000000) >>> 0;
+        var v = Math.random() * 0x10000000000;
+        switch (len) {
+        default:
+        case 4: s += charset[(v >>> 0) & 0x3F];
+        case 3: s += charset[(v >>>  8) & 0x3F];
+        case 2: s += charset[(v >>> 16) & 0x3F];
+        case 1: s += charset[(v >>> 24) & 0x3F];
+        }
+        len -= 4;
+    }
     return s;
 
+/**
     function rand() {
         // https://en.wikipedia.org/wiki/Linear_congruential_generator
         // ix = (ix * 1103515245 + 12345) & 0x7FFFFFFF; // ANSI C mod 2^31, 10m/s; Math.random 10m/s
         ix = (ix * 65793 + 4282663) & 0x7FFFFF; // cc65, mod 2^23 12m/s
         return (ix >> 9); // bits 8..22 are usable
     }
+**/
 }
 
 // locate all substrings patt in string str, and call handler with their offsets
