@@ -66,6 +66,8 @@ var qibl = module.exports = {
     qsearch: qsearch,
     sort3: sort3,
     sort3i: sort3i,
+    randomize: randomize,
+    interleave2: interleave2,
     range: range,
     curry: curry,
     once: once,
@@ -264,6 +266,7 @@ function omitUndefined( item ) {
     return ret;
 }
 
+
 // See also `sane-buffer`.
 function fill( buf, ch, base, bound ) {
     // TODO: maybe typecheck args?
@@ -334,6 +337,30 @@ function swapi( a, i, j ) {
     var t = a[i]; a[i] = a[j]; a[j] = t;
 }
 
+// randomly shuffle the contents of the array between base and bound
+// see qshuffle, Fisher-Yates shuffle
+function randomize( arr, base, bound ) {
+    base = base < 0 ? base + arr.length : base || 0;
+    bound = bound < 0 ? bound + arr.length : bound || arr.length;
+
+    for (var end = bound; end > base; end--) {
+        var gap = end - base;
+        var pick = Math.floor(Math.random() * gap);
+        swapi(arr, base + pick, end - 1);
+    }
+    return arr;
+}
+
+// interleave the elements from arrays a and b into target
+// Any extra elements are appended as-is.  Returns target.
+function interleave2( target, a1, a2 ) {
+    var short = a1.length < a2.length ? a1 : a2;
+    var long = a1.length < a2.length ? a2 : a1;
+    for (var i = 0; i < short.length; i++) target.push(a1[i], a2[i]);
+    for ( ; i < long.length; i++) target.push(long[i]);
+    return target;
+}
+
 /*
  * return an iterable object that will enumerate the values in the range [first..last]
  */
@@ -348,8 +375,8 @@ function range( first, last, stepBy ) {
         : { n: first, last: last, stepBy: null, step: first <= last ? +1 : -1 }}
 
     function step(state) {
-        this.value = state.n;
         this.done = (state.step > 0 ? state.n > state.last : state.n < state.last);
+        this.value = state.n;
         state.stepBy ? state.n = state.stepBy(state.n) : state.n += state.step;
     }
 }

@@ -637,6 +637,71 @@ module.exports = {
         t.done();
     },
 
+    'randomize': {
+        'returns target array': function(t) {
+            var arr = [];
+            t.equal(qibl.randomize(arr), arr);
+            t.done();
+        },
+
+        'scrambles array contents': function(t) {
+            t.deepEqual(qibl.randomize([]), []);
+            var data = qibl.populate(new Array(4), function(i) { return i + 1 });
+            var poses = new Array(data.length);
+            for (var i = 0; i < poses.length; i++) poses[i] = qibl.populate(new Array(poses.length), 0);
+            for (var i = 0; i < 100000; i++) {
+                var arr = qibl.randomize(data.slice(0));
+                for (var n = 1; n <= data.length; n++) {
+                    var ix = arr.indexOf(n);
+                    t.ok(ix >= 0);
+                    poses[n - 1][ix] += 1;
+                }
+            }
+            var max = Math.max.apply(Math, [].concat.apply([], poses));
+            var min = Math.min.apply(Math, [].concat.apply([], poses));
+            // typical range over 100k runs of 4 items is is .4-.8%
+            t.ok(max - min < 10000, "more than 10% difference in locations");
+            t.done();
+        },
+
+        'scrambles a subrange of the array': function(t) {
+            var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            qibl.randomize(arr, 3, 9);
+            t.deepEqual(arr.slice(0, 3), [1, 2, 3]);
+            t.done();
+        },
+
+        'scrambles a subrange relative to the end of the array': function(t) {
+            var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            qibl.randomize(arr, -9, -3);
+            t.deepEqual(arr.slice(6), [7, 8, 9]);
+            t.done();
+        },
+    },
+
+    'interleave2': {
+        'merges arrays': function(t) {
+            t.deepEqual(qibl.interleave2([], [], []), []);
+            t.deepEqual(qibl.interleave2([], [], [1, 2]), [1, 2]);
+            t.deepEqual(qibl.interleave2([], [1, 2], []), [1, 2]);
+            t.deepEqual(qibl.interleave2([], [1, 2], [3]), [1, 3, 2]);
+            t.deepEqual(qibl.interleave2([], [3], [1, 2]), [3, 1, 2]);
+            t.deepEqual(qibl.interleave2([], [1, 2], [3, 4]), [1, 3, 2, 4]);
+            t.deepEqual(qibl.interleave2([], [1, 2, 3], [4]), [1, 4, 2, 3]);
+            t.deepEqual(qibl.interleave2([], [4], [1, 2, 3]), [4, 1, 2, 3]);
+            t.deepEqual(qibl.interleave2([1, 2], [3, 4], [5]), [1, 2, 3, 5, 4]);
+            t.done();
+        },
+
+        'returns the target array': function(t) {
+            var target = [1];
+            var arr = qibl.interleave2(target, [2, 3], [4]);
+            t.equal(arr, target);
+            t.deepEqual(target, [1, 2, 4, 3]);
+            t.done();
+        },
+    },
+
     'range': {
         'returns an iterable': function(t) {
             var range = qibl.range(3, 5);
