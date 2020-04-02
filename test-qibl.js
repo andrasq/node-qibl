@@ -1448,7 +1448,7 @@ module.exports = {
 
     'groupBy': {
         'groups by keys from the provided function': function(t) {
-            t.deepEqual(qibl.groupBy([], function(){ return 1 }), []);
+            t.deepEqual(qibl.groupBy([], function(){ return 1 }), {});
             t.deepEqual(qibl.groupBy([1,2,3], function(e) { return e }), { 1: [1], 2: [2], 3: [3] });
             t.deepEqual(qibl.groupBy([1,2,3], function(e) { return 2*e }), { 2: [1], 4: [2], 6: [3] });
             t.deepEqual(qibl.groupBy([1,2,3], function(e) { return e & 1 }), { 1: [1, 3], 0: [2] });
