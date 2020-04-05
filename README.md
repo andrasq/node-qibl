@@ -40,7 +40,7 @@ class.  Tests the object constructor.
 ### qibl.isMethodContext( _this )
 
 Test whether the given `this` is from a global (function call) context or a method call context.
-Method calls have a `this` object that is not `global` and not `qibl`.
+Method calls have a `this` object that is not `null`, not `global` and not `qibl`.
 
 ### qibl.copyObject( target, src1, ... )
 
