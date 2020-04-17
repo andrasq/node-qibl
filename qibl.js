@@ -311,7 +311,7 @@ function subsample( items, k, base, bound ) {
 // aka see absearch(), binsearch()
 function qsearch( min, max, probeProperty ) {
     // bisection search while have a lot to examine
-    while ((max - min) > 3) {
+    while ((max - min) > 5) {
         var mid = min + Math.floor((max - min) / 2);
         probeProperty(mid) ? min = mid + 1 : max = mid - 1;
     }
@@ -319,7 +319,7 @@ function qsearch( min, max, probeProperty ) {
     // linear search once only a few possibilities left
     for (var n = max; n >= min; n--) if (probeProperty(n)) return n;
 
-    // min-1 here is either the last n which probed ok, or the input min - 1
+    // min here is either the smallest n which failed the probe, or the input min
     return min - 1;
 }
 
