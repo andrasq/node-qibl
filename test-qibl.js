@@ -408,6 +408,57 @@ module.exports = {
         },
     },
 
+    'clone': {
+        'clones builtin classes': function(t) {
+            var tests = [
+                "foo",
+                1234.5,
+                new Date(),
+                new RegExp('foo.*bar', 'i'),
+                qibl.fromBuf("foobar"),
+                [1, 2.5],
+            ];
+            for (var i = 0; i < tests.length; i++) {
+                var copy = qibl.clone(tests[i]);
+                t.equal(String(copy), String(tests[i]));
+                if (typeof tests[i] === 'object') {
+                    t.notEqual(copy, tests[i]);
+                    t.equal(copy.constructor, tests[i].constructor);
+                }
+            }
+            t.done();
+        },
+
+        'copies own properties': function(t) {
+            var obj = new Date();
+            obj.x = 123;
+            var copy = qibl.clone(obj);
+            t.equal(String(copy), String(obj));
+            t.strictEqual(copy.x, obj.x);
+            t.done();
+        },
+
+        'clones custom classes': function(t) {
+            function Foo() { this.x = 1 };
+            Foo.prototype = { inherited: 9 };
+            var object = new Foo();
+            object.y = 2;
+            var copy = qibl.clone(object);
+            t.ok(copy instanceof Foo);
+            t.strictEqual(copy.x, 1);
+            t.strictEqual(copy.y, 2);
+            t.strictEqual(copy.inherited, 9);
+            t.done();
+        },
+
+        'clones recursively': function(t) {
+            var a = {a: {}};
+            t.equal(qibl.clone(a).a, a.a);
+            t.notEqual(qibl.clone(a, true).a, a.a);
+            t.done();
+        },
+    },
+
     'fill should set array elements': function(t) {
         var arr = new Array(3);
         t.deepEqual(qibl.fill(arr, 3), [3, 3, 3]);

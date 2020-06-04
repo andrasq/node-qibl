@@ -38,6 +38,7 @@ var qibl = module.exports = {
     setProperty: setProperty,
     inherits: inherits,
     derive: derive,
+    clone: clone,
     fill: fill,
     populate: populate,
     omitUndefined: omitUndefined,
@@ -230,6 +231,34 @@ function derive( className, parent, proto, constructor ) {
     subclass.prototype = qibl.toStruct(subclass.prototype);
 
     return subclass;
+}
+
+var _builtinClasses = [Number, String, Boolean, Date, RegExp];
+function clone( object, recursively ) {
+    // nb: functions and non-objects are not cloned
+    if (!object || typeof object !== 'object') return object;
+
+    // clone the underlying object
+    var arrayLike = false;
+    var copy =
+        (object instanceof Array) ? ((arrayLike = true), qibl.toArray(object)) :
+        (object instanceof Buffer) ? ((arrayLike = true), qibl.fromBuf(object)) :
+        (_builtinClasses.indexOf(object.constructor) >= 0) ? new object.constructor(object) :
+        {};
+
+    // parent to the base class if not already so
+    if (copy.__proto__ !== object.__proto__) copy.__proto__ = object.__proto__;
+
+    // copy the own properties
+    keys = qibl.keys(object);
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        if (arrayLike && key >= 0) continue;
+        var item = object[key];
+        copy[key] = recursively ? qibl.clone(item) : item;
+    }
+
+    return copy;
 }
 
 // similar to fill() but for objects
