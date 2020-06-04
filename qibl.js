@@ -363,19 +363,25 @@ function interleave2( target, a1, a2 ) {
 
 /*
  * return an iterable object that will enumerate the values in the range [first..last]
+ * nb: lodash and underscore omit the last point, and single-argument versions starts with 0.
+ * nb: we return an iterator, lodash and underscore return an array (and impose a max length)
  */
 function range( first, last, stepBy ) {
-    if (last == undefined) { last = first; first = 1 }
-    if (stepBy && typeof stepBy !== 'function') throw new Error('stepBy is not a function');
+    if (last == undefined) { last = first; first = 0 }
+    if (stepBy != undefined && typeof stepBy !== 'function' && typeof stepBy !== 'number') throw new Error('stepBy is not a number or function');
 
     return qibl.setIterator({}, qibl.makeIterator(step, makeState));
 
-    function makeState() { return stepBy
-        ? { n: first, last: last, stepBy: stepBy, step: first <= last ? +1 : -1 }
-        : { n: first, last: last, stepBy: null, step: first <= last ? +1 : -1 }}
+    function makeState() {
+        return typeof stepBy === 'function'
+            ? { n: first, last: last, stepBy: stepBy, step: first <= last ? +1 : -1 }
+        : typeof stepBy === 'number'
+            ? { n: first, last: last, stepBy: null, step: first <= last && stepBy >= 0 ? +stepBy : -stepBy }
+            : { n: first, last: last, stepBy: null, step: first <= last ? +1 : -1 }
+    }
 
     function step(state) {
-        this.done = (state.step > 0 ? state.n > state.last : state.n < state.last);
+        this.done = (state.step > 0 ? state.n >= state.last : state.n < state.last);
         this.value = state.n;
         state.stepBy ? state.n = state.stepBy(state.n) : state.n += state.step;
     }

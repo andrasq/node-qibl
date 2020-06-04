@@ -704,9 +704,9 @@ module.exports = {
 
     'range': {
         'returns an iterable': function(t) {
-            var range = qibl.range(3, 5);
+            var range = qibl.range(3);
             t.ok(!Array.isArray(range));
-            t.deepEqual(qibl.toArray(range), [3, 4, 5]);
+            t.deepEqual(qibl.toArray(range), [0, 1, 2]);
             t.done();
         },
 
@@ -723,26 +723,39 @@ module.exports = {
             function mapOf(iter, fn) { eval("for (var val of iter) fn(val);") }
         },
 
-        'throws if stepBy is not a function': function(t) {
-            t.throws(function() { qibl.range(1, 10, +1) }, /not a function/);
+        'throws if stepBy is not a number or function': function(t) {
+            t.throws(function() { qibl.range(1, 10, 'a') }, /not a number or function/);
+            t.throws(function() { qibl.range(1, 10, {}) }, /not a number or function/);
             t.done();
         },
 
         'returns a range to': function(t) {
-            t.deepEqual(qibl.toArray(qibl.range(3)), [1, 2, 3]);
-            t.deepEqual(qibl.toArray(qibl.range(5)), [1, 2, 3, 4, 5]);
+            t.deepEqual(qibl.toArray(qibl.range(3)), [0, 1, 2]);
+            t.deepEqual(qibl.toArray(qibl.range(5.00001)), [0, 1, 2, 3, 4, 5]);
+            t.done();
+        },
+
+        'omits the bound': function(t) {
+            t.deepEqual(qibl.toArray(qibl.range(3)), [0, 1, 2]);
+            t.deepEqual(qibl.toArray(qibl.range(3, 5)), [3, 4]);
+            t.deepEqual(qibl.toArray(qibl.range(3, 5.0001)), [3, 4, 5]);
             t.done();
         },
 
         'steps by the increment': function(t) {
-            var range = qibl.range(1, 5, function(x) { return x + 2 });
+            var range = qibl.range(1, 5.0001, function(x) { return x + 2 });
             t.deepEqual(qibl.toArray(range), [1, 3, 5]);
             t.done();
         },
 
         'returns a non-linear range': function(t) {
-            var arr = qibl.toArray(qibl.range(1, 1e4, function(x) { return x * 10 }));
+            var arr = qibl.toArray(qibl.range(1, 1e4 + .000001, function(x) { return x * 10 }));
             t.deepEqual(arr, [1, 10, 100, 1000, 10000]);
+            t.done();
+        },
+
+        'accepts a numeric stepBy': function(t) {
+            t.deepEqual(qibl.toArray(qibl.range(1, 5.0001, 2)), [1, 3, 5]);
             t.done();
         },
 
@@ -755,6 +768,7 @@ module.exports = {
         'returns negative non-sequential ranges': function(t) {
             var range = qibl.range(10, 5, function(x) { return x - 2 });
             t.deepEqual(qibl.toArray(range), [10, 8, 6]);
+            t.deepEqual(qibl.toArray(qibl.range(5, 3, function(x){ return x-.5})), [5, 4.5, 4, 3.5, 3]);
             t.done();
         }
     },
