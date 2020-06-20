@@ -298,8 +298,6 @@ function omitUndefined( item ) {
 
 // See also `sane-buffer`.
 function fill( buf, ch, base, bound ) {
-    // TODO: maybe typecheck args?
-    // TODO: maybe support negative base/bound?
     base = base || 0;
     bound = bound || buf.length;
     for (var i = base; i < bound; i++) buf[i] = ch;

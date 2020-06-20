@@ -301,11 +301,6 @@ Buffers and Arrays
 Fill the buffer or array with the value `ch` from starting offset `base` and up to the limit
 `bound` (but not including `bound`).  Returns the target being filled.
 
-Options:
-- base - if target is an array, the starting offset to populate from.  Default `0`.
-- bound - if target is an array, the limiting offset to populate to.  Default `target.length`.
-- keys - if target is an object, the names of the properties to populate.  Default all own properties.
-
 ### qibl.concat2( target, arr1 [,arr2] )
 
 Concatenate one or two arrays into the target array.  Returns the target array.
@@ -437,7 +432,7 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
-- 1.6.0 - new function `entries`, `sort3i`; new undocumented function `str_locate`, `randomize`, `interleave2`, `groupBy`, `sortBy`, `range`;
+- 1.6.0 - new function `entries`, `sort3i`; new undocumented functions `str_locate`, `randomize`, `interleave2`, `groupBy`, `sortBy`, `range`, `clone`;
           fix get/setIterator property name; speed up iterators, change makeIterator step func args; faster str_random
 - 1.5.1 - fix getProperty, do not prevent multiple callbacks from readBody
 - 1.5.0 - new functions `derive`, `varargsRenamed`, `isMethodContext`, `readBody`;
