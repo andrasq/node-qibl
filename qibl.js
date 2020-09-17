@@ -135,19 +135,24 @@ function merge( target /* ,VARARGS */ ) {
  * node-v10 and up tokenize: 1.6m/s v8, 3.7m/s v13, 2.4m/s v0.10
  * strtok: 2m/s v8, 4.4m/s v13, 2.47m/s v0.10
  * note: defaultValue support makes it 15% slower
+ * note: since node-v12 this function is much slower, dropped from 13m/s to 7m/s
  */
 function getProperty( target, dottedName, defaultValue ) {
     if (typeof target === 'string' && isMethodContext(this)) return getProperty(this, target, dottedName);
-    if (!target) return defaultValue;
 
-    var first, path;
-    if (dottedName.indexOf('.') < 0) { first = dottedName; path = [] } else { path = dottedName.split('.'); first = path[0] }
+    var isDotted = dottedName.length > 40;
+    if (!isDotted) for (var i = 0; i < dottedName.length; i++) { if (dottedName.charCodeAt(i) === 0x2E) { isDotted = true; break; } }
+    if (!isDotted) return (target && target[dottedName] !== undefined ? target[dottedName] : defaultValue);
 
-    target = target[first];
-    for (var i = 1; i < path.length; i++) {
-        if (target == null) return defaultValue;
-        target = target[path[i]];
-    }
+    var path = dottedName.split('.');
+    target = target == null ? undefined : target[path[0]];
+    target = target == null ? undefined : target[path[1]];
+    if (path.length > 2) {
+        target = target == null ? undefined : target[path[2]];
+    if (path.length > 3) {
+        target = target == null ? undefined : target[path[3]];
+    }}
+    for (var i = 4; i < path.length; i++) target = target == null ? undefined : target[path[i]];
     return target !== undefined ? target : defaultValue;
 }
 
@@ -403,12 +408,12 @@ function range( first, last, stepBy ) {
         return typeof stepBy === 'function'
             ? { n: first, last: last, stepBy: stepBy, step: first <= last ? +1 : -1 }
         : typeof stepBy === 'number'
-            ? { n: first, last: last, stepBy: null, step: first <= last && stepBy >= 0 ? +stepBy : -stepBy }
-            : { n: first, last: last, stepBy: null, step: first <= last ? +1 : -1 }
+            ? { n: first, last: last, stepBy: null, step: (first <= last) === (stepBy >= 0) ? +stepBy : -stepBy }
+        : { n: first, last: last, stepBy: null, step: first <= last ? +1 : -1 }
     }
 
     function step(state) {
-        this.done = (state.step > 0 ? state.n >= state.last : state.n < state.last);
+        this.done = (state.step >= 0 ? state.n >= state.last : state.n < state.last);
         this.value = state.n;
         state.stepBy ? state.n = state.stepBy(state.n) : state.n += state.step;
     }

@@ -143,6 +143,14 @@ module.exports = {
                 [{a:1, b:{c:{d:2}}}, 'b.c', {d:2}],
                 [{a:1, b:{c:{d:2}}}, 'b.c.d', 2],
                 [{a:1, b:{c:{d:2}}}, 'b.c.d.e', undefined],
+
+                [{a:null}, 'a', null],
+                [{a: {b: null}}, 'a.b', null],
+                [{a: {b: {c: null}}}, 'a.b.c', null],
+                [{a: {b: {c: {d: null}}}}, 'a.b.c.d', null],
+                [{a: {b: {c: {d: {e: null}}}}}, 'a.b.c.d.e', null],
+                [{a: {b: {c: {d: {e: {f: null}}}}}}, 'a.b.c.d.e.f', null],
+                [{a: {b: {c: {d: {e: {f: null}}}}}}, 'a.b.c', {d: {e: {f: null}}}],
             ];
 
             for (var i=0; i<tests.length; i++) {
@@ -169,6 +177,8 @@ module.exports = {
 
                 [false, 'a'],
                 [null, 'a'],
+                [null, 'a.b'],
+                [null, 'a.b.c'],
                 [0, 'a'],
                 [undefined, 'a'],
             ];
@@ -811,8 +821,10 @@ module.exports = {
         },
 
         'returns negative ranges': function(t) {
-            var range = qibl.range(10, 5);
-            t.deepEqual(qibl.toArray(range), [10, 9, 8, 7, 6, 5]);
+            t.deepEqual(qibl.toArray(qibl.range(10, 5)), [10, 9, 8, 7, 6, 5]);
+            t.deepEqual(qibl.toArray(qibl.range(10, 5, 1)), [10, 9, 8, 7, 6, 5]);
+            t.deepEqual(qibl.toArray(qibl.range(10, 5, 2.5)), [10, 7.5 ,5]);
+            t.deepEqual(qibl.toArray(qibl.range(10, 5, -1)), [10, 9, 8, 7, 6, 5]);
             t.done();
         },
 
