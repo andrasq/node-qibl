@@ -432,6 +432,7 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
+- 1.6.2 - new undocumented `str_random_word`, `str_random_sentence`, `fromCharCodes`, `tryError`
 - 1.6.1 - faster `getProperty`, fix `range` for backward order with negative steps
 - 1.6.0 - new function `entries`, `sort3i`; new undocumented functions `str_locate`, `randomize`, `interleave2`, `groupBy`, `sortBy`, `range`, `clone`;
           fix get/setIterator property name; speed up iterators, change makeIterator step func args; faster str_random

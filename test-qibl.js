@@ -952,6 +952,13 @@ module.exports = {
     },
 
     'str_random': {
+        'fromCharCodes returns string': function(t) {
+            t.equal(qibl.fromCharCodes([]), '');
+            t.equal(qibl.fromCharCodes([0x40]), '@');
+            t.equal(qibl.fromCharCodes([0x61, 0x62]), 'ab');
+            t.done();
+        },
+
         'should return the right length': function(t) {
             for (var i=0; i<100; i++) t.equal(qibl.str_random(i).length, i);
             t.done();
@@ -968,6 +975,42 @@ module.exports = {
             }
             t.contains(Object.keys(counts), 'etraunos'.split(''));
             t.ok(Object.keys(counts).length > 24);
+            t.done();
+        },
+
+        'str_random speed 100k': function(t) {
+            for (var i=0; i<100000; i++) {
+                var w = qibl.str_random(3 + i % 8);
+            }
+            t.done();
+        },
+    },
+
+    'str_random_word': {
+        'returns word': function(t) {
+            for (var i=0; i<10000; i++) {
+                t.ok(/[a-z]{1,20}/.test(qibl.str_random_word()));
+            }
+            t.done();
+        },
+    },
+
+    'str_random_sentence': {
+        'is capitalized': function(t) {
+            for (var i=0; i<1000; i++) /^[A-Z].*/.test(qibl.str_random_sentence());
+            t.done();
+        },
+
+        'ends with period': function(t) {
+            for (var i=0; i<1000; i++) /.*[.]$/.test(qibl.str_random_sentence());
+            t.done();
+        },
+
+        'returns words': function(t) {
+            for (var i=0; i<1000; i++) {
+                var words = qibl.str_random_sentence().split(' ');
+                t.ok(words.length > 1);
+            }
             t.done();
         },
     },

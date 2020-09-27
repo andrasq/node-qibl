@@ -45,7 +45,10 @@ var qibl = module.exports = {
     str_repeat: str_repeat,
     str_truncate: str_truncate,
     strtok: strtok,
+    fromCharCodes: fromCharCodes,
     str_random: str_random,
+    str_random_word: str_random_word,
+    str_random_sentence: str_random_sentence,
     str_locate: str_locate,
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
@@ -444,12 +447,26 @@ function str_truncate( string, limit, opts ) {
     return string.slice(0, limit) + ((opts && typeof opts.ellipsis === 'string') ? opts.ellipsis : '...');
 }
 
+// fromCharCode with many args is faster but only since node-v0.11; spread args faster since node-v8
+// In newer node versions fromCharCode.apply is also fast, but spread args are faster.
+// fromCharCode.apply is only fast since node-v8, spread args are faster but were 30x slower before v8
+// Node before v0.11 is slow with multi-arg fromCharCode and is faster with a convert-char-at-a-time loop.
+// use eval to hide the code from the coverage tool
+var fromCharCodesLoop = eval("true && function(a) { var s = ''; for (var i=0; i<a.length; i++) s += String.fromCharCode(a[i]); return s }");
+var fromCharCodesSpread = tryEval("true && function(a) { return String.fromCharCode(...a) }");
+var fromCharCodesFast = eval("parseInt(process.versions.node) >= 9 ? fromCharCodesSpread : fromCharCodesLoop");
+function fromCharCodes( codes ) {
+    return fromCharCodesFast(codes);
+}
+// function toCharCodes( str ) { var a = new Array(str.length); for (var i=0; i<str.length; i++) a[i] = str.charCodeAt(i); return }
+
 // generate a random-ish string len chars long
 // letter frequencies counted in this file, padded with blanks:
 // var _random_charset = 'aaabccdeeeeeeffghiiijkllmnnnnooopqrrrrssstttttuuvwxyz           ';
 // var _random_charset = 'aaabccdeeeee ffghiiijkllmnnn ooopqrrr ssstttt uuvwxyz           ';
+var _word_charset =   'aaaabbcccddeeeeeefffgghiiiijkkllmnnnooooppqrrrsssstttttuuuvwxyzz';
 var _random_charset = 'aaab ccde eeee ffgh iiij kllm nnn ooop qrrr ssst ttt uuvw xyz   ';
-var hex_charset = '0123456789abcdef01234567-9abcdef0123456789a-cdef0123456789abcdef';
+var hex_charset =     '0123456789abcdef01234567-9abcdef0123456789a-cdef0123456789abcdef';
 function str_random( len, charset ) {
     charset = charset || _random_charset;
     var s = '';
@@ -476,6 +493,16 @@ function str_random( len, charset ) {
         return (ix >> 9); // bits 8..22 are usable
     }
 **/
+}
+var _wordLengths = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 8, 10, 12, 14];
+function str_random_word( ) {
+    return str_random(_wordLengths[(Math.random() * _wordLengths.length) >>> 0], _word_charset);
+}
+function str_random_sentence( ) {
+    var nwords = 3 + Math.random() * 8;
+    var str = String.fromCharCode(0x40 + ((Math.random() * 26) >>> 0)) + str_random_word();
+    for (var i = 1; i < nwords; i++) str += ' ' + str_random_word();
+    return str + '.';
 }
 
 // locate all substrings patt in string str, and call handler with their offsets
@@ -832,13 +859,17 @@ function values( object ) {
     for (var i = 0; i < keys.length; i++) ret.push(object[keys[i]]);
     return ret;
 }
-// Object.entries
+// Object.entries, aka toPairs
 function entries( object ) {
-    var ks = qibl.keys(object);
-    var ret = new Array();
-    for (var i = 0; i < ks.length; i++) ret.push([ks[i], object[ks[i]]]);
-    return ret;
+    var keys = qibl.keys(object);
+    var keyvals = new Array();
+    for (var i = 0; i < keys.length; i++) keyvals.push([keys[i], object[keys[i]]]);
+    return keyvals;
 }
+// function mergeEntries( target, keyvals ) {
+//     for (var i = 0; i < keyvals && keyvals.length; i++) target[keyvals[i][0]] = keyvals[i][1];
+//     return target;
+//}
 
 // replace each occurrence of patt in str with the next one of the args
 // If an `addslashes` function is provided, use it to escape the args.
