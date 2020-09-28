@@ -213,6 +213,36 @@ module.exports = {
         },
     },
 
+    'compileGetProperty': {
+        'returns a function': function(t) {
+            t.equal(typeof qibl.compileGetProperty('a'), 'function');
+            t.equal(typeof qibl.compileGetProperty('a.b'), 'function');
+            t.done();
+        },
+
+        'returns undefined on invalid path': function(t) {
+            t.equal(typeof qibl.compileGetProperty('a b'), 'undefined');
+            t.equal(typeof qibl.compileGetProperty('a&.c'), 'undefined');
+            t.equal(typeof qibl.compileGetProperty('a.7'), 'undefined');
+            t.done();
+        },
+
+        'getter retrieves property': function(t) {
+            t.deepEqual(qibl.compileGetProperty('a')({}), undefined);
+            t.deepEqual(qibl.compileGetProperty('a')({a: 123}), 123);
+            t.deepEqual(qibl.compileGetProperty('a')({b: {a: 1}}), undefined);
+            t.deepEqual(qibl.compileGetProperty('a.b.c')({a: {b: {c: 444}}}), 444);
+            t.deepEqual(qibl.compileGetProperty('a.b.c.d')({a: {b: {c: {d: 987}}}}), 987);
+
+            var get = qibl.compileGetProperty('a.b');
+            t.strictEqual(get({a: 1, b: 2}), undefined);
+            t.strictEqual(get({a: {b: 2}}), 2);
+            t.strictEqual(get({a: {c: {}}}), undefined);
+            t.deepStrictEqual(get({a: {b: {c: 234}}}), {c: 234});
+            t.done();
+        },
+    },
+
     'setProperty': {
         'should set property': function(t) {
             var fn = function(){};

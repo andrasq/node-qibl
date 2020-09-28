@@ -78,6 +78,19 @@ an object other than `qibl`, it will look up values on that instance.
     obj.get('a')                        // { b: 1 }
     obj.get('a.b')                      // 1
 
+### qibl.compileGetProperty( dottedName )
+
+Build a dedicated function to retrieve the named property of the objects passed to it,
+or `undefined` if the property or any of its ancestors are not set.
+The property name must be a valid javascript dotted property path.
+
+    var obj1 = { a: { b: 1 } }
+    var obj2 = { a: { b: { c: 2 } } }
+
+    var get = qibl.compileGetProperty('a.b');
+    get(obj1)                           // 1
+    get(obj2)                           // { c: 2 }
+
 ### qibl.setProperty( target, dottedName, value )
 
 Set a nested property by dotted name.  Dots `.` in the name imply nested objects,
@@ -432,6 +445,7 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
+- 1.6.3 - new function `compileGetProperty`
 - 1.6.2 - new undocumented `str_random_word`, `str_random_sentence`, `fromCharCodes`, `tryError`
 - 1.6.1 - faster `getProperty`, fix `range` for backward order with negative steps
 - 1.6.0 - new function `entries`, `sort3i`; new undocumented functions `str_locate`, `randomize`, `interleave2`, `groupBy`, `sortBy`, `range`, `clone`;

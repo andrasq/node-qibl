@@ -28,6 +28,7 @@ var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.
 var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
+function tryError(str) { throw new Error(str) }
 
 var qibl = module.exports = {
     isHash: isHash,
@@ -35,6 +36,7 @@ var qibl = module.exports = {
     copyObject: copyObject,     assign: copyObject,
     merge: merge,
     getProperty: getProperty,
+    compileGetProperty: compileGetProperty,
     setProperty: setProperty,
     inherits: inherits,
     derive: derive,
@@ -157,6 +159,17 @@ function getProperty( target, dottedName, defaultValue ) {
     }}
     for (var i = 4; i < path.length; i++) target = target == null ? undefined : target[path[i]];
     return target !== undefined ? target : defaultValue;
+}
+// compile the property getter for 10x faster property lookups.
+// Returns a dedicated function to retrieve the named property of the objects passed to it.
+function compileGetProperty(path) {
+    var pretest = 'o';
+    var end = -1;
+    while ((end = path.indexOf('.', end + 1)) >= 0) {
+        pretest += ' && ' + 'o.' + path.slice(0, end);
+    }
+    var getter = tryEval('function(o) { return (' + pretest + ') ? o.' + path + ' : undefined }');
+    return getter;
 }
 
 /*
