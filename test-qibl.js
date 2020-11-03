@@ -1630,7 +1630,7 @@ module.exports = {
             },
 
             'matches readme': function(t) {
-                const patt = qibl.globRegex('{src,test}/**/*.[ch]');
+                var patt = qibl.globRegex('{src,test}/**/*.[ch]');
                 t.equal(patt, '^(src|test)/.*/[^/]*\\.[ch]$');
                 t.done();
             },

@@ -469,7 +469,7 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
-- 1.7.0 - new function `globRegex`
+- 1.7.1 - new function `globRegex`
 - 1.6.3 - new function `compileGetProperty`
 - 1.6.2 - new undocumented `str_random_word`, `str_random_sentence`, `fromCharCodes`, `tryError`
 - 1.6.1 - faster `getProperty`, fix `range` for backward order with negative steps
