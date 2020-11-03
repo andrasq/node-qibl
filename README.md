@@ -286,6 +286,30 @@ the previous state.  It behaves like the `C` `strtok()` library function.
 Backslash-escape all characters in str that would act as metacharacters inside a regular
 expression.  Returns the string with escapes added.
 
+### qibl.globRegex( template )
+
+Convert the glob template to a regular expression pattern.  Returns a string suitable for
+passing to `new RegExp(patt)` to construct a regular expression that identifies strings that
+match the glob template.  The glob syntax is the usual `? * ** [...] {,,,}`, with some notes:
+
+- `?` matches a single character in the string
+- `*` matches zero or more characters, not including `/` pathname separators
+- `**` matches zero or more characters, including pathname separators
+- `[...]` matches the characters listed inside the brackets.  Character ranges `a-z` are ok.
+  *Note:* character lists are passed to the regex verbatim, without any escaping.  Escaped `\]` and `\\`
+  are recognized, but the list contents must obey regexp syntax, not command shell.
+- `[^...]` matches all characters not listed inside the brackets
+- `{,,,}` matches exactly one of the comma-separated alternates.  The alternates must not contain
+  commas `,` or close-brace `}` characters.
+  *Note:* unlike in the command shell, the alternates must not contain nested meta-patterns.
+  Currently they are fully escaped in the regex pattern, so e.g. `{*.[ch],*.js}` matches the strings
+  `"*.[ch]"` or `"*.js"`, but in the future this restriction may be eased.
+
+Examples:
+
+    qibl.globRegex('{src,test}/**/*.[ch]')
+    // => "^(src|test)/.*/[^/]*\\.[ch]$"
+
 ### qibl.vinterpolate( string, substring, argv )
 
 Replace each occurrence of the substring in string with the next argument in the vector
@@ -445,6 +469,7 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
+- 1.7.0 - new function `globRegex`
 - 1.6.3 - new function `compileGetProperty`
 - 1.6.2 - new undocumented `str_random_word`, `str_random_sentence`, `fromCharCodes`, `tryError`
 - 1.6.1 - faster `getProperty`, fix `range` for backward order with negative steps

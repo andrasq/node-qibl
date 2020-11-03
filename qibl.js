@@ -79,6 +79,7 @@ var qibl = module.exports = {
     once: once,
     tryRequire: tryRequire,
     escapeRegex: escapeRegex,
+    globRegex: globRegex,
     keys: keys,
     values: values,
     entries: entries,
@@ -723,6 +724,58 @@ function escapeRegex( str ) {
     // : and = are not special outside of [] ranges or (?) conditionals.
     // ) has to be escaped always, else results in "invalid regex"
     return str.replace(/([.[(*+?{|\\^$=)])/g, '\\$1');
+}
+
+/*
+ * Convert the glob pattern to regular expression syntax.
+ * The regular expression must be created by the caller.
+ * Csh-style negated globs `^*.[ch]` must be handled by the caller.
+ *
+ * Shell glob patterns converted:
+ *   ?          a single path component character, excluding / (sh)
+ *   *          0 or more path component chars, exluding / (sh)
+ *   **         0 or more path component chars, including / (zsh)
+ *   [abc]      a single char that must be a, b or c (sh)
+ *   [!abc]     any one char excluding a, b or c (sh)
+ *   [^abc]     any one char excluding a, b or c (csh)
+ *   {a,b,c}    any of a or b or c  NOTE: no nesting, no contained ',' or '}' meta-chars (csh)
+ * TODO:
+ *   support full csh-style {a,b{"c,{",d}} nested expressions => ['a', 'b"c,{"', 'bd']
+ *   un-closed [ should not be special
+ */
+function globRegex( glob, from, to ) {
+    var incharlist = false;
+    from = from || 0;
+    to = to || glob.length;
+    var expr = '';
+    for (var i = from; i < to; i++) {
+        var c = glob[i];
+        if (incharlist) { if (c === ']') { incharlist = false; expr += ']' } else expr += c }
+        else if (c === '\\') { i+1 < to ? expr += c + glob[++i] : expr += '\\\\'; }
+        else switch (c) {
+        case '?': expr += '[^/]'; break;
+        case '*': if (glob[i+1] === '*') { expr += '.*'; i++ } else expr += '[^/]*'; break;
+        case '[': incharlist = true; if (glob[i+1] === '^') { expr += '[^'; i++ } else expr += '['; break;
+        case '{':
+            // rudimentary parse of flat brace expressions that do not contain commas or metacharacters
+            var endpos = glob.indexOf('}', i + 1);
+            if (endpos < 0) { expr += qibl.escapeRegex(glob.slice(i, to)); i = to }
+            else {
+                var parts = glob.slice(i + 1, endpos).split(',');
+                for (var j = 0; j < parts.length; j++) parts[j] = qibl.escapeRegex(parts[j]);
+                expr += '(' + parts.join('|') + ')';
+                i = endpos;
+            }
+            break;
+        case '^': case '$': case '(': case ')': case '.': case '+': case '|':
+            // see qibl.escapeRegex for the list of regex metacharacters to escape
+            // \ and { are special to glob, and must be escaped, will not be seen here
+            expr += '\\' + glob[i]; break;
+        default:
+            expr += c; break;
+        }
+    }
+    return '^' + expr + '$';
 }
 
 function selectField( arrayOfObjects, key ) {

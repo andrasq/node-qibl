@@ -1547,6 +1547,96 @@ module.exports = {
         },
     },
 
+    'globRegex': {
+        'returns a regex source string': function(t) {
+            t.equals(typeof qibl.globRegex('*.[ch]'), 'string');
+            t.ok(/^\^.*\$$/.test(qibl.globRegex('*.[ch]')));
+            t.contains(qibl.globRegex('*.[ch]'), /^\^.*\$$/);
+            t.done();
+        },
+
+        'does not escape chars in [] charlist': function(t) {
+            // Cannot escape all chars, because eg escaping s or w would alter their meaning (\s, \w)
+            // Cannot escape just \ because want to allow \] and \\ to match ] and \.
+            // So charlist contents are passed as-is to the regex, including any escape sequences.
+            // Escape sequences other than \] and \\ (eg \w, \s, \d) may work, but are not formally supported.
+            t.contains(qibl.globRegex('foo\\b\\ar.[ch]'), '\\b');
+            t.contains(qibl.globRegex('foo\\b\\ar.[ch]'), '\\a');
+            t.contains(qibl.globRegex('foobar.[ch]'), '[ch]');
+            t.contains(qibl.globRegex('foobar.[ch\\w]'), '[ch\\w]');
+            t.done();
+        },
+
+        'conversions': function(t) {
+            var tests = [
+                ['foo/?ar.?', '^foo/[^/]ar\\.[^/]$'],
+                ['foo*b/*r', '^foo[^/]*b/[^/]*r$'],
+                ['test/**/*.js', '^test/.*/[^/]*\\.js$'],
+                ['foo.[ch]', '^foo\\.[ch]$'],
+                ['foo.[ch],v', '^foo\\.[ch],v$'],
+                ['foo.[^ch]', '^foo\\.[^ch]$'],
+                ['foo.{cc,h}', '^foo\\.(cc|h)$'],
+                ['foo.{cc,h},v', '^foo\\.(cc|h),v$'],
+                ['{src,test}/*.[ch]', '^(src|test)/[^/]*\\.[ch]$'],
+            ];
+            for (var i = 0; i < tests.length; i++) {
+                var patt = qibl.globRegex(tests[i][0]);
+                t.contains(patt, tests[i][1], patt + ' does not contain ' + tests[i][1]);
+            }
+            t.done();
+        },
+
+        'escapes metacharacters': function(t) {
+            var chars = '';
+            for (var ch = 0x20; ch < 127; ch++) chars += String.fromCharCode(ch);
+            var patt = qibl.globRegex(chars);
+            ['^', '$', '(', ')', '.', '+', '|'].map(function(ch) {
+                t.contains(patt, '\\' + ch);
+            })
+            t.contains(patt, '0123456789');
+            t.contains(patt, 'abcdefghijklmnopqrstuvwxyz');
+            t.contains(patt, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+            // [, \ and { are special to glob, must be escaped in the glob template
+            // \ escapes the following char, and can escape itself
+            t.contains(patt, '[\\]');
+            t.contains(qibl.globRegex('foo\\bar'), 'foo\\bar');
+            t.contains(qibl.globRegex('foo\\\\bar'), 'foo\\\\bar');
+            t.contains(qibl.globRegex('foo\\{bar}'), 'foo\\{bar}');
+            t.contains(qibl.globRegex('foo\\[bar]'), 'foo\\[bar]');
+            t.done();
+        },
+
+        'edge cases': {
+            'escapes trailing backslash': function(t) {
+                t.contains(qibl.globRegex('*.\\'), /\\\\\$$/);
+                t.done();
+            },
+
+            'does not escape the \ escape character': function(t) {
+                t.contains(qibl.globRegex('foo\.[ch]'), 'foo\\.[ch]');
+                t.notContains(qibl.globRegex('foo\.[ch]'), '\\\\');
+                t.done();
+            },
+
+            'retains escape before {': function(t) {
+                t.contains(qibl.globRegex('foo.\\{c,h\\}'), 'foo\\.\\{c,h\\}');
+                t.contains(qibl.globRegex('foo.\\{c,h})'), 'foo\\.\\{c');
+                t.done();
+            },
+
+            'treats unbalanced brace as not special': function(t) {
+                t.contains(qibl.globRegex('foo.{cc,h'), 'foo\\.\\{cc,h');
+                t.done();
+            },
+
+            'matches readme': function(t) {
+                const patt = qibl.globRegex('{src,test}/**/*.[ch]');
+                t.equal(patt, '^(src|test)/.*/[^/]*\\.[ch]$');
+                t.done();
+            },
+        },
+    },
+
     'selectField': {
         'should select column': function(t) {
             t.deepStrictEqual(qibl.selectField([], 'k'), []);
