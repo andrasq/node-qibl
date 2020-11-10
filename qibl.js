@@ -750,7 +750,7 @@ function globRegex( glob, from, to ) {
     var expr = '';
     for (var i = from; i < to; i++) {
         var c = glob[i];
-        if (incharlist) { if (c === ']') { incharlist = false; expr += ']' } else expr += c }
+        if (incharlist && c !== '\\') { if (c === ']') { incharlist = false; expr += ']' } else expr += c }
         else if (c === '\\') { i+1 < to ? expr += c + glob[++i] : expr += '\\\\'; }
         else switch (c) {
         case '?': expr += '[^/]'; break;

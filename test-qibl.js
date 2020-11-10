@@ -1564,6 +1564,7 @@ module.exports = {
             t.contains(qibl.globRegex('foo\\b\\ar.[ch]'), '\\a');
             t.contains(qibl.globRegex('foobar.[ch]'), '[ch]');
             t.contains(qibl.globRegex('foobar.[ch\\w]'), '[ch\\w]');
+            t.contains(qibl.globRegex('foobar.[\\]{a,b}]'), '[\\]{a,b}]');
             t.done();
         },
 
@@ -1578,6 +1579,8 @@ module.exports = {
                 ['foo.{cc,h}', '^foo\\.(cc|h)$'],
                 ['foo.{cc,h},v', '^foo\\.(cc|h),v$'],
                 ['{src,test}/*.[ch]', '^(src|test)/[^/]*\\.[ch]$'],
+                ['a^b', 'a\\^b'],
+                ['[a\\]]^b', '[a\\]]\\^b'],
             ];
             for (var i = 0; i < tests.length; i++) {
                 var patt = qibl.globRegex(tests[i][0]);
@@ -1589,9 +1592,11 @@ module.exports = {
         'escapes metacharacters': function(t) {
             var chars = '';
             for (var ch = 0x20; ch < 127; ch++) chars += String.fromCharCode(ch);
+            // change the \] in the ascii sequence [\] to close the charlist
+            chars = chars.replace('[\\]', '[\\]]');
             var patt = qibl.globRegex(chars);
             ['^', '$', '(', ')', '.', '+', '|'].map(function(ch) {
-                t.contains(patt, '\\' + ch);
+                t.contains(patt, '\\' + ch, 'un-escaped char ' + ch);
             })
             t.contains(patt, '0123456789');
             t.contains(patt, 'abcdefghijklmnopqrstuvwxyz');
@@ -1608,7 +1613,7 @@ module.exports = {
 
         'edge cases': {
             'escapes trailing backslash': function(t) {
-                t.contains(qibl.globRegex('*.\\'), /\\\\\$$/);
+                t.contains(qibl.globRegex('*.\\'), /\\.\\\\\$$/);
                 t.done();
             },
 
