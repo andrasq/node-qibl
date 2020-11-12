@@ -1581,6 +1581,11 @@ module.exports = {
                 ['{src,test}/*.[ch]', '^(src|test)/[^/]*\\.[ch]$'],
                 ['a^b', 'a\\^b'],
                 ['[a\\]]^b', '[a\\]]\\^b'],
+                ['[a\\\\x]^b', '[a\\\\x]\\^b'],
+                // edge cases
+                ['[a\\', '[a\\\\'],
+                ['[a\\\\', '[a\\\\'],
+                ['[a\\\\\\', '[a\\\\\\\\'],
             ];
             for (var i = 0; i < tests.length; i++) {
                 var patt = qibl.globRegex(tests[i][0]);
