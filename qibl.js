@@ -11,6 +11,7 @@
 'use strict';
 
 var fs = require('fs');
+var events = require('events');
 
 var nodeMajor = parseInt(process.versions.node);
 var nodeMinor = +process.versions.node.split('.')[1];
@@ -92,6 +93,7 @@ var qibl = module.exports = {
     tryRequire: tryRequire,
     escapeRegex: escapeRegex,
     globRegex: globRegex,
+    repeatUntil: repeatUntil,
     walkdir: walkdir,
     keys: keys,
     values: values,
@@ -799,6 +801,7 @@ function globRegex( glob, from, to ) {
 function walkdir( dirname ) {
     var stop, emitter = new events.EventEmitter();
     emitter.on('stop', function() { stop = true });
+    emitter.on('error', function() {}); // silently skip bad files by default
 
     _walkdir(dirname, 0, function() { emitter.emit('close') });
     return emitter;
@@ -806,7 +809,7 @@ function walkdir( dirname ) {
     function _walkdir(dirname, depth, cb) {
         fs.readdir(dirname, function(err, files) {
             if (err) { emitter.emit('error', err, dirname); cb() }
-            repeatUntil(function(done) {
+            else repeatUntil(function(done) {
                 if (files.length <= 0 || stop) return done(null, true);
                 var filepath = pathJoin(dirname, files.shift());
                 var stat = lstatSync(filepath);

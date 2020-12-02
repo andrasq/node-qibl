@@ -12,6 +12,14 @@ var nodeMajor = parseInt(process.versions.node);
 
 var tmpVarargs;
 
+// from minisql:
+function repeatFor(n, proc, callback) {
+    (function _loop(err) {
+        if (err || n-- <= 0) return callback(err);
+        proc(_loop);
+    })()
+}
+
 module.exports = {
     'isHash should identify hashes': function(t) {
         var tests = [
@@ -1644,6 +1652,49 @@ module.exports = {
                 t.equal(patt, '^(src|test)/.*/[^/]*\\.[ch]$');
                 t.done();
             },
+        },
+    },
+
+    'repeatUntil': {
+        'passes the loop index': function(t) {
+            qibl.repeatUntil(function(done, ix) {
+                t.strictEqual(ix, 0);
+                done(null, true);
+            }, t.done);
+        },
+
+        'loops N times': function(t) {
+            var tests = [ 1, 7, 17, 27, 47, 2447, 10007 ];
+            repeatFor(tests.length, function(done) {
+                var ncalls = 0, limit = tests.shift();
+                qibl.repeatUntil(function(done, ix) {
+                    t.equal(ix, ncalls++);
+                    done(null, ncalls >= limit);
+                }, function() {
+                    t.equal(ncalls, limit);
+                    done();
+                })
+            }, t.done);
+        },
+
+        'returns errors': function(t) {
+            qibl.repeatUntil(function(done) {
+                done('mock error');
+            }, function(err) {
+                t.ok(err);
+                t.equal(err, 'mock error');
+                t.done();
+            })
+        },
+
+        'catches exceptions thrown by visitor': function(t) {
+            qibl.repeatUntil(function(done) {
+                throw 'mock error';
+            }, function(err) {
+                t.ok(err);
+                t.equal(err, 'mock error');
+                t.done();
+            })
         },
     },
 
