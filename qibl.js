@@ -798,31 +798,28 @@ function globRegex( glob, from, to ) {
  * Reports all contained files and directories, but not the top-level dirname itself.
  * Does not report the root directory `dirname`.  Reports but does not traverse symlinks.
  */
-function walkdir( dirname ) {
+function walkdir( dirname, visitor, callback ) {
     var stop, emitter = new events.EventEmitter();
-    emitter.on('stop', function() { stop = true });
     emitter.on('error', function() {}); // silently skip bad files by default
 
-    _walkdir(dirname, 0, function() { emitter.emit('close') });
+    setImmediate(function() { _walkfiles(dirname, 0, [null], callback) });
     return emitter;
 
-    function _walkdir(dirname, depth, cb) {
-        fs.readdir(dirname, function(err, files) {
-            if (err) { emitter.emit('error', err, dirname); cb() }
-            else repeatUntil(function(done) {
-                if (files.length <= 0 || stop) return done(null, true);
-                var filepath = pathJoin(dirname, files.shift());
-                var stat = lstatSync(filepath);
-                if (!stat) done();
-                else if (stat.isSymbolicLink()) { emitter.emit('link', filepath, stat); done() }
-                else if (stat.isDirectory()) {
-                    emitter.emit('dir', filepath, stat); _walkdir(filepath, depth + 1, done) }
-                else { emitter.emit('file', filepath, stat); done() }
-            }, cb);
-        })
+    function _walkfiles(dirname, depth, files, cb) {
+        repeatUntil(function(done) {
+            if (files.length <= 0) return done(null, true);
+            var filepath = pathJoin(dirname, files.shift());
+            var stat = lstatSync(filepath);
+            stop = stat ? visitor(filepath, stat) : 'skip';
+            if (stop === 'stop') return callback();
+            else if (stop === 'skip') return done();
+            else if (stat && stat.isDirectory() && !stat.isSymbolicLink()) fs.readdir(
+                filepath, function(err, files) { _walkfiles(filepath, depth + 1, files, done) });
+            else done();
+        }, cb)
     }
     function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
-    function pathJoin(dirname, filename) { return dirname + '/' + filename }
+    function pathJoin(dirname, filename) { return filename === null ? dirname : dirname + '/' + filename }
 }
 
 function selectField( arrayOfObjects, key ) {

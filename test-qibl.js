@@ -1700,75 +1700,59 @@ module.exports = {
     },
 
     'walkdir': {
-        beforeEach: function(done) {
-            this.dirname = '/tmp/_unittest.' + process.pid;
-            done();
-        },
-
         'emits error on invalid dirname': function(t) {
-            var walker = qibl.walkdir('/nonesuch');
-            walker.on('error', function(err, path) {
-                t.equal(err.code, 'ENOENT');
-                t.equal(path, '/nonesuch');
+            var called = false;
+            var errors = qibl.walkdir('/nonesuch', function(){}, function(err) {
+                t.ifError(err); // does not return errors
+                t.ok(called);
+                t.done();
             })
-            walker.on('close', t.done);
+            errors.on('error', function(err, path) {
+                t.equal(path, '/nonesuch');
+                t.equal(err.code, 'ENOENT');
+                called = true;
+            })
         },
 
-        'lists files': function(t) {
-            var fileCount = 0;
-            var walker = qibl.walkdir(__dirname);
-            walker.on('file', function(path, stat) { fileCount += 1 });
-            walker.on('close', function() {
-                t.ok(fileCount > 2);
+        'reports the search root first': function(t) {
+            var first = null;
+            qibl.walkdir(__dirname, function(path) { first = first || path }, function() {
+                t.equal(first, __dirname);
                 t.done();
             })
         },
 
-        'lists symlinks': function(t) {
+        'stops walking on "stop"': function(t) {
+            var fileCount = 0;
+            qibl.walkdir(__dirname, function(path, stat) { return (++fileCount >= 2) && 'stop' }, function() {
+                // __dirname contains more than 2 files, we stopped after 2
+                t.equal(fileCount, 2);
+                t.done();
+            })
+        },
+
+        'reports files': function(t) {
+            var fileCount = 0;
+            qibl.walkdir(__dirname, function(path, stat) { fileCount += 1 }, function() {
+                t.ok(fileCount > 3);
+                t.done();
+            })
+        },
+
+        'reports symlinks': function(t) {
             var linkCount = 0;
             // HACK: linux-specific standard location of many symlinks
-            var walker = qibl.walkdir('/etc/alternatives');
-            walker.on('link', function(path, stat) { linkCount += 1 });
-            walker.on('close', function() {
+            qibl.walkdir('/etc/alternatives', function(path, stat) { linkCount += stat.isSymbolicLink() }, function() {
                 t.ok(linkCount > 10);
                 t.done();
             })
         },
 
-        'stops walking on stop': function(t) {
-            var fileCount = 0, dirCount = 0, errorCount = 0;
-            var walker = qibl.walkdir(__dirname);
-            walker.on('file', function(path, stat) { fileCount += 1; walker.emit('stop') });
-            walker.on('close', function() {
-                t.equal(fileCount, 1);
+        'reports directories': function(t) {
+            var dirCount = 0;
+            qibl.walkdir('/var/log', function(path, stat) { dirCount += stat.isDirectory() }, function() {
+                t.ok(dirCount > 0);
                 t.done();
-            })
-        },
-
-        'traverses directories': function(t) {
-            var dirname = this.dirname;
-            fs.mkdirSync(dirname);
-            fs.mkdirSync(dirname + '/' + 'dir1');
-            fs.writeFileSync(dirname + '/' + 'file1', 'file1');
-            fs.writeFileSync(dirname + '/' + 'file2', 'file1');
-            fs.writeFileSync(dirname + '/' + 'dir1/file3', 'file3');
-
-            var fileCount = 0, dirCount = 0, linkCount = 0;
-            var walker = qibl.walkdir(dirname);
-            walker.on('file', function(path, stat) { fileCount += 1 });
-            walker.on('dir', function(path, stat) { dirCount += 1 });
-            walker.on('link', function(path, stat) { linkCount += 1 });
-            walker.on('close', function() {
-                walker = qibl.walkdir(dirname);
-                walker.on('file', function(path) { fs.unlinkSync(path) });
-                walker.on('close', function() {
-                    fs.rmdirSync(dirname + '/dir1');
-                    fs.rmdirSync(dirname);
-
-                    t.equal(fileCount, 3);
-                    t.equal(dirCount, 1);
-                    t.done();
-                })
             })
         },
     },
