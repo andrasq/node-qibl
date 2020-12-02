@@ -12,6 +12,7 @@
 
 var fs = require('fs');
 var events = require('events');
+var util = require('util');
 
 var nodeMajor = parseInt(process.versions.node);
 var nodeMinor = +process.versions.node.split('.')[1];
@@ -46,7 +47,7 @@ function tryError(str) { throw new Error(str) }
 var qibl = module.exports = {
     isHash: isHash,
     isMethodContext: isMethodContext,
-    copyObject: copyObject,     assign: copyObject,
+    copyObject: copyObject,     assign: copyObject,     assignTo: copyObject,
     merge: merge,
     getProperty: getProperty,
     compileGetProperty: compileGetProperty,
@@ -111,6 +112,7 @@ var qibl = module.exports = {
     toArray: toArray,
     vinterpolate: vinterpolate,
     addslashes: addslashes,
+    makeError: makeError,
 };
 
 // hashes are generic objects without a class
@@ -1008,10 +1010,19 @@ function offsetsOf( str, patt ) {
 }
 **/
 
+// sql escape()
 function addslashes( str, patt ) {
     // TODO: default to escaping only \' \" \\ \0, pass them in for escapeshellcmd()
     patt = patt || /([\'\"\\\x00])/g;
     return str.replace(patt, '\\$1');
+}
+
+// from mysqule (aka node-minisql):
+function makeError( props, fmt /* ,VARARGS */ ) {
+    var args = [].slice.call(arguments);
+    var err = new Error(util.format.apply(null, typeof args[0] === 'object' ? args.slice(1) : args))
+    if (typeof args[0] === 'object') qibl.assignTo(err, args[0])
+    return err
 }
 
 /**

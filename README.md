@@ -465,10 +465,16 @@ Listen for 'data' events from the emitter and assemble the data chunks into the 
 Data may be either all strings or all Buffers.  The returned body is a string for string data,
 else a Buffer for Buffer data.  The callback is invoked when the 'end' event is received.
 
+### makeError( [properties,] message [,arg1 ,arg2, ...] )
+
+Create a new `Error` object with the error message `message` and having the given properties.
+The message arguments are interpolated into the message with `util.format(message, arg1, ...)`.
+
 
 Changelog
 ---------
 
+- 1.8.0 - new `makeError`
 - 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]
 - 1.7.1 - new function `globRegex`

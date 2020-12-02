@@ -2096,4 +2096,30 @@ module.exports = {
             t.done();
         }
     },
+
+    'makeError': {
+        'returns an Error': function(t) {
+            t.ok(qibl.makeError('test error') instanceof Error);
+            t.done();
+        },
+
+        'attaches properites': function(t) {
+            var err = qibl.makeError({ code: 234, msg: 'mock message' }, 'test error');
+            t.equal(err.code, 234);
+            t.equal(err.msg, 'mock message');
+            t.equal(err.message, 'test error');
+            t.done();
+        },
+
+        'interpolates arguments': function(t) {
+            t.equal(qibl.makeError('foo %d bar %s', 78, 'blue').message, 'foo 78 bar blue');
+            t.equal(qibl.makeError({ code: 12 }, 'foo %d bar %s', 78, 'blue').message, 'foo 78 bar blue');
+            t.done();
+        },
+
+        'properties overwrite defaults': function(t) {
+            t.equal(qibl.makeError({ message: 'new msg' }, 'old msg').message, 'new msg');
+            t.done();
+        },
+    },
 }
