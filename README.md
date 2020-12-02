@@ -329,6 +329,16 @@ escaped instead.
     addslashes("curl test.com/;cat /etc/passwd", /([;|&$])/g);
     // => "curl test.com/\;cat /etc/passwd"
 
+### qibl.compileVinterpolate( string, substring )
+
+Build a dedicated function to replace occurrences of the substring with arguments taken from
+the argv array.  Just like vinterpolate, but optimized for the given string.  Throws an Error
+if the argv length does not match the substring count.
+
+    var vinterpolate = qibl.compileVinterpolate('%s, %s!', '%s');
+    vinterpolate(['Hello', 'world']);
+    // => "Hello, world!"
+
 
 Buffers and Arrays
 ------------------
@@ -474,7 +484,7 @@ The message arguments are interpolated into the message with `util.format(messag
 Changelog
 ---------
 
-- 1.8.0 - new `makeError`
+- 1.8.0 - new `makeError`, `compileVinterpolate`
 - 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]
 - 1.7.1 - new function `globRegex`

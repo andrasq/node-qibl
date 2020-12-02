@@ -111,6 +111,7 @@ var qibl = module.exports = {
     IteratorProperty: IteratorProperty,
     toArray: toArray,
     vinterpolate: vinterpolate,
+    compileVinterpolate: compileVinterpolate,
     addslashes: addslashes,
     makeError: makeError,
 };
@@ -985,7 +986,7 @@ function entries( object ) {
 //}
 
 // replace each occurrence of patt in str with the next one of the args
-// If an `addslashes` function is provided, use it to escape the args.
+// If an `addslashes` function is provided, use it to escape/format the args.
 function vinterpolate( str, patt, args, addslashes ) {
     // older node is faster using split(), but split is much slower starting with node-v12,
     // so node-v12 100% faster and node-v13 25% faster with indexOf()
@@ -999,6 +1000,34 @@ function vinterpolate( str, patt, args, addslashes ) {
     }
     if (prevPos < str.length) ret += str.slice(prevPos);
     return ret;
+}
+/** NOTE: addslashes function for sql argument quoting and escaping
+function formatValue(arg) {
+    return (typeof arg === 'number') ? arg
+        : Buffer.isBuffer(arg) ? "UNHEX('" + arg.toString('hex') + "')"
+        : (Array.isArray(arg)) ? arg.map(function(e) { return formatValue(e) }).join(', ')
+        : "'" + qibl.addslashes(String(arg)) + "'";
+} **/
+
+// build a function that will interpolate the arguments into the format string
+// Much faster than vinterpolate, 28m/s vs 6.6m/s (node-v8; 32 vs 4 -v6, 23 vs 8.5 -v10, 32 vs 8.1 -v14)
+// Only 6% slower than backticks `${x}` compile-time interpolation.
+// Compiling the interpolation is 3x faster (23 vs 8m/s) but adds 40 lines of code (compile + cache funcs)
+//   470k/s to compile and 23m/s to run, vs straight 8m/s: faster if more than 28 call
+function compileVinterpolate( fmt, patt ) {
+    var parts = fmt.split(patt).map(function(s) { return '"' + s.replace(/["]/g, '\\"') + '"' });
+    var argCount = parts.length - 1;
+    var _rejectArgs = function(len, n) { throw new Error("format needs " + len + " arguments, got " + n) }
+
+    var src = util.format(
+        "function _interpolate(argv) {\n" +
+        "  if (argv.length !== %d) _rejectArgs(argv.length, %d);\n", argCount, argCount);
+    var lastPart = parts.pop();
+    src += "  return " + parts.map(function(part, ix) { return part + util.format(" + argv[%d] + ", ix) }).join('') + lastPart + ";\n";
+    src += "}";
+// console.log("Ar: **** src", src);
+
+    return eval('true && ' + src);
 }
 
 /**
