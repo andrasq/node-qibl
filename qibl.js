@@ -795,8 +795,8 @@ function globRegex( glob, from, to ) {
 
 /*
  * Simple stateless directory tree walker.  Files are reported and recursed into in order.
- * Reports all contained files and directories, but not the top-level dirname itself.
- * Does not report the root directory `dirname`.  Reports but does not traverse symlinks.
+ * Reports all contained files and directories, including the search root dirname itself.
+ * Reports but does not traverse symlinks.
  */
 function walkdir( dirname, visitor, callback ) {
     var stop, emitter = new events.EventEmitter();
