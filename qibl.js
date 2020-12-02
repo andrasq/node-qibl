@@ -10,6 +10,8 @@
 
 'use strict';
 
+var fs = require('fs');
+
 var nodeMajor = parseInt(process.versions.node);
 var nodeMinor = +process.versions.node.split('.')[1];
 var IteratorProperty = eval('typeof Symbol === "function" && Symbol.iterator || "_iterator"');
@@ -26,6 +28,16 @@ var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.
 
 // rest arguments are faster starting with node-v8
 var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
+
+function _tryCall(fn, cb, i) { try { fn(cb, i) } catch (e) { cb(e) } }
+function repeatUntil( fn, callback ) {  // adapted from miniq:
+    var ncalls = 0, i = 0;
+    (function relaunch(err, stop) {
+        if (err || stop) callback(err);
+        else if (ncalls++ < 20) _tryCall(fn, relaunch, i++);
+        else { ncalls = 0; process.nextTick(relaunch) }
+    })();
+}
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
 function tryError(str) { throw new Error(str) }
@@ -80,6 +92,7 @@ var qibl = module.exports = {
     tryRequire: tryRequire,
     escapeRegex: escapeRegex,
     globRegex: globRegex,
+    walkdir: walkdir,
     keys: keys,
     values: values,
     entries: entries,
@@ -776,6 +789,37 @@ function globRegex( glob, from, to ) {
         }
     }
     return '^' + expr + '$';
+}
+
+/*
+ * Simple stateless directory tree walker.  Files are reported and recursed into in order.
+ * Reports all contained files and directories, but not the top-level dirname itself.
+ * Does not report the root directory `dirname`.  Reports but does not traverse symlinks.
+ */
+function walkdir( dirname ) {
+    var stop, emitter = new events.EventEmitter();
+    emitter.on('stop', function() { stop = true });
+
+    _walkdir(dirname, 0, function() { emitter.emit('close') });
+    return emitter;
+
+    function _walkdir(dirname, depth, cb) {
+        fs.readdir(dirname, function(err, files) {
+            if (err) { emitter.emit('error', err, dirname); cb() }
+            repeatUntil(function(done) {
+                if (files.length <= 0 || stop) return done(null, true);
+                var filepath = pathJoin(dirname, files.shift());
+                var stat = lstatSync(filepath);
+                if (!stat) done();
+                else if (stat.isSymbolicLink()) { emitter.emit('link', filepath, stat); done() }
+                else if (stat.isDirectory()) {
+                    emitter.emit('dir', filepath, stat); _walkdir(filepath, depth + 1, done) }
+                else { emitter.emit('file', filepath, stat); done() }
+            }, cb);
+        })
+    }
+    function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
+    function pathJoin(dirname, filename) { return dirname + '/' + filename }
 }
 
 function selectField( arrayOfObjects, key ) {
