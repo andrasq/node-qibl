@@ -1714,10 +1714,13 @@ module.exports = {
             })
         },
 
-        'reports the search root first': function(t) {
-            var first = null;
-            qibl.walkdir(__dirname, function(path) { first = first || path }, function() {
-                t.equal(first, __dirname);
+        'reports the search root first with filepath and depth': function(t) {
+            var names = [];
+            var depths = [];
+            qibl.walkdir(__dirname, function(path, stat, depth) { names.push(path); depths.push(depth) }, function() {
+                t.equal(names[0], __dirname);
+                t.equal(depths[0], 0);
+                t.equal(depths[1], 1);
                 t.done();
             })
         },
@@ -1729,6 +1732,10 @@ module.exports = {
                 t.equal(fileCount, 2);
                 t.done();
             })
+        },
+
+        'dereferences symlinks on "visit"': function(t) {
+            t.skip();
         },
 
         'reports files': function(t) {

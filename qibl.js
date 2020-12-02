@@ -796,7 +796,8 @@ function globRegex( glob, from, to ) {
 /*
  * Simple stateless directory tree walker.  Files are reported and recursed into in order.
  * Reports all contained files and directories, including the search root dirname itself.
- * Reports but does not traverse symlinks.
+ * Reports but does not traverse symlinks unless the visitor says 'visit'.
+ * Errors are reported out of band as 'error' events on the returned emitter.
  */
 function walkdir( dirname, visitor, callback ) {
     var stop, emitter = new events.EventEmitter();
@@ -810,13 +811,13 @@ function walkdir( dirname, visitor, callback ) {
             if (files.length <= 0) return done(null, true);
             var filepath = pathJoin(dirname, files.shift());
             var stat = lstatSync(filepath);
-            stop = stat ? visitor(filepath, stat) : 'skip';
-            if (stop === 'stop') return callback();
-            else if (stop === 'skip') return done();
-            else if (stat && stat.isDirectory() && !stat.isSymbolicLink()) fs.readdir(
-                filepath, function(err, files) { _walkfiles(filepath, depth + 1, files, done) });
-            else done();
-        }, cb)
+            stop = stat ? visitor(filepath, stat, depth) : 'skip';
+            return (stop === 'stop') ? callback()
+                : (stop === 'skip') ? done()
+                : (stat && stat.isDirectory() && (stop === 'visit' || !stat.isSymbolicLink())) ? fs.readdir(
+                    filepath, function(err, files) { _walkfiles(filepath, depth + 1, files, done) })
+                : done();
+        }, cb);
     }
     function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
     function pathJoin(dirname, filename) { return filename === null ? dirname : dirname + '/' + filename }
