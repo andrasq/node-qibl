@@ -469,6 +469,7 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Changelog
 ---------
 
+- 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]
 - 1.7.1 - new function `globRegex`
 - 1.6.3 - new function `compileGetProperty`
