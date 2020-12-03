@@ -31,6 +31,8 @@ var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.
 // rest arguments are faster starting with node-v8
 var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
+var setImmediate = global.setImmediat || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) }
+
 function _tryCall(fn, cb, i) { try { fn(cb, i) } catch (e) { cb(e) } }
 function repeatUntil( fn, callback ) {  // adapted from miniq:
     var ncalls = 0, i = 0;
