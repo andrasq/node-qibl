@@ -31,7 +31,7 @@ var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.
 // rest arguments are faster starting with node-v8
 var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
-var setImmediate = global.setImmediat || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) }
+var setImmediate = eval('global.setImmediate || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) }')
 
 function _tryCall(fn, cb, i) { try { fn(cb, i) } catch (e) { cb(e) } }
 function repeatUntil( fn, callback ) {  // adapted from miniq:
@@ -41,6 +41,16 @@ function repeatUntil( fn, callback ) {  // adapted from miniq:
         else if (ncalls++ < 20) _tryCall(fn, relaunch, i++);
         else { ncalls = 0; process.nextTick(relaunch) }
     })();
+}
+
+// from minisql
+function repeatFor(n, proc, callback) {
+    var ix = 0, ncalls = 0;
+    (function _loop(err) {
+        if (err || n-- <= 0) return callback(err);
+        (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : proc(_loop, (ix++));
+        // 300k in 10ms @100, 16ms @10 @20, 7.75ms @200, 5ms @1000
+    })()
 }
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
@@ -245,6 +255,7 @@ function inherits( derived, base ) {
     for (var i = 0; i < keys.length; i++) derived[keys[i]] = base[keys[i]];
 
     // set up constructor and prototype linkage
+    // FIXME: does __proto__ need to be instanceof Foo? instanceof Bar?
     derived.prototype = { constructor: derived, __proto__: base.prototype };
 
     // to avoid assigning __proto__, can use the typescript linkage, ie:
