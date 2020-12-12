@@ -814,6 +814,8 @@ function globRegex( glob, from, to ) {
  * Reports all contained files and directories, including the search root dirname itself.
  * Reports but does not traverse symlinks unless the visitor says 'visit'.
  * Errors are reported out of band as 'error' events on the returned emitter.
+ * NOTE: repeatUntil catches errors thrown by callback() and feeds them back to... yes, callback.
+ * The caller can prevent this by wrapping callback in a try/catch or a setImmediate().
  */
 function walkdir( dirname, visitor, callback ) {
     var stop, emitter = new events.EventEmitter();
@@ -997,6 +999,11 @@ function entries( object ) {
 //     for (var i = 0; i < keyvals && keyvals.length; i++) target[keyvals[i][0]] = keyvals[i][1];
 //     return target;
 //}
+
+function pairTo( target, keys, values ) {
+    for (var i=0; i<keys.length; i++) target[keys[i]] = values[i];
+    return target;
+}
 
 // replace each occurrence of patt in str with the next one of the args
 // If an `addslashes` function is provided, use it to escape/format the args.
