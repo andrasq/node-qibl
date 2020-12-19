@@ -2122,4 +2122,63 @@ module.exports = {
             t.done();
         },
     },
+
+    'microtime': {
+        'returns timestamps': function(t) {
+            var t1 = qibl.microtime();
+            var t2 = qibl.microtime();
+            var t3 = qibl.microtime();
+            t.ok(t2 > t1);
+            t.ok(t3 > t2);
+            t.done();
+        },
+        'is sub-millisecond accurate': function(t) {
+            var t0 = Date.now(), t1, t2;
+            // wait for ms transition
+            while (Date.now() === t0) ;
+            t1 = Date.now() / 1000;
+            t2 = qibl.microtime();
+            t.within(t2, t1, .00001, "within 0.01 ms of Date.now()");
+            // typically within .0005 ms, even with node-v0.28
+            t.done();
+        },
+        'speed': function(t) {
+            var x, nloops = 100000;
+
+            console.time('Date.now ' + nloops/1000 + 'k');
+            for (var i=0; i<nloops; i++) x = Date.now();
+            console.timeEnd('Date.now ' + nloops/1000 + 'k');
+
+            console.time('hrtime ' + nloops/1000 + 'k');
+            for (var i=0; i<nloops; i++) x = process.hrtime();
+            console.timeEnd('hrtime ' + nloops/1000 + 'k');
+
+            console.time('microtime ' + nloops/1000 + 'k');
+            for (var i=0; i<nloops; i++) x = qibl.microtime();
+            console.timeEnd('microtime ' + nloops/1000 + 'k');
+
+            t.done();
+        },
+        'display calibration': function test(t) {
+            var ix = 0, times = new Array(40000);
+
+            // capture timestamps for 4 millisecond ticks (3+ ms elapsed), to ensure
+            // that 2nd tick has samples before it and also after it (first tick is not always captured)
+            for (var d = Date.now(); Date.now() < d + 4; ) times[ix++] = [Date.now(), qibl.microtime()];
+
+            // find the index of the middle millisecond tick
+            ix = 0;
+            for (ix++ ; ix<times.length; ix++) if (times[ix-1][0] < times[ix][0]) break;
+            for (ix++ ; ix<times.length; ix++) if (times[ix-1][0] < times[ix][0]) break;
+            var window = 3;
+            // print the timestamps just above and below the tick
+            console.log(times.slice(Math.max(ix - window, 0), Math.min(ix + 1 + window, times.length - 1)));
+
+            // When run immediately following Date.now(), microtime() should always read one call duration later.
+            // I.e., microtime() should never be less than or even within .0002 ms of Date.now().
+            // Empirically, this happens often, ie the calibration loop timing is not stable.
+
+            t.done();
+        },
+    },
 }

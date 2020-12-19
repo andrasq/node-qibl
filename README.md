@@ -480,11 +480,23 @@ else a Buffer for Buffer data.  The callback is invoked when the 'end' event is 
 Create a new `Error` object with the error message `message` and having the given properties.
 The message arguments are interpolated into the message with `util.format(message, arg1, ...)`.
 
+### microtime( )
+
+Return a high precision real-time timestamp of the seconds elapsed since the epoch, similar to
+PHP's `microtime(true)`.  It returns nanosecond precise elapsed times and tracks the system
+clock accurately to within .001 milliseconds.  Note that the system clock itself is usually only
+accurate to 1-10 ms because it is adjusted to a remote time service reached over the network.
+
+    sec = qibl.microtime();
+    // => 1608407555.834298
+
+    new Date(sec * 1000).toISOString();
+    // => "2020-12-19T19:52:35.834Z"
 
 Changelog
 ---------
 
-- 1.8.0 - new `makeError`, `compileVinterpolate`
+- 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`
 - 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]
 - 1.7.1 - new function `globRegex`

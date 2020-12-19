@@ -126,6 +126,7 @@ var qibl = module.exports = {
     compileVinterpolate: compileVinterpolate,
     addslashes: addslashes,
     makeError: makeError,
+    microtime: microtime,
 };
 
 // hashes are generic objects without a class
@@ -1073,6 +1074,30 @@ function makeError( props, fmt /* ,VARARGS */ ) {
     if (typeof args[0] === 'object') qibl.assignTo(err, args[0])
     return err
 }
+
+// microsecond resolution real-time timestamp (available on node-v0.7 and up)
+var _hrtime = eval('process.hrtime || function() { return [Date.now() * 1e-3, 0] };');
+var _microtimeOffset = 0;
+function microtime( ) {
+    var t = _hrtime();
+    return t[0] + t[1] * 1e-9 + _microtimeOffset;
+}
+// Calibrate microtime.  We sync to the system clock with better than .0005 ms accuracy (as measured).
+// Assume the ms tick occurred in the middle of the sampling period (of Date.now duration) and that
+// half the js-C++ domain crossing penalty is incurred after fetching the timestamp.
+// This can cause microtime() to sometimes deliver timestamps less than Date.now, e.g. 123 vs 122.9995
+function _hrTop() { for (var t1 = Date.now(), t2; (t2 = Date.now()) < t1 + 1; ) ; return t2 }
+function _hrCalibrate() {
+    function _nowDuration() { var t1 = microtime(); for (var i=0; i<200; i++) Date.now(); return (microtime() - t1) / 200 }
+    function _hrDuration() { var t1 = microtime(); for (var i=0; i<200; i++) microtime(); return (microtime() - t1) / 200 }
+    var hrDuration = _hrDuration(), nowDuration = _nowDuration();       // warm up and time calls
+    var t1 = _hrTop(), t2 = microtime();                                // ms ticked microtime + Date.now + [0..1]*Date.now ago
+    _microtimeOffset = (t1 / 1000) - t2;                                // offset that makes realtime = microtime() + offset
+    _microtimeOffset += nowDuration + nowDuration / 2;                  // actual ms ticked 1 + [0..1] Date.now calls earlier,
+    _microtimeOffset += hrDuration / 2;                                 // plus half the js-C++ domain crossing latency ago
+}
+// NOTE: occasionally the runtime adds a lot of delay between t1 and t2, if so try again
+do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTop() / 1000 - microtime() > .000002);
 
 /**
 var _warnings = {};
