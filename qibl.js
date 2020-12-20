@@ -488,7 +488,6 @@ var fromCharCodesFast = eval("parseInt(process.versions.node) >= 9 ? fromCharCod
 function fromCharCodes( codes ) {
     return fromCharCodesFast(codes);
 }
-// function toCharCodes( str ) { var a = new Array(str.length); for (var i=0; i<str.length; i++) a[i] = str.charCodeAt(i); return }
 
 // generate a random-ish string len chars long
 // letter frequencies counted in this file, padded with blanks:
@@ -1040,16 +1039,17 @@ function formatValue(arg) {
 // Compiling the interpolation is 3x faster (23 vs 8m/s) but adds 40 lines of code (compile + cache funcs)
 //   470k/s to compile and 23m/s to run, vs straight 8m/s: faster if more than 28 calls
 function compileVinterpolate( fmt, patt ) {
+    var format = util.format;
     if (typeof patt !== 'string') throw new Error('pattern must be a string not ' + (typeof patt));
     var parts = fmt.split(patt).map(function(s) { return '"' + s.replace(/["]/g, '\\"') + '"' });
     var argCount = parts.length - 1;
     var _rejectArgs = function(have, need) { throw new Error("format needs " + need + " arguments, got " + have) }
 
-    var src = util.format(
+    var src = format(
         "function _interpolate(argv) {\n" +
         "  if (argv.length !== %d) _rejectArgs(argv.length, %d);\n", argCount, argCount);
     var lastPart = parts.pop();
-    src += "  return " + parts.map(function(part, ix) { return part + util.format(" + argv[%d] + ", ix) }).join('') + lastPart + ";\n";
+    src += "  return " + parts.map(function(part, ix) { return part + format(" + argv[%d] + ", ix) }).join('') + lastPart + ";\n";
     src += "}";
 // console.log("Ar: **** src", src);
 

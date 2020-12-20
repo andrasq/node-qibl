@@ -2058,6 +2058,24 @@ module.exports = {
 
             t.done();
         },
+
+        'iteration speed': function(t) {
+            var a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            function makeState() { var state = { ix: 0 }; return state }
+            function stepState(state, self, iter) {
+                if (state.ix >= self.a.length) { iter.done = true; iter.value = undefined }
+                else { iter.value = self.a[state.ix++] }
+            }
+            var b = { a: a };
+            console.time('iterate 10 x 100k');
+            for (var i=0; i<100000; i++) {
+                qibl.setIterator(b, qibl.makeIterator(stepState, makeState));
+                var ret = qibl.toArray(b);
+            }
+            console.timeEnd('iterate 10 x 100k');
+            t.deepEqual(ret, a);
+            t.done();
+        },
     },
 
     'Object polyfills': {
