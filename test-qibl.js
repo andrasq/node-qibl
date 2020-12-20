@@ -1699,6 +1699,38 @@ module.exports = {
         },
     },
 
+    'repeatFor': {
+        'loops 0 times': function(t) {
+            var ncalls = 0;
+            qibl.repeatFor(0, function(cb) { ncalls += 1; cb() }, function() {
+                t.equal(ncalls, 0);
+                t.done();
+            })
+        },
+        'loops 1 times': function(t) {
+            var ncalls = 0;
+            qibl.repeatFor(1, function(cb) { ncalls += 1; cb() }, function() {
+                t.equal(ncalls, 1);
+                t.done();
+            })
+        },
+        'loops 1001 times': function(t) {
+            var ncalls = 0;
+            qibl.repeatFor(1001, function(cb) { ncalls += 1; cb() }, function() {
+                t.equal(ncalls, 1001);
+                t.done();
+            })
+        },
+        'returns errors': function(t) {
+            var ncalls = 0;
+            qibl.repeatFor(1001, function(cb) { ncalls += 1; cb(ncalls === 11 ? 'mock error' : null) }, function(err) {
+                t.equal(ncalls, 11);
+                t.equal(err, 'mock error');
+                t.done();
+            })
+        },
+    },
+
     'walkdir': {
         'emits error on invalid dirname': function(t) {
             var called = false;
