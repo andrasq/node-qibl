@@ -493,10 +493,64 @@ accurate to 1-10 ms because it is adjusted to a remote time service reached over
     new Date(sec * 1000).toISOString();
     // => "2020-12-19T19:52:35.834Z"
 
+### repeatUntil( loopedFunction(done(err, done)), callback )
+
+Keep calling `loopedFunction()` until it calls its callback with an error or a truthy `done`
+value.  Errors returned from or thrown by the looped function stop the looping, are caught, and
+are returned to the callback.  Due to the way repeatUntil recurses, errors thrown from the
+callback are also caught and fed back into the callback.  This function is blocking, it does not
+yield the cpu unless the looped function does.
+
+    var count = 0;
+    qibl.repeatUntil(function(done) {
+        count += 1;
+        done(null, count >= 3);
+    }, function(err) {
+        callback(err, count);
+        // => count === 3
+    })
+
+### repeatFor( count, loopedFunction(done(err), ix), callback )
+
+Call `loopedFunction()` exactly `count` times.  Each call is passed a callback followed by the
+loop index `ix`, `0 .. count-1`.  Errors returned by the looped function stop the looping and are
+returned to the callback.  Errors thrown are not yet handled.  This function does not yield
+the cpu unless the looped function does.
+
+    var count = 0;
+    repeatFor(3, function(done, ix) {
+        count += 1;
+        done();
+    }, function(err) {
+        // => count === 3
+    })
+
+### errorEmitter = walkdir( dirname, visitor(path, stat, depth), callback )
+
+Simple stateless directory tree walker.  Files are reported and recursed into in order.
+Reports all contained files and directories, including the search root dirname itself.
+Returns an event emitter that emits 'error' events with the filepath of files that could
+not be `stat`-ed.
+
+Calls the `visitor()` with the filepath of the current file, the file stats obtained with
+`fs.stat`, and the current directory depth starting from 0.  The visitor may return a command
+string to direct how this file should be traversed, one of
+- `'skip'` - omit this subdirectory (subdirectories are normally recursed into when encountered)
+- `'visit'` - do recurse into this subdirectory (symbolic links to directories are normally skipped)
+- `'stop'` - stop the traversal, all done, do not visit the other files
+
+Errors accessing the visited files are reported out of band via 'error' events on the returned
+emitter, and the visitor is not called on them.  The emitter does not throw, un-listened for
+errors are ignored.  Errors accessing the top-level `dirname` are returned to the callback.
+
+
+Traverse the directory
+
+
 Changelog
 ---------
 
-- 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`
+- 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, document repeatUntil, walkdir
 - 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]
 - 1.7.1 - new function `globRegex`
