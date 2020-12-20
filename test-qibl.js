@@ -2133,13 +2133,18 @@ module.exports = {
             t.done();
         },
         'is sub-millisecond accurate': function(t) {
-            var t0 = Date.now(), t1, t2;
+            var t0, t1, t2;
             // wait for ms transition
-            while (Date.now() === t0) ;
-            t1 = Date.now() / 1000;
-            t2 = qibl.microtime();
+            for (var i=0; i<10; i++) {
+                t0 = Date.now();
+                while (Date.now() === t0) ;
+                t1 = Date.now() / 1000;
+                t2 = qibl.microtime();
+                if (t2 - t1 < .0001 && t1 - t2 < .0001) break;
+                // typically within .0005 ms, even with node-v0.28,
+                // but large timing swings in ci testing so retry up to 10 times
+            }
             t.within(t2, t1, .0001, "within 0.1 ms of Date.now()");
-            // typically within .0005 ms, even with node-v0.28, but large timing swings in ci testing
             t.done();
         },
         'speed': function(t) {
