@@ -29,12 +29,13 @@ var invoke2 = eval("(nodeMajor < 8) && _invoke2 || tryEval('function(func, self,
 var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.Map : _Hashmap");
 
 // rest arguments are faster starting with node-v8
-var varargs = eval("(nodeMajor < 8) && _varargs || tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
+var varargs = eval("(nodeMajor < 8) && _varargs ||" +
+    " tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
 var setImmediate = eval('global.setImmediate || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) }')
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
-function tryError(str) { throw new Error(str) }
+// function tryError(str) { throw new Error(str) }
 
 var qibl = module.exports = {
     isHash: isHash,
@@ -248,7 +249,7 @@ function inherits( derived, base ) {
 
 // derive a subclass that inherits from the parent but customizes its own prototype
 // note that is very slow to set-and-call a method in the constructor
-// % timeit node -p 'function Foo(a,b,c){}; Bar = require("./").derive("Bar", Foo, {x: 1}); for (i=0; i<10000000; i++) x = new Bar(1,2,3); x.x'
+// % node -p 'function Foo(a,b,c){}; Bar = require("./").derive("Bar", Foo, {x: 1}); for (i=0; i<10e6; i++) x = new Bar(1,2,3); x.x'
 // nb: v10 10e6 new Foo() .13, v11 .24; new Zed() that invokes Foo() .13
 // nb: functions built with a scope run abysmally slow! (10x slower in node-v10)
 // derive: 4m/s 4.0ghz R2600X
@@ -430,7 +431,9 @@ function interleave2( target, a1, a2 ) {
  */
 function range( first, last, stepBy ) {
     if (last == undefined) { last = first; first = 0 }
-    if (stepBy != undefined && typeof stepBy !== 'function' && typeof stepBy !== 'number') throw new Error('stepBy is not a number or function');
+    if (stepBy != undefined && typeof stepBy !== 'function' && typeof stepBy !== 'number') {
+        throw new Error('stepBy is not a number or function');
+    }
 
     return qibl.setIterator({}, qibl.makeIterator(step, makeState));
 
@@ -479,7 +482,8 @@ function str_truncate( string, limit, opts ) {
 // fromCharCode.apply is only fast since node-v8, spread args are faster but were 30x slower before v8
 // Node before v0.11 is slow with multi-arg fromCharCode and is faster with a convert-char-at-a-time loop.
 // use eval to hide the code from the coverage tool
-var fromCharCodesLoop = eval("true && function(a) { var s = ''; for (var i=0; i<a.length; i++) s += String.fromCharCode(a[i]); return s }");
+var _charCode = String.fromCharCode
+var fromCharCodesLoop = eval("true && function(a) { for (var s='', i=0; i<a.length; i++) s += _charCode(a[i]); return s }");
 var fromCharCodesSpread = tryEval("true && function(a) { return String.fromCharCode(...a) }");
 var fromCharCodesFast = eval("parseInt(process.versions.node) >= 9 ? fromCharCodesSpread : fromCharCodesLoop");
 function fromCharCodes( codes ) {
@@ -568,9 +572,8 @@ function strtok( str, sep ) {
 // see also sane-buffer, qbson/lib/new-buffer
 function saneBuf( ) {
     return {
-        new:   eval('nodeMajor < 10 ? Buffer : function(a, b, c) { return typeof(a) === "number" ? Buffer.allocUnsafe(a) : Buffer.from(a, b, c) }'),
+        new:   function(a, b, c) { return typeof a === 'number' ? qibl.allocBuf(a) : qibl.fromBuf(a, b, c) },
         alloc: eval('nodeMajor >= 6 ? Buffer.allocUnsafe : Buffer'),
-        // allocFill: function(n, ch) { var buf = qibl.allocBuf(n); if (ch !== undefined) qibl.fill(buf, ch); return buf },
         from:  eval('nodeMajor >= 6 ? Buffer.from : Buffer'),
     }
 }
@@ -953,7 +956,8 @@ function toArray( obj, filter ) {
 }
 // function arrayMap(arr, fn) { return _traverse(arr, fn, new Array()) }
 // function arrayEach(arr, fn) { _traverse(arr, fn, { push: function(){} }) }
-// function arrayFilter(arr, fn) { var ret = new Array(); _traverse(arr, fn, { push: function(x) { if (fn(x)) ret.push(x) } }); return ret }
+// function arrayFilter(arr, fn) { var ret = new Array();
+//     _traverse(arr, fn, { push: function(x) { if (fn(x)) ret.push(x) } }); return ret }
 function _traverse( obj, transform, target ) {
     var val, state;
     var isIterable = obj && obj[IteratorProperty] && (state = obj[IteratorProperty]()) && typeof state.next === 'function';
