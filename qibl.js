@@ -1095,15 +1095,18 @@ function microtime( ) {
 // This can cause microtime() to sometimes deliver timestamps less than Date.now, e.g. 123 vs 122.9995
 function _hrTop() { for (var t1 = Date.now(), t2; (t2 = Date.now()) < t1 + 1; ) ; return t2 }
 function _hrCalibrate() {
-    function _nowDuration() { var t1 = microtime(); for (var i=0; i<200; i++) Date.now(); return (microtime() - t1) / 200 }
-    function _hrDuration() { var t1 = microtime(); for (var i=0; i<200; i++) microtime(); return (microtime() - t1) / 200 }
+    var clk = microtime;
+    function _hrDuration() { var t1 = clk(); for (var i=0; i<200; i++) clk(); return (clk() - t1) / (200 + 1) }
+    function _nowDuration() { var t1 = clk(); for (var i=0; i<200; i++) Date.now(); return (clk() - t1 - hrDuration) / 200 }
     var hrDuration = _hrDuration(), nowDuration = _nowDuration();       // warm up and time calls
-    var t1 = _hrTop(), t2 = microtime();                                // ms ticked microtime + Date.now + [0..1]*Date.now ago
-    _microtimeOffset = (t1 / 1000) - t2;                                // offset that makes realtime = microtime() + offset
-    _microtimeOffset += nowDuration + nowDuration / 2;                  // actual ms ticked 1 + [0..1] Date.now calls earlier,
-    _microtimeOffset += hrDuration / 2;                                 // plus half the js-C++ domain crossing latency ago
+    var t1 = _hrTop(), t2 = microtime();                                // ms just changed, microtime + Date.now calls ago
+    _microtimeOffset = (t1 / 1000) - t2;                                // to make uptime into wallclock = microtime() + offset
+    _microtimeOffset += nowDuration / 2;                                // assume ms changed middle of poll period,
+    _microtimeOffset += nowDuration * (4-4) / 4;                        // which overlaps all of the Date.now call,
+    _microtimeOffset += hrDuration;                                     // and before that last microtime call we made
+    _microtimeOffset += (hrDuration - nowDuration) / 2;                 // will also be sampled a bit slower
 }
-// NOTE: occasionally the runtime adds a lot of delay between t1 and t2, if so try again
+// NOTE: occasionally the runtime adds a burst of delay between t1 and t2, if so try again
 do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTop() / 1000 - microtime() > .000002);
 
 /**
