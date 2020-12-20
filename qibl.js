@@ -924,6 +924,9 @@ function sortBy( items, getMetric ) {
 // iterator() returns a traversal object with a method next().
 // next() returns a data wrapper with properties {value, done}.
 // If done is set then value is not to be used.
+//
+// __stepNext is 25% faster if static and reused (walking 10 items; 70% for 40)
+function __stepNext() { this.__step(this.__state, this.__instance, this); return this; }
 function makeIterator( step, makeState ) {
     return function qiblIterator() {
         // makeState is passed the object instance on which the iterator was called
@@ -931,13 +934,12 @@ function makeIterator( step, makeState ) {
         return {
             value: 0,
             done: false,
-            next: stepIterator,
+            next: __stepNext,
             __step: step,
             __state: state,
             __instance: this,
         };
     }
-    function stepIterator() { this.__step(this.__state, this.__instance, this); return this; }
 }
 // install the iterator as Symbol.iterator if the node version supports symbols, else as ._iterator
 function setIterator( obj, iterator ) {

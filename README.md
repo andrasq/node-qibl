@@ -550,14 +550,11 @@ emitter, and the visitor is not called on them.  The emitter does not throw, un-
 errors are ignored.  Errors accessing the top-level `dirname` are returned to the callback.
 
 
-Traverse the directory
-
-
 Changelog
 ---------
 
 - 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, `pairTo`, document repeatUntil, walkdir,
-          fix getProperty() for un-dotted names longer than 40 chars, faster getProperty
+          fix getProperty() for un-dotted names longer than 40 chars, faster getProperty, faster iteration
 - 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]
 - 1.7.1 - new function `globRegex`
