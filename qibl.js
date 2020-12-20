@@ -721,6 +721,57 @@ function _copyFunctionProperties( target, src ) {
 }
 **/
 
+function _tryCall(fn, cb, i) { try { fn(cb, i) } catch (e) { cb(e) } }
+function repeatUntil( fn, callback ) {  // adapted from miniq:
+    var ncalls = 0, i = 0;
+    (function relaunch(err, stop) {
+        if (err || stop) callback(err);
+        else if (ncalls++ < 20) _tryCall(fn, relaunch, i++);
+        else { ncalls = 0; process.nextTick(relaunch) }
+    })();
+}
+
+// from minisql
+function repeatFor(n, proc, callback) {
+    var ix = 0, ncalls = 0;
+    (function _loop(err) {
+        if (err || n-- <= 0) return callback(err);
+        (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : proc(_loop, (ix++));
+        // 300k in 10ms @100, 16ms @10 @20, 7.75ms @200, 5ms @1000
+    })()
+}
+
+/*
+ * Simple stateless directory tree walker.  Files are reported and recursed into in order.
+ * Reports all contained files and directories, including the search root dirname itself.
+ * Reports but does not traverse symlinks unless the visitor says 'visit'.
+ * Errors are reported out of band as 'error' events on the returned emitter.
+ * NOTE: repeatUntil catches errors thrown by callback() and feeds them back to... yes, callback.
+ * The caller can prevent this by wrapping callback in a try/catch or a setImmediate().
+ */
+function walkdir( dirname, visitor, callback ) {
+    var stop, emitter = new events.EventEmitter();
+    emitter.on('error', function() {}); // silently skip bad files by default
+
+    setImmediate(function() { _walkfiles(dirname, 0, [null], callback) });
+    return emitter;
+
+    function _walkfiles(dirname, depth, files, cb) {
+        repeatUntil(function(done) {
+            if (files.length <= 0) return done(null, true);
+            var filepath = pathJoin(dirname, files.shift());
+            var stat = lstatSync(filepath);
+            stop = stat ? visitor(filepath, stat, depth) : 'skip';
+            return (stop === 'stop') ? callback()
+                : (stop === 'skip') ? done()
+                : (stat && stat.isDirectory() && (stop === 'visit' || !stat.isSymbolicLink())) ? fs.readdir(
+                    filepath, function(err, files) { _walkfiles(filepath, depth + 1, files, done) })
+                : done();
+        }, cb);
+    }
+    function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
+    function pathJoin(dirname, filename) { return filename === null ? dirname : dirname + '/' + filename }
+}
 
 // backslash-escape the chars that have special meaning in regex strings
 // See also microrest, restiq.
@@ -789,58 +840,6 @@ function globRegex( glob, from, to ) {
         }
     }
     return '^' + expr + '$';
-}
-
-function _tryCall(fn, cb, i) { try { fn(cb, i) } catch (e) { cb(e) } }
-function repeatUntil( fn, callback ) {  // adapted from miniq:
-    var ncalls = 0, i = 0;
-    (function relaunch(err, stop) {
-        if (err || stop) callback(err);
-        else if (ncalls++ < 20) _tryCall(fn, relaunch, i++);
-        else { ncalls = 0; process.nextTick(relaunch) }
-    })();
-}
-
-// from minisql
-function repeatFor(n, proc, callback) {
-    var ix = 0, ncalls = 0;
-    (function _loop(err) {
-        if (err || n-- <= 0) return callback(err);
-        (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : proc(_loop, (ix++));
-        // 300k in 10ms @100, 16ms @10 @20, 7.75ms @200, 5ms @1000
-    })()
-}
-
-/*
- * Simple stateless directory tree walker.  Files are reported and recursed into in order.
- * Reports all contained files and directories, including the search root dirname itself.
- * Reports but does not traverse symlinks unless the visitor says 'visit'.
- * Errors are reported out of band as 'error' events on the returned emitter.
- * NOTE: repeatUntil catches errors thrown by callback() and feeds them back to... yes, callback.
- * The caller can prevent this by wrapping callback in a try/catch or a setImmediate().
- */
-function walkdir( dirname, visitor, callback ) {
-    var stop, emitter = new events.EventEmitter();
-    emitter.on('error', function() {}); // silently skip bad files by default
-
-    setImmediate(function() { _walkfiles(dirname, 0, [null], callback) });
-    return emitter;
-
-    function _walkfiles(dirname, depth, files, cb) {
-        repeatUntil(function(done) {
-            if (files.length <= 0) return done(null, true);
-            var filepath = pathJoin(dirname, files.shift());
-            var stat = lstatSync(filepath);
-            stop = stat ? visitor(filepath, stat, depth) : 'skip';
-            return (stop === 'stop') ? callback()
-                : (stop === 'skip') ? done()
-                : (stat && stat.isDirectory() && (stop === 'visit' || !stat.isSymbolicLink())) ? fs.readdir(
-                    filepath, function(err, files) { _walkfiles(filepath, depth + 1, files, done) })
-                : done();
-        }, cb);
-    }
-    function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
-    function pathJoin(dirname, filename) { return filename === null ? dirname : dirname + '/' + filename }
 }
 
 function selectField( arrayOfObjects, key ) {
