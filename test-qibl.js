@@ -2061,10 +2061,10 @@ module.exports = {
 
         'iteration speed': function(t) {
             var a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-            function makeState() { var state = { ix: 0 }; return state }
+            function makeState(self) { var state = { ix: 0, data: self.a }; return state }
             function stepState(state, self, iter) {
-                if (state.ix >= self.a.length) { iter.done = true; iter.value = undefined }
-                else { iter.value = self.a[state.ix++] }
+                if (state.ix >= state.data.length) { iter.done = true; iter.value = undefined }
+                else { this.value = state.data[state.ix++] }
             }
             var b = { a: a };
             console.time('iterate 10 x 100k');
@@ -2073,6 +2073,7 @@ module.exports = {
                 var ret = qibl.toArray(b);
             }
             console.timeEnd('iterate 10 x 100k');
+            // 19ms to iterate over 1 million elements 10 at a time, 25m if stepper created on the fly
             t.deepEqual(ret, a);
             t.done();
         },

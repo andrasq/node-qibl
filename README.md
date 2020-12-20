@@ -534,9 +534,9 @@ the cpu unless the looped function does.
 ### errorEmitter = walkdir( dirname, visitor(path, stat, depth), callback )
 
 Simple stateless directory tree walker.  Files are reported and recursed into in order.
-Reports all contained files and directories, including the search root dirname itself.
+Visits all contained files and directories, including the search root dirname itself.
 Returns an event emitter that emits 'error' events with the filepath of files that could
-not be `stat`-ed.
+not be accessed (`fs.stat`-ed).
 
 Calls the `visitor()` with the filepath of the current file, the file stats obtained with
 `fs.stat`, and the current directory depth starting from 0.  The visitor may return a command
