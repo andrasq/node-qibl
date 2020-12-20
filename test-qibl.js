@@ -2138,8 +2138,8 @@ module.exports = {
             while (Date.now() === t0) ;
             t1 = Date.now() / 1000;
             t2 = qibl.microtime();
-            t.within(t2, t1, .00001, "within 0.01 ms of Date.now()");
-            // typically within .0005 ms, even with node-v0.28
+            t.within(t2, t1, .0001, "within 0.1 ms of Date.now()");
+            // typically within .0005 ms, even with node-v0.28, but large timing swings in ci testing
             t.done();
         },
         'speed': function(t) {
