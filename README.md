@@ -200,6 +200,12 @@ Return an array with the own properties of the object.  Equivalent to `Object.va
 
 Return an array of key-value pairs of the own properties of the object.  Equivalent to `Object.entries`.
 
+### qibl.pairTo( target, keys, values )
+
+Set all `keys` in turn as properties on `target` having the corresponding values from `values`.
+If a key does not have a maching value, it is set to `undefined`.  If there are more values than
+keys, the excess are ignored.  Returns `target`.
+
 ### qibl.populate( target, val [,options ] )
 
 Similar to `fill()`, but can can fill with computed values and can also populate objects.
@@ -550,7 +556,7 @@ Traverse the directory
 Changelog
 ---------
 
-- 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, document repeatUntil, walkdir,
+- 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, `pairTo`, document repeatUntil, walkdir,
           fix getProperty() for un-dotted names longer than 40 chars, faster getProperty
 - 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]

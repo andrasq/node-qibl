@@ -93,6 +93,7 @@ var qibl = module.exports = {
     keys: keys,
     values: values,
     entries: entries,
+    pairTo: pairTo,
     selectField: selectField,
     mapById: mapById,
     groupById: groupById,
@@ -1003,6 +1004,7 @@ function entries( object ) {
 //     return target;
 //}
 
+// from mysqule aka node-minisql
 function pairTo( target, keys, values ) {
     for (var i=0; i<keys.length; i++) target[keys[i]] = values[i];
     return target;

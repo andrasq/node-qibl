@@ -2088,6 +2088,20 @@ module.exports = {
         },
     },
 
+    'pairTo': {
+        'pairs keys with values': function(t) {
+            t.deepEqual(qibl.pairTo({}, [], [1, 2, 3]), {});
+            t.deepEqual(qibl.pairTo({}, ['foo.fle'], [1, 2, 3]), { 'foo.fle': 1 });
+            t.deepEqual(qibl.pairTo({}, ['a', 'b'], [1, 2, 3]), { a: 1, b: 2 });
+            t.deepEqual(qibl.pairTo({}, ['a', 'b'], [4]), { a: 4, b: undefined });
+            t.done();
+        },
+        'decorates and returns the target': function(t) {
+            t.deepEqual(qibl.pairTo({a:1}, ['bee'], ['cee', 'dee']), { a: 1, bee: 'cee' });
+            t.done();
+        },
+    },
+
     'vinterpolate': {
         'should interpolate fields': function(t) {
             t.equal(qibl.vinterpolate("foobar", "o", []), "foobar");
