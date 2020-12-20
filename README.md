@@ -490,7 +490,7 @@ The message arguments are interpolated into the message with `util.format(messag
 Return a high precision real-time timestamp with the seconds elapsed since the epoch, similar to
 PHP's `microtime(true)`.  It returns nanosecond precise elapsed times and tracks the system
 clock accurately to within .001 milliseconds.  Note that the system clock itself is usually only
-accurate to 1-10 ms because it is adjusted to a remote time service reached over the network.
+accurate to 1-10 ms because it is synced to a remote time service over a bursty network.
 
     sec = qibl.microtime();
     // => 1608407555.834298
