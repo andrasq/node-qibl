@@ -973,7 +973,7 @@ module.exports = {
         'should be fast': function(t) {
             var str = 'a.b.c.d.e';
             var str = 'foo.bar.baz.bat.zed';
-            var parts, s, nloops = 1e6;
+            var parts, s, nloops = 1e5;
             var t1 = Date.now();
             for (var i=0; i<nloops; i++) {
                 //parts = new Array(qibl.strtok('a.b.c.d.e', '.'));
@@ -985,7 +985,7 @@ module.exports = {
                 // 76ms v8, 130ms v13, 140ms v12, 70ms v10, 92ms v5
             }
             var t2 = Date.now();
-            console.log("AR: strtok: %d in %d ms", nloops, t2 - t1);
+            console.log("AR: strtok: %dk in %d ms", nloops/1000, t2 - t1);
             t.done();
         },
     },

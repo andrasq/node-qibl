@@ -1070,9 +1070,9 @@ function addslashes( str, patt ) {
 // from mysqule (aka node-minisql):
 function makeError( props, fmt /* ,VARARGS */ ) {
     var args = [].slice.call(arguments);
-    var err = new Error(util.format.apply(null, typeof args[0] === 'object' ? args.slice(1) : args))
-    if (typeof args[0] === 'object') qibl.assignTo(err, args[0])
-    return err
+    var props = typeof args[0] === 'object' ? args.shift() : {};
+    var err = new Error(util.format.apply(null, args));
+    return qibl.assignTo(err, props);
 }
 
 // microsecond resolution real-time timestamp (available on node-v0.7 and up)
