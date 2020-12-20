@@ -156,7 +156,7 @@ layout for more efficient access.
 
 Accessing an object can over time result in it being optimized for mapped lookups or
 optimized for hashed lookups, but making an object into a prototype forces an immediate
-conversion to mapped lookups.  To retain the speedup, do not add new properties.
+conversion to mapped lookups.  To retain the speedup, do not add or delete properties.
 
 ### qibl.selectField( arrayOfObjects, propertyName )
 
@@ -385,8 +385,7 @@ are in ascending order.
 
 ### qibl.newBuf( arg, encodingOrOffset, length )
 
-Construct a Buffer like `new Buffer()` used to before it was deprecated.  Note that with
-newer node the constructor polyfill is slow compared to the `allocBuf` and `fromBuf` builders.
+Construct a Buffer like `new Buffer()` used to before it was deprecated.
 
 ### qibl.allocBuf( length )
 
@@ -488,7 +487,7 @@ The message arguments are interpolated into the message with `util.format(messag
 
 ### microtime( )
 
-Return a high precision real-time timestamp of the seconds elapsed since the epoch, similar to
+Return a high precision real-time timestamp with the seconds elapsed since the epoch, similar to
 PHP's `microtime(true)`.  It returns nanosecond precise elapsed times and tracks the system
 clock accurately to within .001 milliseconds.  Note that the system clock itself is usually only
 accurate to 1-10 ms because it is adjusted to a remote time service reached over the network.
@@ -504,8 +503,8 @@ accurate to 1-10 ms because it is adjusted to a remote time service reached over
 Keep calling `loopedFunction()` until it calls its callback with an error or a truthy `done`
 value.  Errors returned from or thrown by the looped function stop the looping, are caught, and
 are returned to the callback.  Due to the way repeatUntil recurses, errors thrown from the
-callback are also caught and fed back into the callback.  This function is blocking, it does not
-yield the cpu unless the looped function does.
+callback are also caught and fed back into the callback.  This function does not yield the cpu
+unless the looped function does.
 
     var count = 0;
     qibl.repeatUntil(function(done) {
