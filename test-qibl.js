@@ -2057,6 +2057,27 @@ module.exports = {
         },
     },
 
+    'compileVinterpolate': {
+        'throws on invalid pattern': function(t) {
+            t.throws(function() { qibl.compileVinterpolate('hello %s') }, /must be a string/);
+            t.done();
+        },
+        'throws on incorrect arg count': function(t) {
+            var interp = qibl.compileVinterpolate('Hello %s, %s!', '%s');
+            t.throws(function() { interp(['there']) }, /needs 2 arg.*got 1/);
+            t.throws(function() { interp(['there', 'you', 'all']) }, /needs 2 arg.*got 3/);
+            t.done();
+        },
+        'interpolates the arguments': function(t) {
+            var interp = qibl.compileVinterpolate('select ?, ?;', '?');
+            t.equal(interp([1, 2]), "select 1, 2;");
+            t.equal(interp([1, "foo"]), "select 1, foo;");
+            t.equal(interp(['foo', false]), "select foo, false;");
+            t.equal(interp(['foo', {}]), "select foo, [object Object];");
+            t.done();
+        },
+    },
+
     'addslashes': {
         'should escape dangerous metacharacters': function(t) {
             var patt = /([\\"';|&$])/g;

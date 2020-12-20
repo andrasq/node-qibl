@@ -1034,11 +1034,12 @@ function formatValue(arg) {
 // Much faster than vinterpolate, 28m/s vs 6.6m/s (node-v8; 32 vs 4 -v6, 23 vs 8.5 -v10, 32 vs 8.1 -v14)
 // Only 6% slower than backticks `${x}` compile-time interpolation.
 // Compiling the interpolation is 3x faster (23 vs 8m/s) but adds 40 lines of code (compile + cache funcs)
-//   470k/s to compile and 23m/s to run, vs straight 8m/s: faster if more than 28 call
+//   470k/s to compile and 23m/s to run, vs straight 8m/s: faster if more than 28 calls
 function compileVinterpolate( fmt, patt ) {
+    if (typeof patt !== 'string') throw new Error('pattern must be a string not ' + (typeof patt));
     var parts = fmt.split(patt).map(function(s) { return '"' + s.replace(/["]/g, '\\"') + '"' });
     var argCount = parts.length - 1;
-    var _rejectArgs = function(len, n) { throw new Error("format needs " + len + " arguments, got " + n) }
+    var _rejectArgs = function(have, need) { throw new Error("format needs " + need + " arguments, got " + have) }
 
     var src = util.format(
         "function _interpolate(argv) {\n" +
