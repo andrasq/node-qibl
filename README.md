@@ -550,7 +550,8 @@ Traverse the directory
 Changelog
 ---------
 
-- 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, document repeatUntil, walkdir
+- 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, document repeatUntil, walkdir,
+          fix getProperty() for un-dotted names longer than 40 chars, faster getProperty
 - 1.7.3 - new undocumented `repeatUntil`, `walkdir`
 - 1.7.2 - fix escaped \] in globRegex char lists [...]
 - 1.7.1 - new function `globRegex`

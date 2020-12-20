@@ -184,6 +184,13 @@ module.exports = {
                 [{a:{b:1}}, 'a.c'],
                 [{a:{b:1}}, 'a.a'],
 
+                [{}, 'aa'],
+                [{}, 'aa.bb'],
+                [{}, 'aa.bb.cc'],
+                [{}, 'aa.bb.cc.dd'],
+                [{}, 'aa.bb.cc.dd.ee'],
+                [{}, 'aa.bb.cc.dd.ee.ff'],
+
                 [false, 'a'],
                 [null, 'a'],
                 [null, 'a.b'],
@@ -218,6 +225,16 @@ module.exports = {
             t.deepStrictEqual(obj.get('a.b.c', 1234), 1234);
             t.deepStrictEqual(obj.get('b', 1234), 1234);
 
+            t.done();
+        },
+
+        'should allow very long names': function(t) {
+            var item = {
+                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 1,
+                bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: { ccc: 2 },
+            }
+            t.equal(qibl.getProperty(item, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), 1);
+            t.equal(qibl.getProperty(item, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.ccc', 2), 2);
             t.done();
         },
     },

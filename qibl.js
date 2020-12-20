@@ -159,9 +159,7 @@ function merge( target /* ,VARARGS */ ) {
 function getProperty( target, dottedName, defaultValue ) {
     if (typeof target === 'string' && isMethodContext(this)) return getProperty(this, target, dottedName);
 
-    var isDotted = dottedName.length > 40;
-    if (!isDotted) for (var i = 0; i < dottedName.length; i++) { if (dottedName.charCodeAt(i) === 0x2E) { isDotted = true; break; } }
-    if (!isDotted) return (target && target[dottedName] !== undefined ? target[dottedName] : defaultValue);
+    if (dottedName.indexOf('.') < 0) return (target && target[dottedName] !== undefined ? target[dottedName] : defaultValue);
 
     var path = dottedName.split('.');
     target = target == null ? undefined : target[path[0]];
@@ -170,8 +168,8 @@ function getProperty( target, dottedName, defaultValue ) {
         target = target == null ? undefined : target[path[2]];
     if (path.length > 3) {
         target = target == null ? undefined : target[path[3]];
+        for (var i = 4; i < path.length; i++) target = target == null ? undefined : target[path[i]];
     }}
-    for (var i = 4; i < path.length; i++) target = target == null ? undefined : target[path[i]];
     return target !== undefined ? target : defaultValue;
 }
 // compile the property getter for 10x faster property lookups.
