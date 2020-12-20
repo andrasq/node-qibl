@@ -217,14 +217,14 @@ function setPropertyMode( target, property, value, mode ) {
     var isSetter = mode.indexOf('S') >= 0;
     var isGetter = mode.indexOf('G') >= 0;
     var isEnumerable = mode.indexOf('x') < 0;
-    var isWritable = mode.indexOf('r') >= 0 && mode.indexOf('w') < 0;
+    var isReadonly = mode.indexOf('r') >= 0 && mode.indexOf('w') < 0;
     var isConfigurable = true;
 
     var u = undefined;
     var descriptor =
         isSetter ? { set: value, enumerable: isEnumerable, configurable: isConfigurable } :
         isGetter ? { get: value, enumerable: isEnumerable, configurable: isConfigurable } :
-                   { value: value, enumerable: isEnumerable, writable: isWritable, configurable: isConfigurable };
+                   { value: value, enumerable: isEnumerable, writable: !isReadonly, configurable: isConfigurable };
     Object.defineProperty(target, property, descriptor);
 }
 

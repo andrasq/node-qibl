@@ -301,8 +301,14 @@ module.exports = {
             t.deepEqual(ret, {b:2});
             t.deepEqual(ret.a, 10);
 
-            // writable
+            // readonly
             ret = qibl.setProperty({a:1, b:2}, 'a', 10, 'r');
+            t.deepEqual(ret, {a:10, b:2});
+            try { ret.a = 20; } catch (e) {}
+            t.deepEqual(ret.a, 10);
+
+            // writable
+            ret = qibl.setProperty({a:1, b:2}, 'a', 10, 'w');
             t.deepEqual(ret, {a:10, b:2});
             try { ret.a = 20; } catch (e) {}
             t.deepEqual(ret.a, 20);
