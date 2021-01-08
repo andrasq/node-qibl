@@ -2299,13 +2299,15 @@ module.exports = {
             t.done();
         },
         'display calibration': function test(t) {
-            var ix = 0, times = new Array(40000);
+            var ix = 0, times = new Array(100000);
 
             // capture timestamps for 4 millisecond ticks (3+ ms elapsed), to ensure
             // that 2nd tick has samples before it and also after it (first tick is not always captured)
-            for (var d = Date.now(); Date.now() < d + 4; ) times[ix++] = [Date.now(), qibl.microtime()];
+            // NOTE: node-v14,v15 have some huge gaps in the times (2+ms), need > 4 to avoid an "[ix-1][0] of undefined"
+            for (var d = Date.now(); Date.now() < d + 10; ) times[ix++] = [Date.now(), qibl.microtime()];
+            // NOTE: node-v13,v14,v15 have huge (1-2ms) gaps between loops, sometimes more
 
-            // find the index of the middle millisecond tick
+            // find the index of the second millisecond tick (with samples before and after)
             ix = 0;
             for (ix++ ; ix<times.length; ix++) if (times[ix-1][0] < times[ix][0]) break;
             for (ix++ ; ix<times.length; ix++) if (times[ix-1][0] < times[ix][0]) break;
