@@ -299,13 +299,17 @@ function clone( object, recursively ) {
 }
 
 // similar to fill() but for objects
+function _fillit(target, val, options) {
+    var base = options && options.base || 0;
+    var bound = options && options.bound || target.length;
+    if (typeof val === 'function') for (var i = base; i < bound; i++) target[i] = val(i);
+    else for (var i = base; i < bound; i++) target[i] = val;
+}
+var _fillit_a = eval('true && ' + _fillit);
+var _fillit_b = eval('true && ' + _fillit);
 function populate( target, val, options ) {
-    if (Array.isArray(target) || target instanceof Buffer) {
-        var base = options && options.base || 0;
-        var bound = options && options.bound || target.length;
-        if (typeof val === 'function') for (var i = base; i < bound; i++) target[i] = val(i);
-        else for (var i = base; i < bound; i++) target[i] = val;
-    }
+    if (Array.isArray(target)) _fillit_a(target, val, options);
+    else if (Buffer.isBuffer(target)) _fillit_b(target, val, options);
     else {
         var keys = options && options.keys ? options.keys : qibl.keys(target);
         kfill(target, keys, typeof val === 'function' ? val : function(k) { return val });

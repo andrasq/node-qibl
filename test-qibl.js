@@ -555,6 +555,16 @@ module.exports = {
             t.done();
         },
 
+        'should set buffer elements': function(t) {
+            var buf = qibl.allocBuf(6);
+            t.deepEqual(qibl.populate(buf, 3), qibl.fromBuf([3, 3, 3, 3, 3, 3]));
+            t.deepEqual(qibl.populate(buf, 5, { base: 2 }), qibl.fromBuf([3, 3, 5, 5, 5, 5]));
+            t.deepEqual(qibl.populate(buf, 7, { base: 3, bound: 5 }), [3, 3, 5, 7, 7, 5]);
+            t.deepEqual(qibl.populate(buf, 9, { base: 2, bound: 4 }), [3, 3, 9, 9, 7, 5]);
+
+            t.done();
+        },
+
         'should populate array elements': function(t) {
             var a = new Array(10);
 
