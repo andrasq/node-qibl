@@ -2174,6 +2174,21 @@ module.exports = {
             t.equal(interp(['foo', {}]), "select foo, [object Object];");
             t.done();
         },
+        'omits leading empty string': function(t) {
+            var fn = qibl.compileVinterpolate('%s,%s world', '%s');
+            t.contains(fn.toString(), 'argv[0] + "," + argv[1] + " world";');
+            t.done();
+        },
+        'omits trailing empty string': function(t) {
+            var fn = qibl.compileVinterpolate('hello %s', '%s');
+            t.contains(fn.toString(), '"hello " + argv[0];');
+            t.done();
+        },
+        'omits embedded empty string': function(t) {
+            var fn = qibl.compileVinterpolate('%s%s %s', '%s');
+            t.contains(fn.toString(), 'argv[0] + argv[1] + " " + argv[2];');
+            t.done();
+        },
     },
 
     'addslashes': {

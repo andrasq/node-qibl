@@ -1057,7 +1057,9 @@ function compileVinterpolate( fmt, patt ) {
         "function _interpolate(argv) {\n" +
         "  if (argv.length !== %d) _rejectArgs(argv.length, %d);\n", argCount, argCount);
     var lastPart = parts.pop();
-    src += "  return " + parts.map(function(part, ix) { return part + format(" + argv[%d] + ", ix) }).join('') + lastPart + ";\n";
+    src += "  return " +
+        parts.map(function(part, ix) {return (part !== '""' ? part + " + " : '')  + format("argv[%d]", ix) }).join(' + ') +
+        (lastPart !== '""' ? ' + ' + lastPart : '') + ";\n";
     src += "}";
 // console.log("Ar: **** src", src);
 
