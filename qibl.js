@@ -108,6 +108,8 @@ var qibl = module.exports = {
     vinterpolate: vinterpolate,
     compileVinterpolate: compileVinterpolate,
     addslashes: addslashes,
+    startsWith: startsWith,
+    endsWith: endsWith,
     makeError: makeError,
     microtime: microtime,
 };
@@ -1072,6 +1074,15 @@ function addslashes( str, patt ) {
     // TODO: default to escaping only \' \" \\ \0, pass them in for escapeshellcmd()
     patt = patt || /([\'\"\\\x00])/g;
     return str.replace(patt, '\\$1');
+}
+
+// "string".startsWith, missing in node-v0.10
+function startsWith( string, prefix ) {
+    return string.indexOf(prefix) === 0;
+}
+// "string".endsWith, missing in node-v0.10
+function endsWith( string, suffix ) {
+    return string.indexOf(suffix, string.length - suffix.length) >= 0;
 }
 
 // from mysqule (aka node-minisql):

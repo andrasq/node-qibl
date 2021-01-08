@@ -552,6 +552,7 @@ errors are ignored.  Errors accessing the top-level `dirname` are returned to th
 Changelog
 ---------
 
+- 1.8.2 - new undocumented startsWith/endsWith
 - 1.8.1 - tune microtime accuracy, fix setProperty readonly mode (undocumented)
 - 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, `pairTo`, document repeatUntil, walkdir,
           fix getProperty() for un-dotted names longer than 40 chars, faster getProperty, faster iteration
