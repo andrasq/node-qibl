@@ -90,6 +90,7 @@ var qibl = module.exports = {
     repeatUntil: repeatUntil,
     repeatFor: repeatFor,
     walkdir: walkdir,
+    walktree: walktree,
     keys: keys,
     values: values,
     entries: entries,
@@ -787,6 +788,23 @@ function walkdir( dirname, visitor, callback ) {
     }
     function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
     function pathJoin(dirname, filename) { return filename === null ? dirname : dirname + '/' + filename }
+}
+
+/*
+ * Recursively visit all nodes in the tree and parade them in front of visitor().
+ * Behaves like an Array.forEach for recursive objects: visitor is passed value, index and object.
+ * Does not traverse arrays, functions, or class instances, just {} hash Objects.
+ */
+function walktree( tree, visitor ) {
+    _visitnodes(tree, visitor, { depth: 1, stop: false });
+}
+function _visitnodes( node, visitor, state ) {
+    if (qibl.isHash(node)) for (var k in node) {
+        var next = visitor(node[k], k, node, state.depth);
+        if (next === 'stop') state.stop = true;
+        else if (next !== 'skip') { state.depth += 1; _visitnodes(node[k], visitor, state); state.depth -= 1 }
+        if (state.stop) break;
+    }
 }
 
 // backslash-escape the chars that have special meaning in regex strings

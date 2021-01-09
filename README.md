@@ -34,8 +34,8 @@ Objects
 
 ### qibl.isHash( object )
 
-Test whether the object is a generic hash `{}` ie `new Object()`, or is an instance of some
-class.  Tests the object constructor.
+Test whether the object is a generic hash `{}` ie `new Object()` and return `true`, else `false`
+if is an instance of some class.  Tests the object constructor.
 
 ### qibl.isMethodContext( _this )
 
@@ -560,11 +560,19 @@ Errors accessing the visited files are reported out of band via 'error' events o
 emitter, and the visitor is not called on them.  The emitter does not throw, un-listened for
 errors are ignored.  Errors accessing the top-level `dirname` are returned to the callback.
 
+### walktree( tree, visitor(value, name, node, depth) )
+
+Recursively examine the properties of tree and call `visitor(node)` on each.  `tree` may be any
+value, but only `isHash` hashes are traversed.  Like Array.forEach, the visitor is called with
+the property value, the property name (index), the object whose property it is, plus `depth`,
+the current level of property traversal, 1 for the direct properties of `tree`.  If the visitor
+returns `'skip'` the property is not recursed into, and if `'stop'` the traversal is halted.
+
 
 Changelog
 ---------
 
-- 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`
+- 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`, new `walktree`
 - 1.8.2 - optimize populate() separately for arrays and buffers,
           omit empty strings from generated compileVinterpolate code, calibrate microtime longer
 - 1.8.1 - tune microtime accuracy, fix setProperty readonly mode (undocumented)

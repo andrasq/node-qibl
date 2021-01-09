@@ -1712,6 +1712,47 @@ module.exports = {
         },
     },
 
+    'walktree': {
+        'recursively traverses object': function(t) {
+            var keys = [];
+            var tree = { a: 1, b: { ba: 2 }, c: 3};
+            qibl.walktree(tree, function(value, key, node) {
+                keys.push(key);
+            });
+            t.deepEqual(keys, ['a', 'b', 'ba', 'c']);
+            t.done();
+        },
+
+        'calls visitor with value, key, object, depth': function(t) {
+            var calls = [];
+            var tree = { a: 1, b: { ba: 2 }, c: 3 };
+            qibl.walktree(tree, function(v, k, o, depth) { calls.push({ v: v, k: k, o: o, depth: depth }) });
+            t.deepEqual(calls, [
+                { v: 1, k: 'a', o: tree, depth: 1 },
+                { v: { ba: 2 }, k: 'b', o: tree, depth: 1 },
+                { v: 2, k: 'ba', o: { ba: 2 }, depth: 2 },
+                { v: 3, k: 'c', o: tree, depth: 1 },
+            ]);
+            t.done();
+        },
+
+        'stops early on stop': function(t) {
+            var keys = [];
+            var tree = { a: 1, b: { ba: 2 }, c: 3};
+            qibl.walktree(tree, function(v, k) { keys.push(k); return k === 'ba' ? 'stop' : null });
+            t.deepEqual(keys, ['a', 'b', 'ba']);
+            t.done();
+        },
+
+        'does not recurse on skip': function(t) {
+            var keys = [];
+            var tree = { a: 1, b: { ba: 2 }, c: 3};
+            qibl.walktree(tree, function(v, k) { keys.push(k); return 'skip' });
+            t.deepEqual(keys, ['a', 'b', 'c']);
+            t.done();
+        },
+    },
+
     'escapeRegex': {
         'should escape all metachars': function(t) {
             var chars = [];
