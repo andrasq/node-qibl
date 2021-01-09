@@ -267,6 +267,18 @@ with a frequency distribution similar to that of the qibl.js source file.
 
     qibl.str_random(20)         // => 'etnq ss q t ae kmunl'
 
+### qibl.str_locate( str, substr, handler(arg, offset), arg )
+
+Locate all substrings `substr` in the string `str`, and call `handler(arg) with their offsets.
+
+### qibl.startsWith( str, substr )
+
+Return true if `substr` is a prefix of the string `str`.  Equivalent to String.prototype.startsWith.
+
+### qibl.endsWith( str, substr )
+
+Return true if `substr` is a suffix of the string `str`.  Equivalent to String.prototype.startsWith.
+
 ### qibl.strtok( str, sep )
 
 Separate the string `str` into parts delimited by the separator `sep`.  When called with a
@@ -552,7 +564,8 @@ errors are ignored.  Errors accessing the top-level `dirname` are returned to th
 Changelog
 ---------
 
-- 1.8.2 - new undocumented startsWith/endsWith, optimize populate() separately for arrays and buffers,
+- 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`
+- 1.8.2 - optimize populate() separately for arrays and buffers,
           omit empty strings from generated compileVinterpolate code, calibrate microtime longer
 - 1.8.1 - tune microtime accuracy, fix setProperty readonly mode (undocumented)
 - 1.8.0 - new `makeError`, `compileVinterpolate`, `microtime`, `repeatFor`, `pairTo`, document repeatUntil, walkdir,

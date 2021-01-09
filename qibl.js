@@ -2,7 +2,7 @@
  * qibl -- quick itty-bitty library
  * Small functions and polyfills that I found useful.
  *
- * Copyright (C) 2019-2020 Andras Radics
+ * Copyright (C) 2019-2021 Andras Radics
  * Licensed under the Apache License, Version 2.0
  *
  * 2019-09-11 - AR.
@@ -542,11 +542,20 @@ function str_random_sentence( ) {
 
 // locate all substrings patt in string str, and call handler with their offsets
 function str_locate( str, patt, handler, arg ) {
-    var pos = 0;
-    for (var pos = 0; pos < str.length; pos += patt.length) {
+    var pos = 0, len = str.length, plen = patt.length;
+    for (var pos = 0; pos < len; pos += plen) {
         if ((pos = str.indexOf(patt, pos)) >= 0) handler(pos, arg);
         else break;
     }
+}
+
+// "string".startsWith, missing in node-v0.10
+function startsWith( string, prefix ) {
+    return string.indexOf(prefix) === 0;
+}
+// "string".endsWith, missing in node-v0.10
+function endsWith( string, suffix ) {
+    return string.indexOf(suffix, string.length - suffix.length) >= 0;
 }
 
 // similar to strtok() and strsep() but empty strings are allowed
@@ -1080,15 +1089,6 @@ function addslashes( str, patt ) {
     // TODO: default to escaping only \' \" \\ \0, pass them in for escapeshellcmd()
     patt = patt || /([\'\"\\\x00])/g;
     return str.replace(patt, '\\$1');
-}
-
-// "string".startsWith, missing in node-v0.10
-function startsWith( string, prefix ) {
-    return string.indexOf(prefix) === 0;
-}
-// "string".endsWith, missing in node-v0.10
-function endsWith( string, suffix ) {
-    return string.indexOf(suffix, string.length - suffix.length) >= 0;
 }
 
 // from mysqule (aka node-minisql):
