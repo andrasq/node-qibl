@@ -792,17 +792,22 @@ function walkdir( dirname, visitor, callback ) {
 
 /*
  * Recursively visit all nodes in the tree and parade them in front of visitor().
+ * Nodes are descended into immediately after visiting, so depth informs when node ends.
  * Behaves like an Array.forEach for recursive objects: visitor is passed value, index and object.
  * Does not traverse arrays, functions, or class instances, just {} hash Objects.
+ * Note: depth of root is 0 like /usr/bin/find, not 1 like util.inspect().
  */
 function walktree( tree, visitor ) {
+    // TODO: visit the root of the tree? only scalars?
+    // visitor(tree, null, undefined, 0);
     _visitnodes(tree, visitor, { depth: 1, stop: false });
 }
 function _visitnodes( node, visitor, state ) {
-    if (qibl.isHash(node)) for (var k in node) {
+    for (var k in node) {
         var next = visitor(node[k], k, node, state.depth);
         if (next === 'stop') state.stop = true;
-        else if (next !== 'skip') { state.depth += 1; _visitnodes(node[k], visitor, state); state.depth -= 1 }
+        else if (next !== 'skip' && qibl.isHash(node[k])) {
+            state.depth += 1; _visitnodes(node[k], visitor, state); state.depth -= 1; }
         if (state.stop) break;
     }
 }
