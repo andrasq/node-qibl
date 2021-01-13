@@ -1753,6 +1753,40 @@ module.exports = {
         },
     },
 
+    'difftree': {
+        'diffs trees': function(t) {
+            var tests = [
+                [{}, {}, undefined],
+                [{a:1, b:2}, {a:1, b:2}, undefined],
+                [{a:1, b: {}}, {a:1, b: {}}, undefined],
+                [{}, {a:1}, {a:1}],
+                [{a:1}, {}, {a:undefined}],
+                [{a:1, b:2}, {a:1, b:3}, {b:3}],
+                [{a:1, b:2}, {a:1, b: {c:3}}, {b:{c:3}}],
+                [{a:1, b: {c:3}}, {a:1, b: {c:4}}, {b:{c:4}}],
+                // the below is the README example
+                [{ v: 0, a: { b: 2 } }, { v: 0, a: { b: 2, c: 3 }, d: 4 }, { a: { c: 3 }, d: 4 }],
+            ];
+            for (var i=0; i<tests.length; i++) {
+                var test = tests[i];
+                t.deepEqual(qibl.difftree(test[0], test[1]), test[2], 'test case ' + i);
+            }
+            t.done();
+        },
+
+        'is fast': function(t) {
+            t.skip(); // breaks if whole suite runs
+            var copy = qibl.assignTo({}, require.cache);
+            for (var k in copy) copy[k] = qibl.assignTo({}, copy[k]);
+            var copy2 = qibl.merge({}, copy);
+            var t1 = qibl.microtime();
+            for (var i=0; i<1000; i++) var diff = qibl.difftree(copy, copy2);   // 250ms for 10k
+            // for (var i=0; i<1000; i++) var diff = t.deepEqual(copy, copy2);  // 320 ms for 10k
+            var t2 = qibl.microtime();
+            t.done();
+        },
+    },
+
     'escapeRegex': {
         'should escape all metachars': function(t) {
             var chars = [];

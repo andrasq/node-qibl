@@ -568,10 +568,20 @@ the property value, the property name (index), the object whose property it is, 
 the current level of property traversal, 1 for the direct properties of `tree`.  If the visitor
 returns `'skip'` the property is not recursed into, and if `'stop'` the traversal is halted.
 
+### difftree( node1, node2 )
+
+Return a recursive copy of `node2` with all properties that are also present in `node1` removed,
+leaving only the properties where node2 differs from node1.  Properties must be `===` strict
+equal to match.  Only `isHash()` hashes are recursed into, not class instances.
+
+    qibl.difftree({ v: 0, a: { b: 2 } }, { v: 0, a: { b: 2, c: 3 }, d: 4 });
+    // => { a: { c: 3 }, d: 4 }
+
 
 Changelog
 ---------
 
+- 1.10.0 - new `difftree`
 - 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`, new `walktree`
 - 1.8.2 - optimize populate() separately for arrays and buffers,
           omit empty strings from generated compileVinterpolate code, calibrate microtime longer

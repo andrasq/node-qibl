@@ -91,6 +91,7 @@ var qibl = module.exports = {
     repeatFor: repeatFor,
     walkdir: walkdir,
     walktree: walktree,
+    difftree: difftree,
     keys: keys,
     values: values,
     entries: entries,
@@ -810,6 +811,28 @@ function _visitnodes( node, visitor, state ) {
             state.depth += 1; _visitnodes(node[k], visitor, state); state.depth -= 1; }
         if (state.stop) break;
     }
+}
+
+// return a tree populated with the differences between trees t1 and t2
+// Cycles and properties of non-hashes are not handled.
+// Is not smart about non-identical but equivalent objects eg [] and [].
+function difftree(t1, t2) {
+    var differs = false, diff = {};
+    for (var k in t1) {
+        if (t1[k] !== t2[k]) {
+            if (isHash(t1[k]) && isHash(t2[k])) {
+                var delta = difftree(t1[k], t2[k]);
+                if (delta !== undefined) { diff[k] = delta; differs = true }
+            } else {
+                diff[k] = t2[k];
+                differs = true;
+            }
+        }
+    }
+    for (var k in t2) {
+        if (!(k in t1)) { diff[k] = t2[k]; differs = true }
+    }
+    return differs ? diff : undefined;
 }
 
 // backslash-escape the chars that have special meaning in regex strings
