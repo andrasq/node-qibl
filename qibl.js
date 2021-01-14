@@ -44,6 +44,7 @@ var qibl = module.exports = {
     merge: merge,
     getProperty: getProperty,
     compileGetProperty: compileGetProperty,
+    getProp: getProp,
     setProperty: setProperty,
     inherits: inherits,
     derive: derive,
@@ -188,6 +189,21 @@ function compileGetProperty(path) {
     var getter = tryEval('function(o) { return (' + pretest + ') ? o.' + path + ' : undefined }');
     return getter;
 }
+
+// quicker getProperty: 45m/s vs 8.8m/s 4.475g 3800X (58m/s 4.8g 5600X)
+var _getters = {};
+var _getterCount = 0;
+function getProp( obj, path, _default ) {
+    // periodically garbage collect the precompiled getters
+    if (_getterCount >= getProp.maxCount) (_getterCount = 0, _getters = {});
+
+    var getter = _getters[path] || (_getterCount++, _getters[path] = compileGetProperty(String(path)));
+    var value = getter(obj);
+    return value !== undefined ? value : _default;
+}
+getProp.maxCount = 10000;
+getProp.getCache = function() { return _getters };
+getProp.clearCache = function() { _getters = {} };
 
 /*
  * Set a nested property by dotted name.

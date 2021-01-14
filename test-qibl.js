@@ -269,6 +269,56 @@ module.exports = {
         },
     },
 
+    'getProp': {
+        'retrieves named property': function(t) {
+            var tests = [
+                [null, 'a', '--default--'],
+                [null, 'a.b.c', '--default--'],
+                [{}, null, '--default--'],
+                [{null: 1}, null, 1],
+                [3, 'a', '--default--'],
+                [{}, 'a', '--default--'],
+                [{a:3}, 'a', 3],
+                [{a:3, b:{}}, 'a.b', '--default--'],
+                [{a:3, b:{}}, 'a.b.c.d', '--default--'],
+                [{a:3, b:{}}, 'b', {}],
+            ];
+            for (var i=0; i<tests.length; i++) {
+                var obj = tests[i][0], path = tests[i][1], expect = tests[i][2];
+                t.deepEqual(qibl.getProp(obj, path, '--default--'), expect);
+            }
+            t.done();
+        },
+
+        'clears getter cache': function(t) {
+            t.ok(Object.keys(qibl.getProp.getCache()).length > 1);
+            qibl.getProp.clearCache();
+            t.equal(Object.keys(qibl.getProp.getCache()).length, 0);
+            t.done();
+        },
+
+        'clears getter cache after having maxCount getters': function(t) {
+            qibl.getProp.clearCache();
+            qibl.getProp.maxCount = 2;
+            qibl.getProp({}, 'a');
+            qibl.getProp({}, 'b');
+            qibl.getProp({}, 'c');
+            t.ok(Object.keys(qibl.getProp.getCache()).length <= 2);
+            t.done();
+        },
+
+        'is fast': function(t) {
+            var x, data = [{a: {b: {c: 1}}}, {a: {b: {c: 2}}}];
+            var nloops = 1e5;
+            var t1 = qibl.microtime();
+            for (var i=0; i<nloops; i++) x = qibl.getProp(data[i & 1], 'a.b.c');
+            var t2 = qibl.microtime();
+            t.printf("AR: %dk lookups in %0.3f ms, %dk/sec", nloops, (t2 - t1) * 1000, nloops / 1000 / (t2 - t1));
+            // 58m/s for 1m, 22m/s for 100k (R5 4.8g 5600X)
+            t.done();
+        },
+    },
+
     'setProperty': {
         'should set property': function(t) {
             var fn = function(){};

@@ -91,6 +91,15 @@ The property name must be a valid javascript dotted property path.
     get(obj1)                           // 1
     get(obj2)                           // { c: 2 }
 
+### qibl.getProp( target, dottedName [,defaultValue] )
+
+A 5 times faster compiled version of `getProperty`.  The first call first compiles a dedicated
+property getter that looks up dottedName, subsequent calls reuse the getter.
+
+Properties:
+- `getProp.maxCount` - capacity limit on the built-inn getter function cache.  Default is 10,000.
+- `getProp.clearCache` - empty the getter cache, discard all getter functions.
+
 ### qibl.setProperty( target, dottedName, value )
 
 Set a nested property by dotted name.  Dots `.` in the name imply nested objects,
@@ -581,7 +590,7 @@ equal to match.  Only `isHash()` hashes are recursed into, not class instances.
 Changelog
 ---------
 
-- 1.10.0 - new `difftree`
+- 1.10.0 - new `difftree`, new `getProp` quicker property getter
 - 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`, new `walktree`
 - 1.8.2 - optimize populate() separately for arrays and buffers,
           omit empty strings from generated compileVinterpolate code, calibrate microtime longer
