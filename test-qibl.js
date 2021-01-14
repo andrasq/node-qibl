@@ -1757,9 +1757,12 @@ module.exports = {
         'diffs trees': function(t) {
             var tests = [
                 [{}, {}, undefined],
+                [{a:undefined}, {}, {a:undefined}],
+                [{}, {a:undefined}, {a:undefined}],
                 [{a:1, b:2}, {a:1, b:2}, undefined],
                 [{a:1, b: {}}, {a:1, b: {}}, undefined],
                 [{}, {a:1}, {a:1}],
+                [{a:1}, {}, {a:undefined}],
                 [{a:1}, {}, {a:undefined}],
                 [{a:1, b:2}, {a:1, b:3}, {b:3}],
                 [{a:1, b:2}, {a:1, b: {c:3}}, {b:{c:3}}],

@@ -816,10 +816,10 @@ function _visitnodes( node, visitor, state ) {
 // return a tree populated with the differences between trees t1 and t2
 // Cycles and properties of non-hashes are not handled.
 // Is not smart about non-identical but equivalent objects eg [] and [].
-function difftree(t1, t2) {
+function difftree( t1, t2 ) {
     var differs = false, diff = {};
     for (var k in t1) {
-        if (t1[k] !== t2[k]) {
+        if (!(k in t2) || t1[k] !== t2[k]) {
             if (isHash(t1[k]) && isHash(t2[k])) {
                 var delta = difftree(t1[k], t2[k]);
                 if (delta !== undefined) { diff[k] = delta; differs = true }
