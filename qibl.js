@@ -365,9 +365,12 @@ function fill( buf, ch, base, bound ) {
 
 // concatenate two arrays, much faster than [].concat for short arrays
 // note that unlike [].concat, a1 and a2 must be arrays and are not flattened
-function concat2( target, a1, a2 ) {
+function concat2( target, a1, a2 /* VARARGS */ ) {
     for (var len = a1.length, i = 0; i < len; i++) target.push(a1[i]);
-    if (a2) for (var len = a2.length, i = 0; i < len; i++) target.push(a2[i]);
+    if (a2) for (var ai=2; ai<arguments.length; ai++) {
+        a2 = arguments[ai];
+        for (var len = a2.length, i = 0; i < len; i++) target.push(a2[i]);
+    }
     return target;
 }
 
