@@ -590,7 +590,7 @@ equal to match.  Only `isHash()` hashes are recursed into, not class instances.
 Changelog
 ---------
 
-- 1.10.0 - new `difftree`, new `getProp` quicker property getter, concat2 of varargs
+- 1.10.0 - new `difftree`, new `getProp` quicker property getter, concat2 of varargs, new undocumented `reparent`
 - 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`, new `walktree`
 - 1.8.2 - optimize populate() separately for arrays and buffers,
           omit empty strings from generated compileVinterpolate code, calibrate microtime longer

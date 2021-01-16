@@ -49,6 +49,7 @@ var qibl = module.exports = {
     inherits: inherits,
     derive: derive,
     clone: clone,
+    reparent: reparent,
     fill: fill,
     populate: populate,
     omitUndefined: omitUndefined,
@@ -257,18 +258,14 @@ function inherits( derived, base ) {
     for (var i = 0; i < keys.length; i++) derived[keys[i]] = base[keys[i]];
 
     // set up constructor and prototype linkage
-    // FIXME: does __proto__ need to be instanceof Foo? instanceof Bar?
-    derived.prototype = { constructor: derived, __proto__: base.prototype };
-
-    // to avoid assigning __proto__, can use the typescript linkage, ie:
-    // function __() { this.constructor = derived }
-    // __.prototype = base.prototype;
-    // derived.prototype = new __();
+    // Traditionally Derived prototype constructor is Derived, with its __proto__ from Base.
+    derived.prototype = qibl.reparent({}, derived, base.prototype).__proto__;
 }
 
 // derive a subclass that inherits from the parent but customizes its own prototype
 // note that is very slow to set-and-call a method in the constructor
-// % node -p 'function Foo(a,b,c){}; Bar = require("./").derive("Bar", Foo, {x: 1}); for (i=0; i<10e6; i++) x = new Bar(1,2,3); x.x'
+// % node -p
+//   'function Foo(a,b,c){}; Bar = require("./").derive("Bar", Foo, {x: 1}); for (i=0; i<10e6; i++) x = new Bar(1,2,3); x.x'
 // nb: v10 10e6 new Foo() .13, v11 .24; new Zed() that invokes Foo() .13
 // nb: functions built with a scope run abysmally slow! (10x slower in node-v10)
 // derive: 4m/s 4.0ghz R2600X
@@ -299,10 +296,7 @@ function clone( object, recursively ) {
         (object instanceof Array) ? ((arrayLike = true), qibl.toArray(object)) :
         (object instanceof Buffer) ? ((arrayLike = true), qibl.fromBuf(object)) :
         (_builtinClasses.indexOf(object.constructor) >= 0) ? new object.constructor(object) :
-        {};
-
-    // parent to the base class if not already so
-    if (copy.__proto__ !== object.__proto__) copy.__proto__ = object.__proto__;
+        reparent({}, object.constructor);
 
     // copy the own properties
     keys = qibl.keys(object);
@@ -315,6 +309,35 @@ function clone( object, recursively ) {
 
     return copy;
 }
+
+// forcibly make obj inherit from ctor
+// Traditionally, if Class extends Base then Class.prototype = { constructor: Class, __proto__: Base },
+// but the prototype constructor is not enumerable (and Class.prototype is not instanceof Class).
+// Thus Class.prototype is not instanceof Derived, and Derived.prototype.constructor is not enumerable.
+// Assigning {} instead is functionally the same but is faster.
+function reparent( obj, ctor, proto ) {
+    // if (typeof ctor !== 'function') throw new Error('constructor not a function');
+    obj.constructor = ctor;
+    obj.__proto__ = { constructor: ctor, __proto__: proto || ctor.prototype };
+    return obj;
+
+    // to avoid assigning __proto__, can use the typescript linkage, ie:
+    // function __() { this.constructor = derived }
+    // __.prototype = base.prototype;
+    // derived.prototype = new __();
+}
+
+/**
+// create an implementation-specific instance of the object, duplicating all methods
+// Useful to create optimized instances, or to avoid deoptimizing the shared methods.
+function specialize( object ) {
+    var copy = reparent({}, object.constructor);
+    for (var k in object) {
+        if (typeof object[k] === 'function') try { copy[k] = eval('true && ' + object[k]) } catch (e) { copy[k] = object[k] }
+    }
+    return copy;
+}
+**/
 
 // similar to fill() but for objects
 function _fillit(target, val, options) {

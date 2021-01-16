@@ -561,12 +561,15 @@ module.exports = {
         },
 
         'clones custom classes': function(t) {
+            function Bar() {};
             function Foo() { this.x = 1 };
-            Foo.prototype = { inherited: 9 };
+            qibl.inherits(Foo, Bar);
+            Foo.prototype.inherited = 9;
             var object = new Foo();
             object.y = 2;
             var copy = qibl.clone(object);
             t.ok(copy instanceof Foo);
+            t.ok(copy instanceof Bar);
             t.strictEqual(copy.x, 1);
             t.strictEqual(copy.y, 2);
             t.strictEqual(copy.inherited, 9);
@@ -577,6 +580,37 @@ module.exports = {
             var a = {a: {}};
             t.equal(qibl.clone(a).a, a.a);
             t.notEqual(qibl.clone(a, true).a, a.a);
+            t.done();
+        },
+    },
+
+    'reparent': {
+        'returns the target': function(t) {
+            var o = {};
+            t.equal(qibl.reparent(o, function Foo(){}), o);
+            t.done();
+        },
+
+        'reparents the construtor and instanceof': function(t) {
+            function Foo(){};
+            Foo.prototype.fn = function(){};
+            Foo.prototype.x = 1;
+            t.equal(qibl.reparent({}, Foo).constructor, Foo);
+            t.equal(qibl.reparent({}, Foo).__proto__.constructor, Foo);
+            t.contains(qibl.reparent({}, Foo).__proto__, Foo.prototype);
+            //t.deepEqual(qibl.reparent({}, Foo).__proto__, new Foo().__proto__);
+            t.ok(qibl.reparent({}, Foo) instanceof Foo);
+            t.done();
+        },
+
+        'changes the constructor and instanceof': function(t) {
+            function Foo() {};
+            Foo.prototype.set = function(k, v) { this.k = v };
+            var obj = {};
+            qibl.reparent(obj, Date);
+            t.equal(obj.constructor, Date);
+            t.ok(obj instanceof Date);
+            t.equal(typeof obj.getTime, 'function');
             t.done();
         },
     },
