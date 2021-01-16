@@ -98,7 +98,7 @@ property getter that looks up dottedName, subsequent calls reuse the getter.
 
 Properties:
 - `getProp.maxCount` - capacity limit on the built-inn getter function cache.  Default is 10,000.
-- `getProp.clearCache` - empty the getter cache, discard all getter functions.
+- `getProp.clearCache()` - empty the getter cache, discard all getter functions.
 
 ### qibl.setProperty( target, dottedName, value )
 
@@ -159,7 +159,7 @@ instead of `parent` to initialize the new instance.  `constructor` must call `pa
 ### qibl.reparent( object, Constructor [,prototype] )
 
 Force `object` to be instanceof `Constructor` and inherit from `prototype` or from
-`Constructor.prototeyp` if no prototype object provided.  This is just a type and inheritance
+`Constructor.prototype` if no prototype object provided.  This is just a type and inheritance
 adjustment, `object` will not have the internal contents of a true Constructor instance.
 Returns `object`.
 
