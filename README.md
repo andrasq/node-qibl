@@ -156,6 +156,14 @@ instead of `parent` to initialize the new instance.  `constructor` must call `pa
     b.a                 // => 1
     b.b                 // => 2
 
+### qibl.reparent( object, Constructor [,prototype] )
+
+Force `object` to be instanceof `Constructor` and inherit from `prototype` or from
+`Constructor.prototeyp` if no prototype object provided.  This is just a type and inheritance
+adjustment, `object` will not have the internal contents of a true Constructor instance.
+Returns `object`.
+
+Similar to `inherits()`, but `reparent()` adjusts objects while `inherits()` adjusts constructors.
 
 ### qibl.toStruct( hash )
 
@@ -590,7 +598,7 @@ equal to match.  Only `isHash()` hashes are recursed into, not class instances.
 Changelog
 ---------
 
-- 1.10.0 - new `difftree`, new `getProp` quicker property getter, concat2 of varargs, new undocumented `reparent`
+- 1.10.0 - new `difftree`, new `getProp` quicker property getter, concat2 of varargs, new `reparent`
 - 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`, new `walktree`
 - 1.8.2 - optimize populate() separately for arrays and buffers,
           omit empty strings from generated compileVinterpolate code, calibrate microtime longer
