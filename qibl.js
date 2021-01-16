@@ -327,18 +327,6 @@ function reparent( obj, ctor, proto ) {
     // derived.prototype = new __();
 }
 
-/**
-// create an implementation-specific instance of the object, duplicating all methods
-// Useful to create optimized instances, or to avoid deoptimizing the shared methods.
-function specialize( object ) {
-    var copy = reparent({}, object.constructor);
-    for (var k in object) {
-        if (typeof object[k] === 'function') try { copy[k] = eval('true && ' + object[k]) } catch (e) { copy[k] = object[k] }
-    }
-    return copy;
-}
-**/
-
 // similar to fill() but for objects
 function _fillit(target, val, options) {
     var base = options && options.base || 0;
@@ -448,6 +436,12 @@ function sort3i( arr, i, j, k ) {
 function swapi( a, i, j ) {
     var t = a[i]; a[i] = a[j]; a[j] = t;
 }
+/**
+// swap the 3 array elements so that a[i] = a[j], a[j] = a[k], and a[k] = a[i];
+function mov3i( a, i, j, k ) { var t = a[i]; a[i] = a[j]; a[j] = a[k]; a[k] = t }
+function rotl3i(a, i, j, k) { return mov3i(a, i, j, k) }
+function rotr3i(a, i, j, k) { return mov3i(a, k, j, i) }
+**/
 
 // randomly shuffle the contents of the array between base and bound
 // see qshuffle, Fisher-Yates shuffle
