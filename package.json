@@ -5,7 +5,7 @@
   "keywords": [ "repeat", "fill", "assign", "merge", "Buffer", "polyfill", "toStruct", "subsample" ],
   "main": "qibl.js",
   "license": "Apache-2.0",
-  "files": ["REAMDE.md", "qibl.js"],
+  "files": ["LICENSE", "README.md", "qibl.js"],
   "repository": { "type": "git", "url": "git://github.com/andrasq/node-qibl" },
   "readme": "see README.md",
 
