@@ -93,11 +93,11 @@ The property name must be a valid javascript dotted property path.
 
 ### qibl.getProp( target, dottedName [,defaultValue] )
 
-A 5 times faster compiled version of `getProperty`.  The first call first compiles a dedicated
-property getter that looks up dottedName, subsequent calls reuse the getter.
+A 5 times faster compiled version of `getProperty`.  The first call compiles a dedicated
+property getter to look up dottedName, subsequent calls reuse the getter.
 
 Properties:
-- `getProp.maxCount` - capacity limit on the built-inn getter function cache.  Default is 10,000.
+- `getProp.maxCount` - capacity limit on the built-in getter function cache.  Default is 10,000.
 - `getProp.clearCache()` - empty the getter cache, discard all getter functions.
 
 ### qibl.setProperty( target, dottedName, value )
