@@ -577,9 +577,9 @@ Errors accessing the visited files are reported out of band via 'error' events o
 emitter, and the visitor is not called on them.  The emitter does not throw, un-listened for
 errors are ignored.  Errors accessing the top-level `dirname` are returned to the callback.
 
-### walktree( tree, visitor(value, name, node, depth) )
+### walktree( tree, visitor(node[key], key, node, depth) )
 
-Recursively examine the properties of tree and call `visitor(node)` on each.  `tree` may be any
+Recursively examine the properties of tree and call `visitor()` on each.  `tree` may be any
 value, but only `isHash` hashes are traversed.  Like Array.forEach, the visitor is called with
 the property value, the property name (index), the object whose property it is, plus `depth`,
 the current level of property traversal, 1 for the direct properties of `tree`.  If the visitor
@@ -591,7 +591,10 @@ Return a recursive copy of `node2` with all properties that are also present in 
 leaving only the properties where node2 differs from node1.  Properties must be `===` strict
 equal to match.  Only `isHash()` hashes are recursed into, not class instances.
 
-    qibl.difftree({ v: 0, a: { b: 2 } }, { v: 0, a: { b: 2, c: 3 }, d: 4 });
+    qibl.difftree(
+        { v: 0, a: { b: 2 } },
+        { v: 0, a: { b: 2, c: 3 }, d: 4 }
+    );
     // => { a: { c: 3 }, d: 4 }
 
 
