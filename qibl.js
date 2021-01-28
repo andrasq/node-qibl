@@ -61,6 +61,7 @@ var qibl = module.exports = {
     str_random_word: str_random_word,
     str_random_sentence: str_random_sentence,
     str_locate: str_locate,
+    compareVersions: compareVersions,
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
@@ -585,6 +586,23 @@ function str_locate( str, patt, handler, arg ) {
         if ((pos = str.indexOf(patt, pos)) >= 0) handler(pos, arg);
         else break;
     }
+}
+
+// compare semver version strings
+// scan for the first version differece by decreasing significance, and return -1, 0 or +1
+// like for a sort comparison function
+function compareVersions( version1, version2 ) {
+    if (typeof version1 !== 'string' || typeof version2 !== 'string') return _vcompar(version1, version2);
+    var ver1 = version1.split('.'), ver2 = version2.split('.');
+    for (var i = 0; i < ver1.length; i++) if (ver1[i] !== ver2[i]) break;
+    return (i >= ver1.length && i < ver2.length) ? -1 : _vcompar(ver1[i], ver2[i]);
+}
+function _vcompar(v1, v2) {
+console.log("AR: _vcompar", v1, v2, v1 === v2)
+    if (v1 === v2) return 0;
+    if (v1 === undefined || v2 === undefined) return v1 === undefined ? -1 : 1; // "1.2" before "1.2.0"
+    var diff = parseInt(v1) - parseInt(v2);                                     // "9" before "10", "7-a" before "11-a"
+    return diff < 0 ? -1 : diff > 0 ? 1 : (v1 < v2) ? -1 : 1;                   // "11-a" before "11-b", "a" before "b"
 }
 
 // "string".startsWith, missing in node-v0.10

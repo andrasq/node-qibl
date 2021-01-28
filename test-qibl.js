@@ -1204,6 +1204,46 @@ module.exports = {
         },
     },
 
+    'compareVersions': {
+        'compares version strings': function(t) {
+            var tests = [
+                ["", "", 0],
+                ["1.2", "1.2", 0],
+                ["11.2.3", "11.2.3", 0],
+                ["1.2.33.4", "1.2.33.4", 0],
+                ["1", "1.0", -1],
+                ["1", "1.0.0", -1],
+                ["1.0", "1.0.0", -1],
+                ["1", "2", -1],
+                ["1.1", "1.2", -1],
+                ["1.2", "1.2.0", -1],
+                ["a", "aa", -1],
+                ["1.2", "1.2a", -1],
+                ["1.2a", "1.2aa", -1],
+                ["1.2aa", "1.2b", -1],
+                ["1.7z", "1.7z.1", -1],
+                ["1.7z.1", "1.7z.2", -1],
+                ["1.7z", "1.11a", -1],
+                ["1.2.33.3", "1.2.33.4", -1],
+
+                [0, 0, 0],
+                [1.25, 1.25, 0],
+                [undefined, undefined, 0],
+                [undefined, 0, -1],
+                [0, undefined, 1],
+                [null, null, 0],
+            ];
+            for (var i = 0; i < tests.length; i++) {
+                var v1 = tests[i][0], v2 = tests[i][1], expect = tests[i][2];
+                var got = qibl.compareVersions(v1, v2);
+                var got2 = qibl.compareVersions(v2, v1);
+                t.equal(got, expect, util.format("test %d: %s :: %s ->", i, v1, v2, got));
+                t.equal(got2, -expect, util.format("test %d: %s :: %s ->", i, v2, v1, got2));
+            }
+            t.done();
+        },
+    },
+
     },
 
     'saneBuf': {
