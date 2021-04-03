@@ -260,6 +260,8 @@ function inherits( derived, base ) {
 
     // set up constructor and prototype linkage
     // Traditionally Derived prototype constructor is Derived, with its __proto__ from Base.
+    // NOTE: class Derived() has a read-only, un-deletable, un-redefinable prototype
+    // util.inherits does not alter it, we crash
     derived.prototype = qibl.reparent({}, derived, base.prototype).__proto__;
 }
 
@@ -768,7 +770,7 @@ function restoreListeners( emitter, event, listeners ) {
 function readBody( emitter, cb ) {
     var doneCount = 0, chunk1, chunks, data = '';
     emitter.on('data', function(chunk) {
-        if (typeof chunk === 'string') data += chunk;
+        if (typeof chunk === 'string') data ? data += chunk : data = chunk;
         else if (!chunk1) chunk1 = chunk;
         else if (!chunks) chunks = new Array(chunk1, chunk);
         else chunks.push(chunk);
