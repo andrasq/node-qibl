@@ -374,7 +374,7 @@ if the argv length does not match the substring count.
     vinterpolate(['Hello', 'world']);
     // => "Hello, world!"
 
-### compareVersions( semver1, semver2 )
+### semverCompar( semver1, semver2 )
 
 Compare the two semantic version number strings and return -1 if version 1 is lower than,
 0 if equal to, or +1 if greater than version 2.  Handles dotted versions of any depth,
@@ -382,7 +382,7 @@ and accepts version numbers with text suffixes.  Versions numbers sort lower fir
 shorter string, then alpha order of the strings.  So "1.1" before "1.2", "1.2" before "1.2a",
 "1.2a" before "1.2aa", "1.2aa" before "1.2b", "1.7b" before "1.11a".
 
-        // qibl.compareVersions("1.2c", "1.3a")         // -1
+        // qibl.semverCompar("1.2c", "1.3a")         // -1
 
 
 Buffers and Arrays
@@ -611,7 +611,7 @@ equal to match.  Only `isHash()` hashes are recursed into, not class instances.
 Changelog
 ---------
 
-- 1.11.0 - new `compareVersions`
+- 1.11.1 - calibrate microtime better for node v12 and up, rename to `semverCompar`
 - 1.10.0 - new `difftree`, new `getProp` quicker property getter, concat2 of varargs, new `reparent`
 - 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`, new `walktree`
 - 1.8.2 - optimize populate() separately for arrays and buffers,

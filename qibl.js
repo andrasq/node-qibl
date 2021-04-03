@@ -61,7 +61,8 @@ var qibl = module.exports = {
     str_random_word: str_random_word,
     str_random_sentence: str_random_sentence,
     str_locate: str_locate,
-    compareVersions: compareVersions,
+    compareVersions: semverCompar,
+    semverCompar: semverCompar,
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
@@ -593,14 +594,14 @@ function str_locate( str, patt, handler, arg ) {
 // compare semver version strings
 // scan for the first version differece by decreasing significance, and return -1, 0 or +1
 // like for a sort comparison function
-function compareVersions( version1, version2 ) {
+function semverCompar( version1, version2 ) {
     if (typeof version1 !== 'string' || typeof version2 !== 'string') return _vcompar(version1, version2);
     var ver1 = version1.split('.'), ver2 = version2.split('.');
     for (var i = 0; i < ver1.length; i++) if (ver1[i] !== ver2[i]) break;
     return (i >= ver1.length && i < ver2.length) ? -1 : _vcompar(ver1[i], ver2[i]);
 }
 function _vcompar(v1, v2) {
-console.log("AR: _vcompar", v1, v2, v1 === v2)
+//console.log("AR: _vcompar", v1, v2, v1 === v2)
     if (v1 === v2) return 0;
     if (v1 === undefined || v2 === undefined) return v1 === undefined ? -1 : 1; // "1.2" before "1.2.0"
     var diff = parseInt(v1) - parseInt(v2);                                     // "9" before "10", "7-a" before "11-a"
@@ -1213,13 +1214,13 @@ function microtime( ) {
 // half the js-C++ domain crossing penalty is incurred after fetching the timestamp.
 // This can cause microtime() to sometimes deliver timestamps less than Date.now, e.g. 123 vs 122.9995
 // NOTE: node-v10,v12 calibration is great, but node-v13,v14,v15 is off (or way off)
-function _hrTop() { for (var t1 = Date.now(), t2; (t2 = Date.now()) < t1 + 1; ) ; return t2 }
+function _hrTick() { for (var t1 = Date.now(), t2; (t2 = Date.now()) < t1 + 1; ) ; return t2 }
 function _hrCalibrate() {
-    var clk = microtime;
-    function _hrDuration() { var t1 = clk(); for (var i=0; i<777; i++) clk(); return (clk() - t1) / (777 + 1) }
-    function _nowDuration() { var t1 = clk(); for (var i=0; i<777; i++) Date.now(); return (clk() - t1 - hrDuration) / 777 }
+    var clk = microtime, timeRuns = eval("nodeMajor > 11 ? 3000 : 750");
+    function _hrDuration() { var t1 = clk(); for (var i=0; i<timeRuns; i++) clk(); return (clk() - t1) / (timeRuns + 1) }
+    function _nowDuration() { var t1 = clk(); for (var i=0; i<timeRuns; i++) Date.now(); return (clk() - t1 - hrDuration) / timeRuns }
     var hrDuration = _hrDuration(), nowDuration = _nowDuration();       // warm up and time calls
-    var t1 = _hrTop(), t2 = microtime();                                // ms just changed, microtime + Date.now calls ago
+    var t1 = _hrTick(), t2 = microtime();                               // wait for ms tick, changed microtime + Date.now calls ago
     _microtimeOffset = (t1 / 1000) - t2;                                // to make uptime into wallclock = microtime() + offset
     _microtimeOffset += nowDuration / 2;                                // assume ms changed middle of poll period,
     _microtimeOffset += nowDuration * (4-4) / 4;                        // which overlaps all of the Date.now call,
@@ -1227,7 +1228,7 @@ function _hrCalibrate() {
     _microtimeOffset += (hrDuration - nowDuration) / 2;                 // will also be sampled a bit slower
 }
 // NOTE: occasionally the runtime adds a burst of delay between t1 and t2, if so try again
-do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTop() / 1000 - microtime() > .000002);
+do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTick() / 1000 - microtime() > .000002);
 
 /**
 var _warnings = {};

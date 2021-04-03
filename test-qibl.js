@@ -1204,7 +1204,12 @@ module.exports = {
         },
     },
 
-    'compareVersions': {
+    'semverCompar': {
+        'exposed under both old and new name': function(t) {
+            t.equal(qibl.compareVersions, qibl.semverCompar);
+            t.done();
+        },
+
         'compares version strings': function(t) {
             var tests = [
                 ["", "", 0],
@@ -1235,8 +1240,8 @@ module.exports = {
             ];
             for (var i = 0; i < tests.length; i++) {
                 var v1 = tests[i][0], v2 = tests[i][1], expect = tests[i][2];
-                var got = qibl.compareVersions(v1, v2);
-                var got2 = qibl.compareVersions(v2, v1);
+                var got = qibl.semverCompar(v1, v2);
+                var got2 = qibl.semverCompar(v2, v1);
                 t.equal(got, expect, util.format("test %d: %s :: %s ->", i, v1, v2, got));
                 t.equal(got2, -expect, util.format("test %d: %s :: %s ->", i, v2, v1, got2));
             }
