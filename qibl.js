@@ -96,10 +96,12 @@ var qibl = module.exports = {
     walkdir: walkdir,
     walktree: walktree,
     difftree: difftree,
+    retry: retry,
     keys: keys,
     values: values,
     entries: entries,
     pairTo: pairTo,
+    extractTo: extractTo,
     selectField: selectField,
     mapById: mapById,
     groupById: groupById,
@@ -892,6 +894,23 @@ function difftree( t1, t2 ) {
     return differs ? diff : undefined;
 }
 
+/*
+ * Repeat func() until it succeeeds over at most timeout ms.
+ * The delays between attempts are computed by getDelay(attemptCount).
+ * At least two attempts are made, one at the beginning and one at timeout.
+ * Note that the total timeout 
+ */
+function retry( getDelay, timeout, func, callback ) {
+    var time = 0, retries = 0;
+    func(function _loop(err) {
+        if (!err || time >= timeout) return callback(err);
+        var delay = getDelay(++retries);
+        setTimeout(func, delay <= (timeout - time) ? delay : (timeout - time + 1), _loop);
+        time += delay;
+    })
+}
+
+
 // backslash-escape the chars that have special meaning in regex strings
 // See also microrest, restiq.
 function escapeRegex( str ) {
@@ -1000,7 +1019,7 @@ function distinct( items, getKey ) {
     var found = new Hashmap();
     for (var i = 0; i < items.length; i++) { var k = getKey(items[i]); if (found.get(k) === undefined) found.set(k, items[i]) }
     var vals = found.values();
-    return Array.isArray(vals) ? vals : toArray(vals);
+    return Array.isArray(vals) ? vals : qibl.toArray(vals);
 }
 // function _identity(x) { return x }
 function _toString(x) { return typeof x === 'string' ? x : '' + x }     // TODO: time '' + x vs typeof
@@ -1064,11 +1083,13 @@ function setIterator( obj, iterator ) {
     obj[IteratorProperty] = iterator;
     return obj;
 }
+
 // return the iterator.  Note that iterators have to be called as a method call, ie iter.call(obj),
 // to associate the iterator function with the instance being iterated.
 function getIterator( obj ) {
     return obj[IteratorProperty];
 }
+
 function toArray( obj, filter ) {
     return _traverse(obj, filter, new Array());
 }
@@ -1127,6 +1148,12 @@ function entries( object ) {
 function pairTo( target, keys, values ) {
     for (var i=0; i<keys.length; i++) target[keys[i]] = values[i];
     return target;
+}
+
+// from minisql utils:
+function extractTo( dst, src, mask ) {
+    for (var k in mask) dst[k] = src[k];
+    return dst;
 }
 
 // replace each occurrence of patt in str with the next one of the args

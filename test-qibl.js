@@ -1919,6 +1919,40 @@ module.exports = {
         },
     },
 
+    'retry': {
+        'stops when successful': function(t) {
+            var callCount = 0;
+            var now = Date.now();
+            qibl.retry(function() { return 5 }, 10, function(cb) { ++callCount < 3 ? cb('again') : cb() }, function(err) {
+                t.ifError(err);
+                t.equal(callCount, 3);
+                t.ok(Date.now() >= now + 10 - 1);
+                t.done();
+            })
+        },
+
+        'calls getDelay with the retry count': function(t) {
+            var counts = [];
+            qibl.retry(function(n) { counts.push(n); return 1 }, 4, function(cb) { cb('mock-err') }, function(err) {
+                t.deepEqual(counts, [1, 2, 3, 4]);
+                t.done();
+            })
+        },
+
+        'makes multiple attemps then times out': function(t) {
+            function uniformDelay(n) { return 4 };
+            var times = [];
+            qibl.retry(uniformDelay, 10, function(cb) { times.push(Date.now()); cb('mock-err') }, function(err) {
+                t.equal(err, 'mock-err');
+                t.equal(times.length, 4);
+                // there is a long-ish gap between the first and second attempt,
+                // time the delta from second to last
+                t.ok(times[1] - times[0] <= 10 - 4);
+                t.done();
+            })
+        }
+    },
+
     'escapeRegex': {
         'should escape all metachars': function(t) {
             var chars = [];
@@ -2340,6 +2374,21 @@ module.exports = {
         },
         'decorates and returns the target': function(t) {
             t.deepEqual(qibl.pairTo({a:1}, ['bee'], ['cee', 'dee']), { a: 1, bee: 'cee' });
+            t.done();
+        },
+    },
+
+    'extractTo': {
+        'copies out values': function(t) {
+            // existing properties
+            t.deepEqual(qibl.extractTo({}, {a:1, b:2}, {a:0}), {a:1});
+            t.deepEqual(qibl.extractTo({}, {a:1, b:2}, {b:0}), {b:2});
+            t.deepEqual(qibl.extractTo({x:9}, {a:1, b:2}, {b:0}), {x:9, b:2});
+            t.deepEqual(qibl.extractTo({x:9}, {a:1, b:2}, {a:1, b:1, c:1}), {x:9, a:1, b:2, c:undefined});
+
+            // missing properties
+            t.deepEqual(qibl.extractTo({}, {a:1, b:2}, {c:0, a:0}), {c: undefined, a: 1});
+
             t.done();
         },
     },

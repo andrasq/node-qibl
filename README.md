@@ -217,11 +217,21 @@ Return an array with the own properties of the object.  Equivalent to `Object.va
 
 Return an array of key-value pairs of the own properties of the object.  Equivalent to `Object.entries`.
 
+### qibl.assignTo( target, source [, source2, ...] )
+
+Assign all enumerable own properties of the sources `src` onto `target`, and return
+`target`.  Also available as `copyObject`.  Equivalent to `Object.assign`.
+
 ### qibl.pairTo( target, keys, values )
 
 Set all `keys` in turn as properties on `target` having the corresponding values from `values`.
 If a key does not have a maching value, it is set to `undefined`.  If there are more values than
 keys, the excess are ignored.  Returns `target`.
+
+### qibl.extractTo( target, source, mask )
+
+Assign to `target` properties of `source` that occur in `mask`.  Assigns `undefined` if the
+property is not set on `source`.
 
 ### qibl.populate( target, val [,options ] )
 
@@ -607,11 +617,18 @@ equal to match.  Only `isHash()` hashes are recursed into, not class instances.
     );
     // => { a: { c: 3 }, d: 4 }
 
+### retry( getDelay(tryCount), timeout, func(cb), callback(err) )
+
+Try calling `func` until it succeeds or have waited `timeout` total milliseconds pausing
+`getDelay(retryCount)` ms between attempts.  Returns the result of the last attempt.
+Makes an attempt at the very start, and a final one at the very end of the timeout period.
+
 
 Changelog
 ---------
 
-- 1.11.1 - calibrate microtime better for node v12 and up, rename to `semverCompar`
+- 1.11.2 - calibrate microtime better for node v12 and up, rename to `semverCompar`, new `extractTo`, new `retry`
+           document as `assignTo`
 - 1.10.0 - new `difftree`, new `getProp` quicker property getter, concat2 of varargs, new `reparent`
 - 1.9.0 - new `startsWith` / `endsWith`, document `str_locate`, new `walktree`
 - 1.8.2 - optimize populate() separately for arrays and buffers,
