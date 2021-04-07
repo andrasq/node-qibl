@@ -2540,11 +2540,19 @@ module.exports = {
 
     'microtime': {
         'returns timestamps': function(t) {
+            // NOTE: with node-v12+, if calibration loop is long (7000 iterations), can get t2 == t3
+            // More often with v12.16.3:amd64 than i386, less with v11.8.0.  ... pending GC? bad timers lib?
+            // Can get eg 1617757302.9440007 .944001 .944001.  Changed the test to ensure that 1 < 3.
+            // NOTE: iterating 15k or more times to calibrate yields very good accuracy under newer node too (v12).
+            // NOTE: recorind the time before and after the calibration loop shows only 0.1 ms elapsed,
+            // even if wallclock time shows 1 sec.  Both Date.now() and process.hrtime() are off, unclear why.
+            // Actual time for 50k loops is about 10 ms (timed externally to node).
             var t1 = qibl.microtime();
             var t2 = qibl.microtime();
             var t3 = qibl.microtime();
-            t.ok(t2 > t1);
-            t.ok(t3 > t2);
+            t.ok(t1 <= t2);
+            t.ok(t2 <= t3);
+            t.ok(t1 < t3);
             t.done();
         },
         'is sub-millisecond accurate': function(t) {

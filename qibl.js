@@ -1243,7 +1243,7 @@ function microtime( ) {
 // NOTE: node-v10,v12 calibration is great, but node-v13,v14,v15 is off (or way off)
 function _hrTick() { for (var t1 = Date.now(), t2; (t2 = Date.now()) < t1 + 1; ) ; return t2 }
 function _hrCalibrate() {
-    var clk = microtime, timeRuns = eval("nodeMajor > 11 ? 3000 : 750");
+    var clk = microtime, timeRuns = eval("nodeMajor > 11 ? 17000 : 750");  // node-v12 calibrates better with 15k than 5000
     function _hrDuration() { var t1 = clk(); for (var i=0; i<timeRuns; i++) clk(); return (clk() - t1) / (timeRuns + 1) }
     function _nowDuration() { var t1 = clk(); for (var i=0; i<timeRuns; i++) Date.now(); return (clk() - t1 - hrDuration) / timeRuns }
     var hrDuration = _hrDuration(), nowDuration = _nowDuration();       // warm up and time calls
