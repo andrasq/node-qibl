@@ -2596,6 +2596,22 @@ module.exports = {
             for (var d = Date.now(); Date.now() < d + 10; ) times[ix++] = [Date.now(), qibl.microtime()];
             // NOTE: node-v13,v14,v15 have huge (1-2ms) gaps between loops, sometimes more
 
+            // find and report the ms transitions
+            // NOTE: node-v12 and newer have a lot of duplicate timestamps (ie, identical hrtime()),
+            // and hrtime can report times out of sync with Date.now() (eg .000 ms vs .637 ms)
+            // NOTE: node-v14 is hugely faster to gather 2x2x100k samples than v15 (2x),
+            // but node before v5 was hugely faster still (another > 2x).
+            var dateTime = Infinity, microTime = Infinity;
+            var transitions = [];
+            for (var i = 0; i < 100000; i++) {
+                var mt = qibl.microtime();
+                var dt = Date.now();
+                if (dt > dateTime) transitions.push([dateTime, microTime], [-dt, mt], [Date.now(), qibl.microtime()]);
+                dateTime = dt;
+                microTime = mt;
+            }
+            console.log("AR: ms transitions over 100k samples", transitions);
+
             // find the index of the second millisecond tick (with samples before and after)
             ix = 0;
             for (ix++ ; ix<times.length; ix++) if (times[ix-1][0] < times[ix][0]) break;
