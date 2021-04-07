@@ -811,10 +811,11 @@ module.exports = {
             t.equal(counts[1], 0);
             t.equal(counts[9], 0);
 
-            // of eligible range, no more than 1% difference over 100k
+            // of eligible range, no more than 2% difference over 100k
+            // NOTE: this will fail occasionally with very low probability
             var min = Math.min.apply(null, counts.slice(2, -1));
             var max = Math.max.apply(null, counts.slice(2, -1));
-            t.ok(max - min < 1000, "min-max spread too large");
+            t.ok(max - min < 2000, "min-max spread too large");
 
             t.done();
         },
