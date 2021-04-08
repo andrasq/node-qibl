@@ -623,6 +623,20 @@ Try calling `func` until it succeeds or have waited `timeout` total milliseconds
 `getDelay(retryCount)` ms between attempts.  Returns the result of the last attempt.
 Makes an attempt at the very start, and a final one at the very end of the timeout period.
 
+### new Mutex( limit )
+
+Create a mutual exclusion semaphore that allows `limit` concurrent users to a limited-use
+resource; default `1` one.  A Mutex has one methods: `acquire(func)`.  It queues `func`
+waiting for the resource to be free, locks one unit of the resource, and calls
+`func(release)`.  `release` is a callback that must be called to release the resource unit,
+the resource will remain locked until freed, no timeout.
+
+    mutex = new qibl.Mutex();
+    mutex.acquire((done) => {
+        useResource();
+        done();
+    });
+
 
 Changelog
 ---------

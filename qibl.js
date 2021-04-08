@@ -921,12 +921,12 @@ function Mutex( limit ) {
 
     var self = this;
     this.acquire = function acquire(user) {
-        if (self.busy < self.limit) { self.busy += 1; user(self.release) }
+        if (self.busy < self.limit) { self.busy += 1; user(self._release) }
         else self.queue.push(user);
     }
-    this.release = function release() {
+    this._release = function _release() {
         var next = self.queue.shift();
-        (next) ? setImmediate(next, self.release) : self.busy -= 1;
+        (next) ? setImmediate(next, self._release) : self.busy -= 1;
     }
 }
 
