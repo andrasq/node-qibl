@@ -627,6 +627,7 @@ Makes an attempt at the very start, and a final one at the very end of the timeo
 Changelog
 ---------
 
+- 1.12.0 - new `Mutex` from miniq, bump version for new calls
 - 1.11.2 - calibrate microtime better for node v12 and up, rename to `semverCompar`, new `extractTo`, new `retry`
            document as `assignTo`
 - 1.10.0 - new `difftree`, new `getProp` quicker property getter, concat2 of varargs, new `reparent`

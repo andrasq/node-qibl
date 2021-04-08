@@ -97,6 +97,7 @@ var qibl = module.exports = {
     walktree: walktree,
     difftree: difftree,
     retry: retry,
+    Mutex: Mutex,
     keys: keys,
     values: values,
     entries: entries,
@@ -908,6 +909,25 @@ function retry( getDelay, timeout, func, callback ) {
         setTimeout(func, delay <= (timeout - time) ? delay : (timeout - time + 1), _loop);
         time += delay;
     })
+}
+
+// Mutex from miniq/lib/utils
+// call serializer, each next call is launched by the previous call`s release() callback
+// usage: mutex.acquire(function(release) { ... release() });
+function Mutex( limit ) {
+    this.busy = 0;
+    this.limit = limit || 1;
+    this.queue = new Array();
+
+    var self = this;
+    this.acquire = function acquire(user) {
+        if (self.busy < self.limit) { self.busy += 1; user(self.release) }
+        else self.queue.push(user);
+    }
+    this.release = function release() {
+        var next = self.queue.shift();
+        (next) ? setImmediate(next, self.release) : self.busy -= 1;
+    }
 }
 
 

@@ -1954,6 +1954,55 @@ module.exports = {
         }
     },
 
+    'Mutex': {
+        'runs calls immediately': function(t) {
+            var uut = new qibl.Mutex();
+            var t1 = Date.now();
+            uut.acquire(function(release) {
+                var t2 = Date.now();
+                t.ok(t2 - t1 <= 1);
+                release();
+                t.done();
+            })
+        },
+
+        'sets busy when in use': function(t) {
+            var uut = new qibl.Mutex();
+            uut.acquire(function(release) {
+                t.ok(uut.busy);
+                release();
+                t.done();
+            })
+        },
+
+        'clears busy when no longer in use': function(t) {
+            var uut = new qibl.Mutex();
+            uut.acquire(function(release) {
+                t.ok(uut.busy);
+                setTimeout(function() {
+                    t.ok(!uut.busy);
+                    t.done();
+                }, 2)
+                release();
+            })
+        },
+
+        'queues calls': function(t) {
+            var uut = new qibl.Mutex();
+            var call1, call2, t1 = Date.now();
+            uut.acquire(function(release) { call1 = true; setTimeout(release, 5) });
+            uut.acquire(function(release) { call2 = true; setTimeout(release, 5) });
+            uut.acquire(function(release) {
+                var t2 = Date.now();
+                t.ok(t2 - t1 >= 10 - 1);
+                t.ok(call1);
+                t.ok(call2);
+                release();
+                t.done();
+            })
+        },
+    },
+
     'escapeRegex': {
         'should escape all metachars': function(t) {
             var chars = [];
