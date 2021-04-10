@@ -609,7 +609,8 @@ returns `'skip'` the property is not recursed into, and if `'stop'` the traversa
 
 Return a recursive copy of `node2` with all properties that are also present in `node1` removed,
 leaving only the properties where node2 differs from node1.  Properties must be `===` strict
-equal to match.  Only `isHash()` hashes are recursed into, not class instances.
+equal to match.  Only `isHash()` hashes and arrays are recursed into, not class instances.
+If two arrays differ, the differing elements are returned at their original offsets.
 
     qibl.difftree(
         { v: 0, a: { b: 2 } },
@@ -641,6 +642,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
+- 1 12.1 - make `difftree` recursively diff array contents, for full json support
 - 1.12.0 - new `Mutex` from miniq, bump version for new calls
 - 1.11.2 - calibrate microtime better for node v12 and up, rename to `semverCompar`, new `extractTo`, new `retry`
            document as `assignTo`

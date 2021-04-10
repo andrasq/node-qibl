@@ -873,15 +873,21 @@ function _visitnodes( node, visitor, state ) {
     }
 }
 
-// return a tree populated with the differences between trees t1 and t2
-// Cycles and properties of non-hashes are not handled.
-// Is not smart about non-identical but equivalent objects eg [] and [].
+/*
+ * return a tree populated with the differences between trees t1 and t2
+ * Cycles and properties of non-hashes are not handled.
+ * Only handles JSON data types (string, number, boolean, null, array, object),
+ * and is not smart about non-identical but equivalent objects eg /^a/ and /^a/.
+ */
 function difftree( t1, t2 ) {
     var differs = false, diff = {};
     for (var k in t1) {
         if (!(k in t2) || t1[k] !== t2[k]) {
             if (isHash(t1[k]) && isHash(t2[k])) {
                 var delta = difftree(t1[k], t2[k]);
+                if (delta !== undefined) { diff[k] = delta; differs = true }
+            } else if (Array.isArray(t1[k]) && Array.isArray(t2[k])) {
+                var delta = diffArray(t1[k], t2[k]);
                 if (delta !== undefined) { diff[k] = delta; differs = true }
             } else {
                 diff[k] = t2[k];
@@ -894,12 +900,21 @@ function difftree( t1, t2 ) {
     }
     return differs ? diff : undefined;
 }
+function diffArray( a1, a2 ) {
+    var differs = false, diff = [];
+    for (var i = 0; i < a1.length; i++) {
+        if (a1[i] === a2[i] || (isHash(a1[i]) && isHash(a2[i]) && !difftree(a1[i], a2[i]))) continue;
+        { diff[i] = a2[i]; differs = true }
+    }
+    for ( ; i < a2.length; i++) { diff[i] = a2[i]; differs = true }
+    return differs ? diff : undefined;
+}
 
 /*
  * Repeat func() until it succeeeds over at most timeout ms.
  * The delays between attempts are computed by getDelay(attemptCount).
  * At least two attempts are made, one at the beginning and one at timeout.
- * Note that the total timeout 
+ * Note: the timeout limit applies to the sum of the delays, not elapsed wallclock time.
  */
 function retry( getDelay, timeout, func, callback ) {
     var time = 0, retries = 0;
