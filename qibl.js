@@ -882,27 +882,22 @@ function _visitnodes( node, visitor, state ) {
  */
 function difftree( t1, t2 ) {
     var differs = false, diff = {};
-    for (var k in t1) {
-        if (t1[k] === t2[k]) continue;
-        var delta = (isHash(t1[k]) && isHash(t2[k])) ? difftree(t1[k], t2[k])
-            : (Array.isArray(t1[k]) && Array.isArray(t2[k])) ? diffArray(t1[k], t2[k])
-            : (differs = true, diff[k] = t2[k], undefined);
-        if (delta !== undefined) { diff[k] = delta; differs = true }
-    }
+    for (var k in t1) if (t1[k] !== t2[k] && _diffit2(diff, k, t1[k], t2[k])) differs = true;
     for (var k in t2) if (!(k in t1) && t2[k] !== undefined) { diff[k] = t2[k]; differs = true }
     return differs ? diff : undefined;
 }
-function diffArray( a1, a2 ) {
-    var differs = false, diff = [];
-    for (var i = 0; i < a1.length; i++) {
-        if (a1[i] === a2[i]) continue;
-        var delta = (isHash(a1[i]) && isHash(a2[i])) ? difftree(a1[i], a2[i])
-            : (Array.isArray(a1[i]) && Array.isArray(a2[i])) ? diffArray(a1[i], a2[i])
-            : (differs = true, diff[i] = a2[i], undefined);
-        if (delta !== undefined) { diff[i] = delta; differs = true }
-    }
-    for ( ; i < a2.length; i++) { diff[i] = a2[i]; differs = true }
+function diffarray( a1, a2 ) {
+    var i, differs = false, diff = [];
+    for (i = 0; i < a1.length; i++) if (a1[i] !== a2[i] && _diffit2(diff, i, a1[i], a2[i])) differs = true;
+    for (     ; i < a2.length; i++) if (i in a2 && a2[i] !== undefined) { diff[i] = a2[i]; differs = true }
     return differs ? diff : undefined;
+}
+function _diffit2( target, key, v1, v2 ) {
+    var differs = false, delta = (isHash(v1) && isHash(v2)) ? difftree(v1, v2)
+        : (Array.isArray(v1) && Array.isArray(v2)) ? diffarray(v1, v2)
+        : (target[key] = v2, differs = true, undefined);
+    if (delta !== undefined) { target[key] = delta; differs = true }
+    return differs;
 }
 
 /*
