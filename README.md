@@ -611,10 +611,11 @@ Return a recursive copy of `node2` with all properties that are also present in 
 leaving only the properties where node2 differs from node1.  Properties must be `===` strict
 equal to match.  Only `isHash()` hashes and arrays are recursed into, not class instances.
 If two arrays differ, the differing elements are returned at their original offsets.
+An element or property set to `undefined` matches a missing or unset one.
 
     qibl.difftree(
-        { v: 0, a: { b: 2 } },
-        { v: 0, a: { b: 2, c: 3 }, d: 4 }
+        { v: 1, a: { b: 2 } },
+        { v: 1, a: { b: 2, c: 3 }, d: 4 }
     );
     // => { a: { c: 3 }, d: 4 }
 

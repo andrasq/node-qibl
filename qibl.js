@@ -878,33 +878,28 @@ function _visitnodes( node, visitor, state ) {
  * Cycles and properties of non-hashes are not handled.
  * Only handles JSON data types (string, number, boolean, null, array, object),
  * and is not smart about non-identical but equivalent objects eg /^a/ and /^a/.
+ * Note: a property set to undefined matches an unset property.
  */
 function difftree( t1, t2 ) {
     var differs = false, diff = {};
     for (var k in t1) {
-        if (!(k in t2) || t1[k] !== t2[k]) {
-            if (isHash(t1[k]) && isHash(t2[k])) {
-                var delta = difftree(t1[k], t2[k]);
-                if (delta !== undefined) { diff[k] = delta; differs = true }
-            } else if (Array.isArray(t1[k]) && Array.isArray(t2[k])) {
-                var delta = diffArray(t1[k], t2[k]);
-                if (delta !== undefined) { diff[k] = delta; differs = true }
-            } else {
-                diff[k] = t2[k];
-                differs = true;
-            }
-        }
+        if (t1[k] === t2[k]) continue;
+        var delta = (isHash(t1[k]) && isHash(t2[k])) ? difftree(t1[k], t2[k])
+            : (Array.isArray(t1[k]) && Array.isArray(t2[k])) ? diffArray(t1[k], t2[k])
+            : (differs = true, diff[k] = t2[k], undefined);
+        if (delta !== undefined) { diff[k] = delta; differs = true }
     }
-    for (var k in t2) {
-        if (!(k in t1)) { diff[k] = t2[k]; differs = true }
-    }
+    for (var k in t2) if (!(k in t1) && t2[k] !== undefined) { diff[k] = t2[k]; differs = true }
     return differs ? diff : undefined;
 }
 function diffArray( a1, a2 ) {
     var differs = false, diff = [];
     for (var i = 0; i < a1.length; i++) {
-        if (a1[i] === a2[i] || (isHash(a1[i]) && isHash(a2[i]) && !difftree(a1[i], a2[i]))) continue;
-        { diff[i] = a2[i]; differs = true }
+        if (a1[i] === a2[i]) continue;
+        var delta = (isHash(a1[i]) && isHash(a2[i])) ? difftree(a1[i], a2[i])
+            : (Array.isArray(a1[i]) && Array.isArray(a2[i])) ? diffArray(a1[i], a2[i])
+            : (differs = true, diff[i] = a2[i], undefined);
+        if (delta !== undefined) { diff[i] = delta; differs = true }
     }
     for ( ; i < a2.length; i++) { diff[i] = a2[i]; differs = true }
     return differs ? diff : undefined;
