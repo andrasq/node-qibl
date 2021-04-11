@@ -619,6 +619,15 @@ An element or property set to `undefined` matches a missing or unset one.
     );
     // => { a: { c: 3 }, d: 4 }
 
+### diffarray( array1, array2 )
+
+Return an array with the recursive pairwise diffs of the array elements.
+Elements that are equal are omitted from the returned array.  An omitted element
+matches the `undefined` value.
+
+    qibl.diffarray([ , 2, 3], [undefined, 2, 4]);
+    // => [ , , 4]
+
 ### retry( getDelay(tryCount), timeout, func(cb), callback(err) )
 
 Try calling `func` until it succeeds or have waited `timeout` total milliseconds pausing
@@ -643,7 +652,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
-- 1 12.1 - make `difftree` recursively diff array contents, for full json support
+- 1 12.1 - make `difftree` recursively diff array contents for full json support, expose `diffarray`
 - 1.12.0 - new `Mutex` from miniq, bump version for new calls
 - 1.11.2 - calibrate microtime better for node v12 and up, rename to `semverCompar`, new `extractTo`, new `retry`
            document as `assignTo`

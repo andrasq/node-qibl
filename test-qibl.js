@@ -1944,6 +1944,38 @@ module.exports = {
         },
     },
 
+    'diffarray': {
+        'diffs arrays': function(t) {
+        var tests = [
+            [[], [], undefined],
+            [[undefined], [], undefined],
+            [[undefined, undefined], [], undefined],
+            [[], [undefined, , undefined], undefined],
+            [[,,,], [,,,,,], undefined],
+            [[1,2,3], [1,2,3], undefined],
+            [[1,2,3], [9,2,3], [9]],
+            [[1,2,3], [1,9,3], [,9]],
+            [[1,2,3], [1,2,9], [,,9]],
+            [[1,2,3], [1,2,3,9], [,,,9]],
+            [[1,2,3], [1,2,3,undefined,9], [,,,,9]],
+            [[1,2,3], [1,2], [,,undefined]],
+            [[1,2,3], [1,], [,undefined,undefined]],
+            [[1,2,3], [,2,3], [undefined]],
+            [[{a:1},{b:2}], [{a:1},{b:2}], undefined],
+            [[{a:1},{b:2}], [{a:1},{b:3}], [,{b:3}]],
+            [[{a:1},{b:2}], [{a:1},{b:2,c:3}], [,{c:3}]],
+            [[{a:1,c:3},{b:2}], [{a:1},{b:2}], [{c:undefined}]],
+            // the below is the README example
+            [[ , 2, 3], [undefined, 2, 4], [,,4]],
+        ];
+        for (var i=0; i<tests.length; i++) {
+            var test = tests[i];
+            t.deepEqual(qibl.diffarray(test[0], test[1]), test[2], 'test case ' + i);
+        }
+        t.done();
+        },
+    },
+
     'retry': {
         'stops when successful': function(t) {
             var callCount = 0;

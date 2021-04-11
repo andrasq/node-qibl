@@ -96,6 +96,7 @@ var qibl = module.exports = {
     walkdir: walkdir,
     walktree: walktree,
     difftree: difftree,
+    diffarray: diffarray,
     retry: retry,
     Mutex: Mutex,
     keys: keys,
