@@ -170,26 +170,27 @@ function merge( target /* ,VARARGS */ ) {
  * note: defaultValue support makes it 15% slower
  * note: since node-v12 this function is much slower, dropped from 13m/s to 7m/s
  */
+function isNull(obj) { return obj === undefined || obj === null }
 function getProperty( target, dottedName, defaultValue ) {
     if (typeof target === 'string' && isMethodContext(this)) return getProperty(this, target, dottedName);
 
-    if (dottedName.indexOf('.') < 0) return (target && target[dottedName] !== undefined ? target[dottedName] : defaultValue);
+    if (dottedName.indexOf('.') < 0) return (!isNull(target) && target[dottedName] !== undefined ? target[dottedName] : defaultValue);
 
     var path = dottedName.split('.');
-    target = target == null ? undefined : target[path[0]];
-    target = target == null ? undefined : target[path[1]];
+    target = isNull(target) ? undefined : target[path[0]];
+    target = isNull(target) ? undefined : target[path[1]];
     if (path.length > 2) {
-        target = target == null ? undefined : target[path[2]];
+        target = isNull(target) ? undefined : target[path[2]];
     if (path.length > 3) {
-        target = target == null ? undefined : target[path[3]];
-        for (var i = 4; i < path.length; i++) target = target == null ? undefined : target[path[i]];
+        target = isNull(target) ? undefined : target[path[3]];
+        for (var i = 4; i < path.length; i++) target = isNull(target) ? undefined : target[path[i]];
     }}
     return target !== undefined ? target : defaultValue;
 }
 // compile the property getter for 10x faster property lookups.
 // Returns a dedicated function to retrieve the named property of the objects passed to it.
 function compileGetProperty(path) {
-    var pretest = 'o';
+    var pretest = '(o !== null && o !== undefined)';
     var end = -1;
     while ((end = path.indexOf('.', end + 1)) >= 0) {
         pretest += ' && ' + 'o.' + path.slice(0, end);
@@ -1022,7 +1023,7 @@ function selectField( arrayOfObjects, key ) {
     var values = new Array();
     for (var i = 0; i < arrayOfObjects.length; i++) {
         var obj = arrayOfObjects[i];
-        (obj == null) ? values.push(undefined) : values.push(obj[key]);
+        (obj === null || obj === undefined) ? values.push(undefined) : values.push(obj[key]);
     }
     return values;
 }
@@ -1035,7 +1036,7 @@ function _mapById( arrayOfObjects, idName, target, all ) {
     all = all || false;
     for (var i = 0; i < arrayOfObjects.length; i++) {
         var obj = arrayOfObjects[i];
-        if (obj == undefined) continue;
+        if (obj === null || obj === undefined) continue;
         var key = obj[idName];
         if (key === undefined) continue;
         (!all) ? target[key] = obj : (target[key]) ? target[key].push(obj) : target[key] = new Array(obj);
