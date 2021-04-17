@@ -79,6 +79,7 @@ var qibl = module.exports = {
     _invoke1: _invoke1,
     _invoke2: _invoke2,
     concat2: concat2,
+    flatMap2: flatMap2,
     subsample: subsample,
     qsearch: qsearch,
     sort3: sort3,
@@ -391,6 +392,17 @@ function concat2( target, a1, a2 /* VARARGS */ ) {
         for (var len = a2.length, i = 0; i < len; i++) target.push(a2[i]);
     }
     return target;
+}
+
+// like [].flatMap but appended to the dst array and 20x faster (node-v12)
+// flatMap implements `[].concat(...arr.map(compute))`
+function flatMap2( dst, src, compute ) {
+    for (var i = 0; i < src.length; i++) {
+        if (!(i in src)) continue;
+        var val = compute(src[i], i, src);
+        Array.isArray(val) ? qibl.concat2(dst, val) : dst.push(val);
+    }
+    return dst;
 }
 
 // return up to k randomly selected items from arr between base and bound,

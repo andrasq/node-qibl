@@ -746,6 +746,41 @@ module.exports = {
         t.done();
     },
 
+    'flatMap2': {
+        'appends the computed values': function(t) {
+            t.deepEqual(qibl.flatMap2([], [1, 2, 3], function(x) { return 1}), [1, 1, 1]);
+            t.deepEqual(qibl.flatMap2([9], [1, 2, 3], function(x) { return 1}), [9, 1, 1, 1]);
+            t.deepEqual(qibl.flatMap2([], [1, 2, 3], function(x) { return x}), [1, 2, 3]);
+            t.deepEqual(qibl.flatMap2([0,,], [1, 2, 3], function(x) { return x}), [0, , 1, 2, 3]);
+            t.done();
+        },
+
+        'flattens computed arrays': function(t) {
+            t.deepEqual(qibl.flatMap2([], [1, [2], [[3]]], function(x) { return x}), [1, 2, [3]]);
+            t.deepEqual(qibl.flatMap2([9, 0], [1, [2], [[3]]], function(x) { return x}), [9, 0, 1, 2, [3]]);
+            t.deepEqual(qibl.flatMap2([], [1, 2, 3], function(x) { return [1, x] }), [1, 1, 1, 2, 1, 3]);
+            t.deepEqual(qibl.flatMap2([], [1, [2], 3], function(x) { return [1, x] }), [1, 1, 1, [2], 1, 3]);
+            t.done();
+        },
+
+        'skips missing elements': function(t) {
+            t.deepEqual(qibl.flatMap2([], [,,3,,,,4], function(x) { return [x] }), [3, 4]);
+            t.done();
+        },
+
+        'concatenates arrays of arrays': function(t) {
+            function nine(x) { return [9, 9] }
+            t.deepEqual(qibl.flatMap2([1, 2], [[1], [2]], function(x) { return [9, 9]}), [1, 2, 9, 9, 9, 9]);
+            t.deepEqual(qibl.flatMap2([1, 2], [[1], [2]], nine), [1, 2, 9, 9, 9, 9]);
+
+            t.deepEqual(qibl.flatMap2([], [[1], [2, 3], [[4]]], function(x) { return x }), [1, 2, 3, [4]]);
+
+            // the readme example:
+            t.deepEqual(qibl.flatMap2([0], [{v: 1}, {v: [2, 3]}], function(x) { return x.v }), [0, 1, 2, 3]);
+            t.done();
+        },
+    },
+
     'subsample': {
         before: function(done) {
             this.sampleit = function(t, limit, arr, length) {
