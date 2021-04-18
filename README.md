@@ -98,6 +98,7 @@ property getter to look up dottedName, subsequent calls reuse the getter.
 
 Properties:
 - `getProp.maxCount` - capacity limit on the built-in getter function cache.  Default is 10,000.
+        Looping over more than 10k different dotted names might bust the cache.
 - `getProp.clearCache()` - empty the getter cache, discard all getter functions.
 
 ### qibl.setProperty( target, dottedName, value )
