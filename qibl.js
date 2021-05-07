@@ -1189,9 +1189,9 @@ function pairTo( target, keys, values ) {
     return target;
 }
 
-// from minisql utils:
+// based on minisql utils:
 function extractTo( dst, src, mask ) {
-    for (var k in mask) dst[k] = src[k];
+    for (var k in mask) dst[k] = isHash(mask[k]) && isHash(src[k]) ? extractTo(dst[k] || {}, src[k], mask[k]) : src[k];
     return dst;
 }
 

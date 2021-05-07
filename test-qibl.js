@@ -1934,6 +1934,10 @@ module.exports = {
                 [{a:1, c:3}, {a:1, b:2, c:3}, {b:2}],
                 [{a:1, b:2}, {a:1, b: {c:3}}, {b:{c:3}}],
                 [{a:1, b: {c:3}}, {a:1, b: {c:4}}, {b:{c:4}}],
+                [{a:true}, {a:false}, {a:false}],
+                [{a:true}, {a:null}, {a:null}],
+                [{a:true}, {a:undefined}, {a:undefined}],
+                [{a:true}, {}, {a:undefined}],
                 [[], [], undefined],
                 [[1], [1], undefined],
                 [[,1], [,1], undefined],
@@ -2529,6 +2533,15 @@ module.exports = {
 
             // missing properties
             t.deepEqual(qibl.extractTo({}, {a:1, b:2}, {c:0, a:0}), {c: undefined, a: 1});
+
+            // nested properties
+            t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {a: true}), {a: 1});
+            t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {b: true}), {b: {c: 2}});
+            t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {c: true}), {c: undefined});
+            t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {b: true}), {b: {c: 2}});
+            t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {b: {c: true}}), {b: {c: 2}});
+            t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {b: {x: true}}), {b: {x: undefined}});
+            t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {b: {x: {y: true}}}), {b: {x: undefined}});
 
             t.done();
         },

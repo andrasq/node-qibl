@@ -663,6 +663,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
+- 1.13.0 - allow `extractTo` to copy nested properties
 - 1.12.2 - experimental `flatMap2`
 - 1.12.1 - make `difftree` recursively diff array contents for full json support, expose `diffarray`
 - 1.12.0 - new `Mutex` from miniq, bump version for new calls
