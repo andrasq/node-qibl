@@ -786,7 +786,7 @@ function restoreListeners( emitter, event, listeners ) {
 
 // gather and return the data emitted, default to '' if no data
 function readBody( emitter, cb ) {
-    var doneCount = 0, chunk1, chunks, data = '';
+    var chunk1, chunks, data = '';
     emitter.on('data', function(chunk) {
         if (typeof chunk === 'string') data ? data += chunk : data = chunk;
         else if (!chunk1) chunk1 = chunk;
