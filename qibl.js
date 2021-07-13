@@ -922,8 +922,8 @@ function _diffit2( target, key, v1, v2 ) {
  */
 function retry( getDelay, timeout, func, callback ) {
     var time = 0, retries = 0;
-    func(function _loop(err) {
-        if (!err || time >= timeout) return callback(err);
+    func(function _loop(err, result) {
+        if (!err || time >= timeout) return callback(err, result);
         var delay = getDelay(++retries);
         setTimeout(func, delay <= (timeout - time) ? delay : (timeout - time + 1), _loop);
         time += delay;

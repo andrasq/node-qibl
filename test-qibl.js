@@ -2046,7 +2046,14 @@ module.exports = {
                 t.ok(times[1] - times[0] <= 10 - 4);
                 t.done();
             })
-        }
+        },
+
+        'returns the function return value': function(t) {
+            qibl.retry(function() { return 1 }, 10, function(cb) { cb(null, 1234) }, function(err, ret) {
+                t.equal(ret, 1234);
+                t.done();
+            });
+        },
     },
 
     'Mutex': {
