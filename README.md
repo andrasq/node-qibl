@@ -459,6 +459,13 @@ Create a new Buffer with its contents pre-initialized to the given string, array
 This builder is a pass-through to the native implementation (`Buffer.from` or `new Buffer`) and
 always runs at full speed.
 
+### qibl.chunk( array, size )
+
+Split an array into chunks of at most `size` elements each.  Returns an array of arrays
+which concatenate to the input `array`.
+
+    qibl.chunk([1,2,3,4,5], 2)
+    // => [[1,2], [3,4], [5]]
 
 Functions
 ---------
@@ -616,6 +623,14 @@ the property value, the property name (index), the object whose property it is, 
 the current level of property traversal, 1 for the direct properties of `tree`.  If the visitor
 returns `'skip'` the property is not recursed into, and if `'stop'` the traversal is halted.
 
+### copytreeDecycle( tree [, replacement] )
+
+Deep-copy the object `tree` with all nodes that are backreferences introducing cycles
+replaced with the `replacement`.  The default replacement is the string `[Circular]`.  The
+copy replaces all class instances with generic objects, preserving only the enumerable own
+properties; the original classes and inherited methods are ignored.  This call can be used
+to make objects containing cycles safe for serialization, e.g. for JSON.stringify.
+
 ### difftree( node1, node2 )
 
 Return a recursive copy of `node2` with all properties that are also present in `node1` removed,
@@ -663,6 +678,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
+- 1.14.0 - new `chunk` array splitter, `copytreeDecycle` cycle-free object copy
 - 1.13.1 - fix retry to return the computed result
 - 1.13.0 - allow `extractTo` to copy nested properties
 - 1.12.2 - experimental `flatMap2`

@@ -80,6 +80,7 @@ var qibl = module.exports = {
     _invoke2: _invoke2,
     concat2: concat2,
     flatMap2: flatMap2,
+    chunk: chunk,
     subsample: subsample,
     qsearch: qsearch,
     sort3: sort3,
@@ -96,6 +97,7 @@ var qibl = module.exports = {
     repeatFor: repeatFor,
     walkdir: walkdir,
     walktree: walktree,
+    copytreeDecycle: copytreeDecycle,
     difftree: difftree,
     diffarray: diffarray,
     retry: retry,
@@ -404,6 +406,18 @@ function flatMap2( dst, src, compute ) {
         Array.isArray(val) ? qibl.concat2(dst, val) : dst.push(val);
     }
     return dst;
+}
+
+
+// like php array_chunk(), split an array into batches
+// invalid results return an empty array like lodash.chunk, not null like php
+function chunk( array, batchSize ) {
+    if (!array || batchSize < 1) return [];
+    var base = 0, chunks = [];
+    while (base < array.length) {
+        chunks.push(array.slice(base, base += batchSize));
+    }
+    return chunks;
 }
 
 // return up to k randomly selected items from arr between base and bound,
@@ -884,6 +898,38 @@ function _visitnodes( node, visitor, state ) {
         else if (next !== 'skip' && qibl.isHash(node[k])) {
             state.depth += 1; _visitnodes(node[k], visitor, state); state.depth -= 1; }
         if (state.stop) break;
+    }
+}
+
+/*
+ * Deep-copy the item with all nodes that are backreferences introducing cycles replaced with the stub
+ * to make the item suitable for passing to eg JSON.stringify.
+ */
+function copytreeDecycle( item, _stub, _nodes ) {
+    _stub = _stub || '[Circular]';
+    _nodes = _nodes || [];
+    if (typeof item !== 'object' || Array.isArray(item) || item === null) {
+        // non-objects and arrays cannot have cycles, their properties are not json encoded
+        return item;
+    }
+    else if (typeof item.toJSON === 'function') {
+        // toJSON is expected to handle cycles
+        return item;
+    }
+    else if (_nodes.indexOf(item) >= 0) {
+        return _stub;
+    }
+    else {
+        var copy = {};
+        _nodes.push(item);
+        var keys = Object.keys(item);
+        for (var i=0; i < keys.length; i++) {
+            var key = keys[i];
+            var value = item[key];
+            copy[key] = typeof value === 'object' && value ? copytreeDecycle(value, _stub, _nodes) : value;
+        }
+        _nodes.pop();
+        return copy;
     }
 }
 

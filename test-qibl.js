@@ -781,6 +781,28 @@ module.exports = {
         },
     },
 
+    'chunk': {
+        'splits array into batches': function(t) {
+            var tests = [
+                [[1,2,3], 1, [[1], [2], [3]]],
+                [[1,2,3], 2, [[1,2], [3]]],
+                [[1,2,3], 3, [[1,2,3]]],
+                [[1,2,3], 4, [[1,2,3]]],
+
+                [[], 2, []],
+                [null, 2, []],
+                [[1,2,3,4,5], 0, []],
+                [[1,2,3,4,5], 2, [[1,2], [3,4], [5]]],
+                [[1,2,3,4,5], 3, [[1,2,3], [4,5]]],
+            ];
+            for (var i=0; i<tests.length; i++) {
+                var test = tests[i];
+                t.deepEqual(qibl.chunk(test[0], test[1]), test[2]);
+            }
+            t.done();
+        },
+    },
+
     'subsample': {
         before: function(done) {
             this.sampleit = function(t, limit, arr, length) {
@@ -1914,6 +1936,48 @@ module.exports = {
             var tree = { a: 1, b: { ba: 2 }, c: 3};
             qibl.walktree(tree, function(v, k) { keys.push(k); return 'skip' });
             t.deepEqual(keys, ['a', 'b', 'c']);
+            t.done();
+        },
+    },
+
+    'copytreeDecycle': {
+        'copies items': function(t) {
+            var now = new Date();
+            var items = [
+                [0, 0],
+                [1, 1],
+                ['two', 'two'],
+                [null, null],
+                [{a:1, b:2}, {a:1, b:2}],
+                [{a:1, b:{c:3}}, {a:1, b:{c:3}}],
+                [now, now],
+                [{dt: now}, {dt: now}],
+            ];
+            for (var i=0; i<items.length; i++) {
+                t.deepStrictEqual(qibl.copytreeDecycle(items[i][0]), items[i][1]);
+            }
+            t.done();
+        },
+
+        'avoids cycles': function(t) {
+            var item = {};
+            item.item = item;
+            t.deepStrictEqual(qibl.copytreeDecycle(item), {item: '[Circular]'});
+
+            var item = {a: {}, b: {}};
+            item.b.a = item.a;
+            item.a.b = item.b;
+            t.deepStrictEqual(qibl.copytreeDecycle(item), {a: {b: {a: "[Circular]"}}, b: {a: {b: "[Circular]"}}});
+
+            t.done();
+        },
+
+        'does not avoid cycles in objects that have a toJSON method': function(t) {
+            var custom = {a: 1, b: 2};
+            custom.custom = custom;
+            t.deepStrictEqual(qibl.copytreeDecycle({a: custom}), {a: {a: 1, b: 2, custom: '[Circular]'}});
+            custom.toJSON = function(){};
+            t.deepStrictEqual(qibl.copytreeDecycle({a: custom}), {a: custom});
             t.done();
         },
     },
