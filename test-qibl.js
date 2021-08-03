@@ -1952,27 +1952,32 @@ module.exports = {
                 [{a:1, b:{c:3}}, {a:1, b:{c:3}}],
                 [now, now],
                 [{dt: now}, {dt: now}],
+                [[1,2,3], [1,2,3]],
+                [{a: [1, now]}, {a: [1, now]}],
             ];
             for (var i=0; i<items.length; i++) {
                 t.deepStrictEqual(qibl.copytreeDecycle(items[i][0]), items[i][1]);
+                t.deepStrictEqual(qibl.copytreeDecycle([items[i][0]]), [items[i][1]]);
             }
             t.done();
         },
 
-        'avoids cycles': function(t) {
+        'removes cycles': function(t) {
             var item = {};
             item.item = item;
             t.deepStrictEqual(qibl.copytreeDecycle(item), {item: '[Circular]'});
+            t.deepStrictEqual(qibl.copytreeDecycle({a: {b: {c: item}}}), {a: {b: {c: {item: '[Circular]'}}}});
 
             var item = {a: {}, b: {}};
             item.b.a = item.a;
             item.a.b = item.b;
             t.deepStrictEqual(qibl.copytreeDecycle(item), {a: {b: {a: "[Circular]"}}, b: {a: {b: "[Circular]"}}});
+            t.deepStrictEqual(qibl.copytreeDecycle([item]), [{a: {b: {a: "[Circular]"}}, b: {a: {b: "[Circular]"}}}]);
 
             t.done();
         },
 
-        'does not avoid cycles in objects that have a toJSON method': function(t) {
+        'does not remove cycles in objects that have a toJSON method': function(t) {
             var custom = {a: 1, b: 2};
             custom.custom = custom;
             t.deepStrictEqual(qibl.copytreeDecycle({a: custom}), {a: {a: 1, b: 2, custom: '[Circular]'}});

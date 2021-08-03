@@ -810,6 +810,7 @@ function readBody( emitter, cb ) {
     emitter.on('end', function() {
         if (!chunk1) return cb(null, data);
         else if (!chunks) return cb(null, chunk1);
+        // FIXME: node-v0.6 does not have Buffer.concat
         else cb(null, Buffer.concat(chunks));
     })
     emitter.on('error', function(err) {
@@ -905,10 +906,10 @@ function _visitnodes( node, visitor, state ) {
  * Deep-copy the item with all nodes that are backreferences introducing cycles replaced with the stub
  * to make the item suitable for passing to eg JSON.stringify.
  */
-function copytreeDecycle( item, _stub, _nodes ) {
-    _stub = _stub || '[Circular]';
-    _nodes = _nodes || [];
-    if (typeof item !== 'object' || Array.isArray(item) || item === null) {
+function copytreeDecycle( item, stub, nodes ) {
+    stub = stub || '[Circular]';
+    nodes = nodes || [];
+    if (typeof item !== 'object' || item === null) {
         // non-objects and arrays cannot have cycles, their properties are not json encoded
         return item;
     }
@@ -916,19 +917,27 @@ function copytreeDecycle( item, _stub, _nodes ) {
         // toJSON is expected to handle cycles
         return item;
     }
-    else if (_nodes.indexOf(item) >= 0) {
-        return _stub;
+    else if (nodes.indexOf(item) >= 0) {
+        return stub;
+    }
+    else if (Array.isArray(item)) {
+        var copy = [];
+        for (var i=0; i<item.length; i++) {
+            var value = item[i];
+            copy[i] = typeof value === 'object' && value ? copytreeDecycle(value, stub, nodes) : value;
+        }
+        return copy;
     }
     else {
         var copy = {};
-        _nodes.push(item);
+        nodes.push(item);
         var keys = Object.keys(item);
         for (var i=0; i < keys.length; i++) {
             var key = keys[i];
             var value = item[key];
-            copy[key] = typeof value === 'object' && value ? copytreeDecycle(value, _stub, _nodes) : value;
+            copy[key] = typeof value === 'object' && value ? copytreeDecycle(value, stub, nodes) : value;
         }
-        _nodes.pop();
+        nodes.pop();
         return copy;
     }
 }
