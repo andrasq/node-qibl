@@ -678,6 +678,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
+- 1.14.1 - fix copytreeDecycle toJSON and cycles in arrays; faster copyObject on node-v10 and up
 - 1.14.0 - new `chunk` array splitter, `copytreeDecycle` cycle-free object copy
 - 1.13.1 - fix retry to return the computed result
 - 1.13.0 - allow `extractTo` to copy nested properties

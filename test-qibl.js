@@ -1950,10 +1950,10 @@ module.exports = {
                 [null, null],
                 [{a:1, b:2}, {a:1, b:2}],
                 [{a:1, b:{c:3}}, {a:1, b:{c:3}}],
-                [now, now],
-                [{dt: now}, {dt: now}],
+                [now, now.toJSON()],
+                [{dt: now}, {dt: now.toJSON()}],
                 [[1,2,3], [1,2,3]],
-                [{a: [1, now]}, {a: [1, now]}],
+                [{a: [1, now]}, {a: [1, now.toJSON()]}],
             ];
             for (var i=0; i<items.length; i++) {
                 t.deepStrictEqual(qibl.copytreeDecycle(items[i][0]), items[i][1]);
@@ -1977,12 +1977,18 @@ module.exports = {
             t.done();
         },
 
-        'does not remove cycles in objects that have a toJSON method': function(t) {
-            var custom = {a: 1, b: 2};
-            custom.custom = custom;
-            t.deepStrictEqual(qibl.copytreeDecycle({a: custom}), {a: {a: 1, b: 2, custom: '[Circular]'}});
-            custom.toJSON = function(){};
-            t.deepStrictEqual(qibl.copytreeDecycle({a: custom}), {a: custom});
+        'tolerates it if toJSON throws': function(t) {
+            var obj = { a:1, b:2, c:{toJSON: function() { throw new Error('mock toJSON error') }} };
+            t.deepStrictEqual(qibl.copytreeDecycle(obj), {a: 1, b:2, c:'[Circular]'});
+            t.done();
+        },
+
+        'remove cycless in toJSON replacements': function(t) {
+            var cyclic = {a: 1, b: 2};
+            cyclic.selfref = cyclic;
+            t.deepStrictEqual(qibl.copytreeDecycle({a: cyclic}), {a: {a: 1, b: 2, selfref: '[Circular]'}});
+            cyclic.toJSON = function(){ return this };
+            t.deepStrictEqual(qibl.copytreeDecycle({a: cyclic}), {a: {a: 1, b: 2, selfref: '[Circular]', toJSON: undefined}});
             t.done();
         },
     },

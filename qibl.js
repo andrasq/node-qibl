@@ -141,9 +141,13 @@ function isMethodContext( self ) {
 // See also `qhash`.
 function copyObject( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
-        src = arguments[i];
-        var keys = qibl.keys(src);
-        for (var j = 0; j < keys.length; j++) target[keys[j]] = src[keys[j]];
+        // node-v10 and up is faster than a manual loop, but older node is 5-10x slower
+        if (nodeMajor >= 10) Object.assign(target, arguments[i]);
+        else {
+            src = arguments[i];
+            var keys = qibl.keys(src);
+            for (var j = 0; j < keys.length; j++) target[keys[j]] = src[keys[j]];
+        }
     }
     return target;
 }
@@ -906,6 +910,7 @@ function _visitnodes( node, visitor, state ) {
  * Deep-copy the item with all nodes that are backreferences introducing cycles replaced with the stub
  * to make the item suitable for passing to eg JSON.stringify.
  */
+function _tryToJSON(item, replacement) { try { return item.toJSON() } catch (err) { return replacement } }
 function copytreeDecycle( item, stub, nodes ) {
     stub = stub || '[Circular]';
     nodes = nodes || [];
@@ -913,18 +918,25 @@ function copytreeDecycle( item, stub, nodes ) {
         // non-objects and arrays cannot have cycles, their properties are not json encoded
         return item;
     }
-    else if (typeof item.toJSON === 'function') {
-        // toJSON is expected to handle cycles
-        return item;
-    }
     else if (nodes.indexOf(item) >= 0) {
+        // break cycles by stubbing backreferences from inner nodes to ancestor nodes
         return stub;
+    }
+    else if (typeof item.toJSON === 'function') {
+        item = _tryToJSON(item, stub);
+        // temporarily remove the toJSON method so if the item is self-referential it will not re-jsonify itself
+        // note that the item is not put on the nodes list, it has not been traversed yet
+        var toJSON;
+        if (item && typeof item.toJSON === 'function') { toJSON = item.toJSON; item.toJSON = undefined }
+        var copy = copytreeDecycle(item, stub, nodes);
+        if (toJSON) item.toJSON = toJSON;
+        return copy;
     }
     else if (Array.isArray(item)) {
         var copy = [];
         for (var i=0; i<item.length; i++) {
             var value = item[i];
-            copy[i] = typeof value === 'object' && value ? copytreeDecycle(value, stub, nodes) : value;
+            copy[i] = typeof value === 'object' && value !== null ? copytreeDecycle(value, stub, nodes) : value;
         }
         return copy;
     }
@@ -935,7 +947,7 @@ function copytreeDecycle( item, stub, nodes ) {
         for (var i=0; i < keys.length; i++) {
             var key = keys[i];
             var value = item[key];
-            copy[key] = typeof value === 'object' && value ? copytreeDecycle(value, stub, nodes) : value;
+            copy[key] = typeof value === 'object' && value !== null ? copytreeDecycle(value, stub, nodes) : value;
         }
         nodes.pop();
         return copy;
