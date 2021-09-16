@@ -46,6 +46,7 @@ var qibl = module.exports = {
     compileGetProperty: compileGetProperty,
     getProp: getProp,
     setProperty: setProperty,
+    getLastDefined: getLastDefined,
     inherits: inherits,
     derive: derive,
     clone: clone,
@@ -106,6 +107,7 @@ var qibl = module.exports = {
     values: values,
     entries: entries,
     pairTo: pairTo,
+    flipTo: flipTo,
     extractTo: extractTo,
     selectField: selectField,
     mapById: mapById,
@@ -261,6 +263,15 @@ function setPropertyMode( target, property, value, mode ) {
         isGetter ? { get: value, enumerable: isEnumerable, configurable: isConfigurable } :
                    { value: value, enumerable: isEnumerable, writable: !isReadonly, configurable: isConfigurable };
     Object.defineProperty(target, property, descriptor);
+}
+
+/*
+ * Return the last argument that is defined, ie is not null or undefined.
+ */
+function getLastDefined(/* VARARGS */) {
+    var len = arguments.length, arg, last;
+    for (var i = 0; i < len; i++) if ((arg = arguments[i]) !== undefined && arg !== null) last = arg;
+    return last;
 }
 
 // make the derived class inherit from the base
@@ -1253,6 +1264,13 @@ function entries( object ) {
 // from mysqule aka node-minisql
 function pairTo( target, keys, values ) {
     for (var i=0; i<keys.length; i++) target[keys[i]] = values[i];
+    return target;
+}
+
+// like php array_flip
+function flipTo( target, item ) {
+    var keys = qibl.keys(item);
+    for (var i=0; i<keys.length; i++) target[item[keys[i]]] = keys[i];
     return target;
 }
 

@@ -408,6 +408,23 @@ module.exports = {
         },
     },
 
+    'getLastDefined': {
+        'should return the last defined argument': function(t) {
+            var tests = [
+                [[], undefined],
+                [[1], 1],
+                [[3, 1, 2], 2],
+                [[undefined, 1], 1],
+                [[1, undefined], 1],
+                [[undefined, 1, undefined], 1],
+            ];
+            for (var i=0; i<tests.length; i++) {
+                t.deepStrictEqual(qibl.getLastDefined.apply(null, tests[i][0]), tests[i][1], 'test ' + i);
+            }
+            t.done();
+        },
+    },
+
     'inherits': {
         'should inherit class properties': function(t) {
             var Base = function() {};
@@ -2601,6 +2618,22 @@ module.exports = {
         },
         'decorates and returns the target': function(t) {
             t.deepEqual(qibl.pairTo({a:1}, ['bee'], ['cee', 'dee']), { a: 1, bee: 'cee' });
+            t.done();
+        },
+    },
+
+    'flipTo': {
+        'flips objects': function(t) {
+            var tests = [
+                [{}, {}],
+                [{a:1}, {1:'a'}],
+                [[1,2,3], {1:0, 2:1, 3:2}],
+                [{a:1, b:2, c:'three'}, {1:'a', 2: 'b', three: 'c'}],
+            ];
+            for (var i=0; i<tests.length; i++) {
+                t.deepEqual(qibl.flipTo({}, tests[i][0]), tests[i][1], util.format("test %d", i, tests[i][1]));
+                t.deepEqual(qibl.flipTo({x:12}, tests[i][0]), Object.assign({x:12}, tests[i][1]), util.format("test x %d", i));
+            }
             t.done();
         },
     },

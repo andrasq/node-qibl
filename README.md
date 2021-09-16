@@ -123,6 +123,22 @@ an object other than `qibl`, it will set properties on that instance.
     obj.set('b', 2)                     // { a: { b: 1 }, b: 2 }
     obj                                 // { a: { b: 1 }, b: 2 }
 
+### qibl.getLastDefined( /* VARARGS */ )
+
+Return the last defined argument.  An argument is defined if it is not `null` or `undefined`.
+Useful counterpart to a value-OR chain `a || b || c` that return the first set value (works
+only for non-falsy values, but often that's enough).
+
+    const defaultValue = 'default';
+    const previousValue = undefined;
+    const newValue = 'new';
+
+    qibl.getLastDefined(defaultValue, previousValue);
+    // => 'default'
+
+    const value = qibl.getLastDefined(defaultValue, previousValue, newValue);
+    // => 'new'
+
 ### qibl.inherits( Derived, Base )
 
 Arrange for the Derived class to inherit class and instance methods and properties
@@ -228,6 +244,15 @@ Assign all enumerable own properties of the sources `src` onto `target`, and ret
 Set all `keys` in turn as properties on `target` having the corresponding values from `values`.
 If a key does not have a maching value, it is set to `undefined`.  If there are more values than
 keys, the excess are ignored.  Returns `target`.
+
+### qibl.flipTo( target, hash )
+
+Flip the `hash`, changing all values to keys and the keys to values.  Works for values that are strings
+and numbers, not for objects or arrays.  Merges the flipped value-key pairs onto `target`, and
+returns `target`.
+
+    var flipped = qibl.flipTo({ a: 1 }, { b: 2, c: 'three' });
+    // => { 1: 'a', 2: 'b', three: 'c' }
 
 ### qibl.extractTo( target, source, mask )
 
@@ -678,6 +703,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
+- 1.15.0 - new `flipTo`, `getLastDefined`
 - 1.14.1 - fix copytreeDecycle toJSON and cycles in arrays; faster copyObject on node-v10 and up
 - 1.14.0 - new `chunk` array splitter, `copytreeDecycle` cycle-free object copy
 - 1.13.1 - fix retry to return the computed result
