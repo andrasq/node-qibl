@@ -1914,6 +1914,9 @@ module.exports = {
                 t.done();
             })
         },
+
+        // fixme: traverses symlinked-to directories
+        // todo: does not report ENOTDIR as error
     },
 
     'walktree': {

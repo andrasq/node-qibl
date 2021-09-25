@@ -884,10 +884,12 @@ function walkdir( dirname, visitor, callback ) {
             var filepath = pathJoin(dirname, files.shift());
             var stat = lstatSync(filepath);
             stop = stat ? visitor(filepath, stat, depth) : 'skip';
-            return (stop === 'stop') ? callback()
+            return (stop === 'stop') ? done(null, true)
                 : (stop === 'skip') ? done()
-                : (stat && stat.isDirectory() && (stop === 'visit' || !stat.isSymbolicLink())) ? fs.readdir(
-                    filepath, function(err, files) { _walkfiles(filepath, depth + 1, files, done) })
+                : (stat && (stat.isDirectory || (stop === 'visit' && stat.isSymbolicLink())))
+                    ? fs.readdir(filepath, function(err, files) { err
+                        ? ((err.code !== 'ENOTDIR' && emitter.emit('error', err, filepath)), done())
+                        : _walkfiles(filepath, depth + 1, files, done) })
                 : done();
         }, cb);
     }
