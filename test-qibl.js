@@ -2632,7 +2632,7 @@ module.exports = {
             ];
             for (var i=0; i<tests.length; i++) {
                 t.deepEqual(qibl.flipTo({}, tests[i][0]), tests[i][1], util.format("test %d", i, tests[i][1]));
-                t.deepEqual(qibl.flipTo({x:12}, tests[i][0]), Object.assign({x:12}, tests[i][1]), util.format("test x %d", i));
+                t.deepEqual(qibl.flipTo({x:12}, tests[i][0]), qibl.assignTo({x:12}, tests[i][1]), util.format("test x %d", i));
             }
             t.done();
         },
