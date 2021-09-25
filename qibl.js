@@ -268,10 +268,10 @@ function setPropertyMode( target, property, value, mode ) {
 /*
  * Return the last argument that is defined, ie is not null or undefined.
  */
-function getLastDefined(/* VARARGS */) {
-    var len = arguments.length, arg, last;
-    for (var i = 0; i < len; i++) if ((arg = arguments[i]) !== undefined && arg !== null) last = arg;
-    return last;
+function getLastDefined( /* VARARGS */ ) {
+    var len = arguments.length, arg;
+    for (var i = len - 1; i >= 0; i--) if ((arg = arguments[i]) !== undefined && arg !== null) return arg;
+    return undefined;
 }
 
 // make the derived class inherit from the base
