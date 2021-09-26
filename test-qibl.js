@@ -1855,6 +1855,14 @@ module.exports = {
                 t.done();
             })
         },
+        'catches and returns errors': function(t) {
+            var ncalls = 0;
+            qibl.repeatFor(1001, function(cb) { ncalls += 1; if (ncalls === 11) throw 'mock error'; cb() }, function(err) {
+                t.equal(ncalls, 11);
+                t.equal(err, 'mock error');
+                t.done();
+            })
+        },
     },
 
     'walkdir': {

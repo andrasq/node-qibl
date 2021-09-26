@@ -854,11 +854,11 @@ function repeatUntil( fn, callback ) {  // adapted from miniq:
 }
 
 // from minisql
-function repeatFor(n, proc, callback) {
+function repeatFor( n, proc, callback ) {
     var ix = 0, ncalls = 0;
     (function _loop(err) {
         if (err || n-- <= 0) return callback(err);
-        (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : proc(_loop, (ix++));
+        (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : _tryCall(proc, _loop, (ix++));
         // 300k in 10ms @100, 16ms @10 @20, 7.75ms @200, 5ms @1000
     })()
 }
