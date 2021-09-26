@@ -415,7 +415,7 @@ function concat2( target, a1, a2 /* VARARGS */ ) {
 // like [].flatMap but appended to the dst array and 20x faster (node-v12)
 // flatMap implements `[].concat(...arr.map(compute))`
 function flatMap2( dst, src, compute ) {
-    for (var i = 0; i < src.length; i++) {
+    for (var len = src.length, i = 0; i < len; i++) {
         if (!(i in src)) continue;
         var val = compute(src[i], i, src);
         Array.isArray(val) ? qibl.concat2(dst, val) : dst.push(val);

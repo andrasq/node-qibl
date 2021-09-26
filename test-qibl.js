@@ -796,6 +796,12 @@ module.exports = {
             t.deepEqual(qibl.flatMap2([0], [{v: 1}, {v: [2, 3]}], function(x) { return x.v }), [0, 1, 2, 3]);
             t.done();
         },
+
+        'appends self to self': function(t) {
+            var arr = [1, [2, 3]];
+            t.deepEqual(qibl.flatMap2(arr, arr, function(x) { return x }), [1, [2, 3], 1, 2, 3]);
+            t.done();
+        },
     },
 
     'chunk': {
