@@ -1790,6 +1790,20 @@ module.exports = {
             }, t.done);
         },
 
+        'loops 1001 times': function(t) {
+            var ncalls = 0;
+            var t1 = qibl.microtime();
+            qibl.repeatUntil(function(done) {
+                ncalls += 1;
+                done(null, ncalls >= 1001);
+            }, function(err) {
+                var t2 = qibl.microtime();
+                console.log("AR: looped 1001 in %d ms", (t2 - t1) * 1000);
+                t.equal(ncalls, 1001);
+                t.done();
+            })
+        },
+
         'loops N times': function(t) {
             var tests = [ 1, 7, 17, 27, 47, 2447, 10007 ];
             repeatFor(tests.length, function(done) {
@@ -1842,7 +1856,10 @@ module.exports = {
         },
         'loops 1001 times': function(t) {
             var ncalls = 0;
+            var t1 = qibl.microtime();
             qibl.repeatFor(1001, function(cb) { ncalls += 1; cb() }, function() {
+                var t2 = qibl.microtime();
+                console.log("AR: looped 1001 in %d ms", (t2 - t1) * 1000);
                 t.equal(ncalls, 1001);
                 t.done();
             })
@@ -1859,6 +1876,39 @@ module.exports = {
             var ncalls = 0;
             qibl.repeatFor(1001, function(cb) { ncalls += 1; if (ncalls === 11) throw 'mock error'; cb() }, function(err) {
                 t.equal(ncalls, 11);
+                t.equal(err, 'mock error');
+                t.done();
+            })
+        },
+    },
+
+    'forEach': {
+        'loops repeatFor on arg array': function(t) {
+            var spy = t.spyOnce(qibl, 'repeatFor');
+            var args = [];
+            qibl.forEach(['a', 'b', 'c'], function(cb, x, ix) { args.push(x, ix); cb() }, function callback(err) {
+                t.ifError(err);
+                t.ok(spy.called);
+                t.deepEqual(spy.args[0][0], 3); 
+                t.deepEqual(spy.args[0][2], callback); 
+                t.deepEqual(args, ['a', 0, 'b', 1, 'c', 2]);
+                t.done();
+            })
+        },
+        'loops 1001 times': function(t) {
+            var ncalls = 0;
+            var arr = qibl.fill(new Array(1001), 0);
+            var t1 = qibl.microtime();
+            qibl.forEach(arr, function(cb) { ncalls += 1; cb() }, function(err) {
+                var t2 = qibl.microtime();
+                console.log("AR: looped %d in %d ms", arr.length, (t2 - t1) * 1000);
+                t.ifError(err);
+                t.equal(ncalls, arr.length);
+                t.done();
+            })
+        },
+        'catches and returns errors': function(t) {
+            qibl.forEach([1, 2, 3], function(cb) { throw 'mock error' }, function(err) {
                 t.equal(err, 'mock error');
                 t.done();
             })

@@ -622,6 +622,13 @@ the cpu unless the looped function does.
         // => count === 3
     })
 
+### forEach( itemsArray, visitorFunction(done(err), item, ix, itemsArray), callback )
+
+Call the visitor function with each element of the array.  The visitor is passed, in order,
+a callback that must be invoked when the visitor is done, the array item, the index of the
+item in the array, and the array itself.  Missing elements will be passed as `undefined`.
+This function uses `repeatFor` and does not yield the cpu unless the called visitor does.
+
 ### errorEmitter = walkdir( dirname, visitor(path, stat, depth), callback )
 
 Simple stateless directory tree walker.  Files are reported and recursed into in order.
@@ -703,6 +710,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
+- 1.16.0 - new `forEach`
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
 - 1.15.1 - fix flipTo unit test for older node

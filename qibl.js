@@ -96,6 +96,7 @@ var qibl = module.exports = {
     globRegex: globRegex,
     repeatUntil: repeatUntil,
     repeatFor: repeatFor,
+    forEach: forEach,
     walkdir: walkdir,
     walktree: walktree,
     copytreeDecycle: copytreeDecycle,
@@ -861,6 +862,13 @@ function repeatFor( n, proc, callback ) {
         (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : _tryCall(proc, _loop, (ix++));
         // 300k in 10ms @100, 16ms @10 @20, 7.75ms @200, 5ms @1000
     })()
+}
+
+// async [].forEach, passing the callback first
+function forEach( items, proc, callback ) {
+    qibl.repeatFor(items.length, function(done, ix) {
+        proc(done, items[ix], ix, items);
+    }, callback)
 }
 
 /*
