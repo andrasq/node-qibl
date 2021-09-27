@@ -656,6 +656,20 @@ error for the directory to already exist.
 
 Remove the named file or directory.  If directory, removes all its contents too.
 
+### globdir( dirname, templateOrRegex, callback(err, filepathArray) )
+
+Recursively walk the directory looking for files matching the pattern, and return to the
+callback the list of matching filepaths.  The filenames will be full paths with the
+directory name prepended.
+
+If the filename template is not already a regular expression it will be converted with
+`qibl.globRegex()`
+
+    // find all files in ./src/ whose names end in '.js'
+    globdir('./src', '*.js', (err, files) => {
+        // ...
+    })
+
 ### walktree( tree, visitor(node[key], key, node, depth) )
 
 Recursively examine the properties of tree and call `visitor()` on each.  `tree` may be any
@@ -719,7 +733,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
-- 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`
+- 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`, `globdir`; make `walkdir` accept `""` as synonym for "."
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
 - 1.15.1 - fix flipTo unit test for older node

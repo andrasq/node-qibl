@@ -101,6 +101,7 @@ var qibl = module.exports = {
     walkdir: walkdir,
     mkdir_p: mkdir_p,
     rmdir_r: rmdir_r,
+    globdir: globdir,
     walktree: walktree,
     copytreeDecycle: copytreeDecycle,
     difftree: difftree,
@@ -893,19 +894,19 @@ function walkdir( dirname, visitor, callback ) {
         repeatUntil(function(done) {
             if (files.length <= 0) return done(null, true);
             var filepath = pathJoin(dirname, files.shift());
-            var stat = lstatSync(filepath);
-            stop = stat ? visitor(filepath, stat, depth) : 'skip';
+            var stat = lstatSync(filepath || '.');
+            stop = stat ? visitor(filepath || '.', stat, depth) : filepath ? 'skip' : '';
             return (stop === 'stop') ? done(null, true)
                 : (stop === 'skip') ? done()
-                : (stat && (stat.isDirectory || (stop === 'visit' && stat.isSymbolicLink())))
-                    ? fs.readdir(filepath, function(err, files) { err
-                        ? ((err.code !== 'ENOTDIR' && emitter.emit('error', err, filepath)), done())
+                : (stat && (stat.isDirectory() || (stop === 'visit' && stat.isSymbolicLink())))
+                    ? fs.readdir(filepath || '.', function(err, files) { err
+                        ? ((err.code !== 'ENOTDIR' && emitter.emit('error', err, filepath || '.')), done())
                         : _walkfiles(filepath, depth + 1, files, done) })
                 : done();
         }, cb);
     }
     function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
-    function pathJoin(dirname, filename) { return filename === null ? dirname : dirname + '/' + filename }
+    function pathJoin(dirname, filename) { return filename === null ? dirname : (dirname ? dirname + '/' : '') + filename }
 }
 
 /*
@@ -943,6 +944,20 @@ function rmdir_r( dirpath, callback ) {
             })
         })
     })
+}
+
+/*
+ * Recursively walk the directory looking for files matching the pattern.
+ * Returns the list of filenames matched.
+ */
+function globdir( dirname, pattern, callback ) {
+    pattern = (pattern instanceof RegExp) ? pattern : new RegExp(qibl.globRegex(String(pattern)));
+    var files = [], error = null;
+    var visitor = function(path, stat, depth) { if (pattern.test(path)) files.push(path); return error ? 'stop' : '' }
+    var emitter = qibl.walkdir(dirname, visitor, function(err) {
+        callback(err || error, files);
+    })
+    emitter.on('error', function(err) { error = err });
 }
 
 /*

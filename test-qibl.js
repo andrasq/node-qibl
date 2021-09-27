@@ -2102,6 +2102,53 @@ module.exports = {
         },
     },
 
+    'globdir': {
+        'returns filepaths matching pattern': function(t) {
+            qibl.globdir('', '*qibl.*', function(err, files) {
+                t.ifError(err);
+                t.deepEqual(files.sort(), ['qibl.js', 'test-qibl.js']);
+                t.done();
+            })
+        },
+
+        'returns filepaths matching regex': function(t) {
+            qibl.globdir('', /.*qibl.*/, function(err, files) {
+                t.ifError(err);
+                t.deepEqual(files.sort(), ['qibl.js', 'test-qibl.js']);
+                t.done();
+            })
+        },
+
+        'errors': {
+            'emits errors': function(t) {
+                t.stubOnce(fs, 'lstatSync').throws(new Error('mock stat error'));
+                qibl.globdir('', '*.js', function(err, files) {
+                    t.ok(err);
+                    t.equal(err.message, 'mock stat error');
+                    t.done();
+                })
+            },
+
+            'stops on error': function(t) {
+                t.stubOnce(fs, 'readdir').yields(null, ['a', 'b', 'c']);
+                var mockDir = { isDirectory: function() { return true } };
+                var mockFile = { isDirectory: function() { return false } };
+                var spy = t.stub(fs, 'lstatSync')
+                    .onCall(0).returns(mockDir)                 // '.'
+                    .onCall(1).returns(mockFile)                // './a'
+                    .onCall(2).throws('mock stat error');       // './b'
+                qibl.globdir('.', '**', function(err, files) {
+                    spy.restore();
+                    t.ok(err);
+                    t.equal(err, 'mock stat error');
+                    // because lstat(b) fails, the visitor is not called for ./b
+                    t.deepEqual(files, ['.', './a']);
+                    t.done();
+                })
+            },
+        },
+    },
+
     'walktree': {
         'recursively traverses object': function(t) {
             var keys = [];
