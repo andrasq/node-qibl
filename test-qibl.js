@@ -6,6 +6,7 @@
 'use strict'
 
 var util = require('util');
+var path = require('path');
 var events = require('events');
 var fs = require('fs');
 var qibl = require('./');
@@ -1981,6 +1982,56 @@ module.exports = {
 
         // fixme: traverses symlinked-to directories
         // todo: does not report ENOTDIR as error
+    },
+
+    'mkdir_p': {
+        'creates directory': function(t) {
+            var filepath = '/tmp/test.' + process.pid + '/foo/bar';
+            qibl.mkdir_p(filepath, function(err) {
+                t.ifError(err);
+                var stat = fs.statSync(filepath);
+                t.ok(stat.isDirectory());
+                fs.rmdirSync(filepath);
+                fs.rmdirSync(path.dirname(filepath));
+                fs.rmdirSync(path.dirname(path.dirname(filepath)));
+                t.done();
+            })
+        },
+
+        'errors': {
+            'ok if already exists': function(t) {
+                qibl.mkdir_p('/bin', function(err) {
+                    t.ifError(err);
+                    t.done();
+                })
+            },
+
+            'ok if path component already exists': function(t) {
+                qibl.mkdir_p('/var/tmp/test.' + process.pid, function(err) {
+                    t.ifError(err);
+                    fs.rmdirSync('/var/tmp/test.' + process.pid);
+                    t.done();
+                })
+            },
+
+            'returns create error': function(t) {
+                var filepath = '/bin/ls/test.' + process.pid;
+                qibl.mkdir_p(filepath, function(err) {
+                    t.ok(err);
+                    t.equal(err.code, 'ENOTDIR');
+                    t.equal(err.message, '/bin/ls: not a directory');
+                    t.done();
+                })
+            },
+
+            'returns perms error': function(t) {
+                qibl.mkdir_p('/etc/foobar', function(err) {
+                    t.ok(err);
+                    t.equal(err.code, 'EACCES');
+                    t.done();
+                })
+            },
+        },
     },
 
     'walktree': {

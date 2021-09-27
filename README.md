@@ -647,6 +647,11 @@ Errors accessing the visited files are reported out of band via 'error' events o
 emitter, and the visitor is not called on them.  The emitter does not throw, un-listened for
 errors are ignored.  Errors accessing the top-level `dirname` are returned to the callback.
 
+### mkdir_p( dirname, callback(err) )
+
+Create the named directory, including all enclosing directories as necessary.  It is not an
+error for the directory to already exist.
+
 ### walktree( tree, visitor(node[key], key, node, depth) )
 
 Recursively examine the properties of tree and call `visitor()` on each.  `tree` may be any
@@ -710,7 +715,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
-- 1.16.0 - new `forEach`
+- 1.16.0 - new `forEach`, `mkdir_p`
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
 - 1.15.1 - fix flipTo unit test for older node

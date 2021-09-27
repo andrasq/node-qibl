@@ -12,6 +12,7 @@
 
 var fs = require('fs');
 var events = require('events');
+var path = require('path');
 var util = require('util');
 
 var nodeMajor = parseInt(process.versions.node);
@@ -98,6 +99,7 @@ var qibl = module.exports = {
     repeatFor: repeatFor,
     forEach: forEach,
     walkdir: walkdir,
+    mkdir_p: mkdir_p,
     walktree: walktree,
     copytreeDecycle: copytreeDecycle,
     difftree: difftree,
@@ -903,6 +905,24 @@ function walkdir( dirname, visitor, callback ) {
     }
     function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
     function pathJoin(dirname, filename) { return filename === null ? dirname : dirname + '/' + filename }
+}
+
+/*
+ * Recursively create the directory dirname, including all enclosing directories.
+ */
+function mkdir_p( dirname, callback ) {
+    var parentdir = path.dirname(dirname);
+    // the root directory (/ or .) is its own parent directory, and it already exists
+    if (parentdir === dirname) return callback();
+    mkdir_p(parentdir, function(err) {
+        if (err) return callback(err);
+        fs.mkdir(dirname, function(err) {
+            if (err && err.code === 'EEXIST') return isDirectory(dirname) ? callback()
+                : callback(qibl.makeError({ code: 'ENOTDIR' }, dirname + ': not a directory'));
+            callback(err);
+        })
+    })
+    function isDirectory(dirname) { try { return fs.statSync(dirname).isDirectory() } catch (err) { } }
 }
 
 /*
