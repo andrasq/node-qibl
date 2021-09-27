@@ -853,7 +853,7 @@ function repeatUntil( fn, callback ) {  // adapted from miniq:
     var ncalls = 0, i = 0;
     (function relaunch(err, stop) {
         if (err || stop) callback(err);
-        else if (ncalls++ < 20) _tryCall(fn, relaunch, i++);
+        else if (ncalls++ < 100) _tryCall(fn, relaunch, i++);
         else { ncalls = 0; process.nextTick(relaunch) }
     })();
 }
