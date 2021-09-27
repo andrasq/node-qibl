@@ -1369,6 +1369,15 @@ module.exports = {
             t.equal(buf.length, 7);
             t.done();
         },
+
+        'should concat bufs': function(t) {
+            var chunks = [qibl.fromBuf('foo'), qibl.fromBuf('barr'), qibl.fromBuf(''), qibl.fromBuf('x')];
+            var buf = qibl.concatBuf(chunks);
+            var expect = 'foobarrx';
+            t.equal(buf.length, expect.length);
+            for (var i=0; i<buf.length; i++) t.equal(buf[i], expect.charCodeAt(i));
+            t.done();
+        },
     },
 
     'toStruct should return struct': function(t) {
@@ -1890,7 +1899,7 @@ module.exports = {
             qibl.forEach(['a', 'b', 'c'], function(cb, x, ix) { args.push(x, ix); cb() }, function callback(err) {
                 t.ifError(err);
                 t.ok(spy.called);
-                t.deepEqual(spy.args[0][0], 3); 
+                t.deepEqual(spy.args[0][0], 3);
                 t.deepEqual(spy.args[0][2], callback); 
                 t.deepEqual(args, ['a', 0, 'b', 1, 'c', 2]);
                 t.done();
@@ -3051,9 +3060,11 @@ module.exports = {
             var t1 = qibl.microtime();
             var t2 = qibl.microtime();
             var t3 = qibl.microtime();
+            // on node-v0.6 must wait for the timestamp to change
+            if (qibl.semverCompar(process.version.node, '0.7') < 0) for (var i=0; i<20000; i++) t3 = qibl.microtime();
             t.ok(t1 <= t2);
             t.ok(t2 <= t3);
-            t.ok(t1 < t3);
+            t.ok(t1 < t3, util.format("expect %s < %s", t1, t3));
             t.done();
         },
         'is sub-millisecond accurate': function(t) {
@@ -3078,9 +3089,11 @@ module.exports = {
             for (var i=0; i<nloops; i++) x = Date.now();
             console.timeEnd('Date.now ' + nloops/1000 + 'k');
 
-            console.time('hrtime ' + nloops/1000 + 'k');
-            for (var i=0; i<nloops; i++) x = process.hrtime();
-            console.timeEnd('hrtime ' + nloops/1000 + 'k');
+            if (qibl.semverCompar(process.versions.node, '0.7') >= 0) {
+                console.time('hrtime ' + nloops/1000 + 'k');
+                for (var i=0; i<nloops; i++) x = process.hrtime();
+                console.timeEnd('hrtime ' + nloops/1000 + 'k');
+            }
 
             console.time('microtime ' + nloops/1000 + 'k');
             for (var i=0; i<nloops; i++) x = qibl.microtime();

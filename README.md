@@ -733,8 +733,8 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
-- 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`, `globdir`; make `walkdir` accept `""` as synonym for ".",
-           make `repeatUntil` iterate as fast as `repeatFor`
+- 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`, `globdir`, `concatBuf`; make `walkdir` accept `""` as synonym for ".",
+           make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
 - 1.15.1 - fix flipTo unit test to work with older node

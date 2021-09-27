@@ -68,6 +68,7 @@ var qibl = module.exports = {
     newBuf: saneBuf().new,
     allocBuf: saneBuf().alloc,
     fromBuf: saneBuf().from,
+    concatBuf: saneBuf().concat,
     toStruct: toStruct,
     clearListeners: clearListeners,
     restoreListeners: restoreListeners,
@@ -149,6 +150,7 @@ function isMethodContext( self ) {
 function copyObject( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
         // node-v10 and up is faster than a manual loop, but older node is 5-10x slower
+        /* istanbul ignore if */
         if (nodeMajor >= 10) Object.assign(target, arguments[i]);
         else {
             src = arguments[i];
@@ -698,6 +700,12 @@ function saneBuf( ) {
         new:   function(a, b, c) { return typeof a === 'number' ? qibl.allocBuf(a) : qibl.fromBuf(a, b, c) },
         alloc: eval('nodeMajor >= 6 ? Buffer.allocUnsafe : Buffer'),
         from:  eval('nodeMajor >= 6 ? Buffer.from : Buffer'),
+        concat: function(chunks) {
+            for (var size=0, i=0; i<chunks.length; i++) size += chunks[i].length;
+            var buf = qibl.allocBuf(size);
+            for (var pos=0, i=0; i<chunks.length; i++) { chunks[i].copy(buf, pos); pos += chunks[i].length }
+            return buf;
+        },
     }
 }
 
@@ -808,7 +816,7 @@ function tryRequire( name ) {
 function clearListeners( emitter, event ) {
     // node-v0.8 returns the actual storage array whose contents will empty out
     // after the removeListeners below, so make our own copy of the array
-    var listeners = emitter.listeners(event).slice(0);
+    var listeners = qibl.concat2(new Array(), emitter.listeners(event));
     for (var i = 0; i < listeners.length; i++) emitter.removeListener(event, listeners[i]);
     return listeners;
 }
@@ -830,8 +838,9 @@ function readBody( emitter, cb ) {
     emitter.on('end', function() {
         if (!chunk1) return cb(null, data);
         else if (!chunks) return cb(null, chunk1);
-        // FIXME: node-v0.6 does not have Buffer.concat
-        else cb(null, Buffer.concat(chunks));
+        // else cb(null, Buffer.concat(chunks));
+        // node-v0.6 does not have Buffer.concat
+        else cb(null, qibl.concatBuf(chunks));
     })
     emitter.on('error', function(err) {
         cb(err);
