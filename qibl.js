@@ -100,6 +100,7 @@ var qibl = module.exports = {
     forEach: forEach,
     walkdir: walkdir,
     mkdir_p: mkdir_p,
+    rmdir_r: rmdir_r,
     walktree: walktree,
     copytreeDecycle: copytreeDecycle,
     difftree: difftree,
@@ -923,6 +924,25 @@ function mkdir_p( dirname, callback ) {
         })
     })
     function isDirectory(dirname) { try { return fs.statSync(dirname).isDirectory() } catch (err) { } }
+}
+
+/*
+ * Recursively remove the directory (or file) dirpath, including all its files and sub-directories.
+ */
+function rmdir_r( dirpath, callback ) {
+    fs.stat(dirpath, function(err, stat) {
+        if (err) return callback(err);
+        if (!stat.isDirectory()) return fs.unlink(dirpath, callback);
+        fs.readdir(dirpath, function(err, files) {
+            if (err) return callback(err);
+            qibl.repeatFor(files.length, function(next, ix) {
+                rmdir_r(dirpath + '/' + files[ix], next);
+            }, function(err) {
+                if (err) return callback(err);
+                fs.rmdir(dirpath, callback);
+            })
+        })
+    })
 }
 
 /*

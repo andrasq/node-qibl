@@ -652,6 +652,10 @@ errors are ignored.  Errors accessing the top-level `dirname` are returned to th
 Create the named directory, including all enclosing directories as necessary.  It is not an
 error for the directory to already exist.
 
+### rmdir_r( fileName_or_directoryName, callback(err) )
+
+Remove the named file or directory.  If directory, removes all its contents too.
+
 ### walktree( tree, visitor(node[key], key, node, depth) )
 
 Recursively examine the properties of tree and call `visitor()` on each.  `tree` may be any
@@ -715,7 +719,7 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
-- 1.16.0 - new `forEach`, `mkdir_p`
+- 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
 - 1.15.1 - fix flipTo unit test for older node

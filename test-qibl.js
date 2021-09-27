@@ -2034,6 +2034,74 @@ module.exports = {
         },
     },
 
+    'rmdir_r': {
+        'removes the directory and its contents': function(t) {
+            var dirname = '/tmp/test.' + process.pid;
+            qibl.mkdir_p(dirname, function(err) {
+                fs.statSync(dirname);           // assert directory exists
+                t.ifError(err);
+                fs.writeFileSync(dirname + '/a', 'one');
+                qibl.mkdir_p(dirname + '/b', function(err) {
+                    t.ifError(err);
+                    qibl.rmdir_r(dirname, function(err) {
+                        t.ifError(err);
+                        fs.stat(dirname, function(err) {
+                            t.ok(err);          // assert directory does not exist
+                            t.equal(err.code, 'ENOENT');
+                            t.done();
+                        })
+                    })
+                })
+            })
+        },
+
+        'errors': {
+            'returns stat error': function(t) {
+                qibl.rmdir_r('/nonesuch', function(err) {
+                    t.ok(err);
+                    t.equal(err.code, 'ENOENT');
+                    t.done();
+                })
+            },
+
+            'returns readdir error': function(t) {
+                t.stubOnce(fs, 'stat').yields(null, { isDirectory: function() { return true } });
+                t.stubOnce(fs, 'readdir').yields(new Error('mock readdir error'));
+                qibl.rmdir_r('/something', function(err) {
+                    t.ok(err);
+                    t.equal(err.message, 'mock readdir error');
+                    t.done();
+                })
+            },
+
+            'returns unlink error': function(t) {
+                t.stubOnce(fs, 'stat').yields(null, { isDirectory: function() { return false } });
+                qibl.rmdir_r('/something', function(err) {
+                    t.ok(err);
+                    t.equal(err.code, 'ENOENT');
+                    t.done();
+                })
+            },
+
+            'returns rmdir error': function(t) {
+                var dirname = '/tmp/test.' + process.pid;
+                qibl.mkdir_p(dirname, function(err) {
+                    t.ifError();
+                    fs.writeFileSync(dirname + '/a', 'one');
+                    fs.writeFileSync(dirname + '/b', 'two');
+                    fs.writeFileSync(dirname + '/c', 'three');
+                    t.stubOnce(fs, 'unlink').yields(new Error('mock unlink error'));
+                    qibl.rmdir_r(dirname, function(err) {
+                        t.ok(err);
+                        t.equal(err.message, 'mock unlink error');
+                        t.equal(fs.readFileSync(dirname + '/a'), 'one');
+                        qibl.rmdir_r(dirname, t.done);
+                    })
+                })
+            },
+        },
+    },
+
     'walktree': {
         'recursively traverses object': function(t) {
             var keys = [];
