@@ -42,10 +42,13 @@ if is an instance of some class.  Tests the object constructor.
 Test whether the given `this` is from a global (function call) context or a method call context.
 Method calls have a `this` object that is not `null`, not `global` and not `qibl`.
 
-### qibl.copyObject( target, src1, ... )
+### qibl.assignTo( target, src1, ... )
 
 Assign all enumerable own properties of the sources `src` onto `target`, and return
-`target`.  Equivalent to `Object.assign`.
+`target`.  Also available as `copyObject` and `assign`.  Equivalent to `Object.assign`.
+
+    // qibl.assignTo({ a: 1 }, { b: 2 }, { c: 3 });
+    // => { a: 1, b: 2, c: 3 }
 
 ### qibl.merge( target, src1, ... )
 
@@ -233,11 +236,6 @@ Return an array with the own properties of the object.  Equivalent to `Object.va
 ### qibl.entries( object )
 
 Return an array of key-value pairs of the own properties of the object.  Equivalent to `Object.entries`.
-
-### qibl.assignTo( target, source [, source2, ...] )
-
-Assign all enumerable own properties of the sources `src` onto `target`, and return
-`target`.  Also available as `copyObject`.  Equivalent to `Object.assign`.
 
 ### qibl.pairTo( target, keys, values )
 
@@ -733,9 +731,9 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
+- 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs
 - 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`, `globdir`, `concatBuf`; make `walkdir` accept `""` as synonym for ".",
-           make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6,
-           fix globdir filename matching in `'.'`
+           make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
 - 1.15.1 - fix flipTo unit test to work with older node

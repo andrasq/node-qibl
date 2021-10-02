@@ -41,7 +41,7 @@ function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
 var qibl = module.exports = {
     isHash: isHash,
     isMethodContext: isMethodContext,
-    copyObject: copyObject,     assign: copyObject,     assignTo: copyObject,
+    copyObject: assignTo,     assign: assignTo,     assignTo: assignTo,
     merge: merge,
     getProperty: getProperty,
     compileGetProperty: compileGetProperty,
@@ -147,9 +147,9 @@ function isMethodContext( self ) {
 
 // transfer the own properties of src onto target, aka Object.assign
 // See also `qhash`.
-function copyObject( target /* ,VARARGS */ ) {
+function assignTo( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
-        // node-v10 and up is faster than a manual loop, but older node is 5-10x slower
+        // node-v10 and up assign() is faster than a manual loop, but on older node is 5-10x slower
         /* istanbul ignore if */
         if (nodeMajor >= 10) Object.assign(target, arguments[i]);
         else {
