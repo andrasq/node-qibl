@@ -1900,7 +1900,7 @@ module.exports = {
                 t.ifError(err);
                 t.ok(spy.called);
                 t.deepEqual(spy.args[0][0], 3);
-                t.deepEqual(spy.args[0][2], callback); 
+                t.deepEqual(spy.args[0][2], callback);
                 t.deepEqual(args, ['a', 0, 'b', 1, 'c', 2]);
                 t.done();
             })
@@ -2115,15 +2115,15 @@ module.exports = {
         'returns filepaths matching pattern': function(t) {
             qibl.globdir('', '*qibl.*', function(err, files) {
                 t.ifError(err);
-                t.deepEqual(files.sort(), ['qibl.js', 'test-qibl.js']);
+                t.deepEqual(files.sort(), ['./qibl.js', './test-qibl.js']);
                 t.done();
             })
         },
 
         'returns filepaths matching regex': function(t) {
-            qibl.globdir('', /.*qibl.*/, function(err, files) {
+            qibl.globdir('.', /.*qibl\..*/, function(err, files) {
                 t.ifError(err);
-                t.deepEqual(files.sort(), ['qibl.js', 'test-qibl.js']);
+                t.deepEqual(files.sort(), ['./qibl.js', './test-qibl.js']);
                 t.done();
             })
         },
@@ -2146,12 +2146,12 @@ module.exports = {
                     .onCall(0).returns(mockDir)                 // '.'
                     .onCall(1).returns(mockFile)                // './a'
                     .onCall(2).throws('mock stat error');       // './b'
-                qibl.globdir('.', '**', function(err, files) {
+                qibl.globdir('.', '*', function(err, files) {
                     spy.restore();
                     t.ok(err);
                     t.equal(err, 'mock stat error');
                     // because lstat(b) fails, the visitor is not called for ./b
-                    t.deepEqual(files, ['.', './a']);
+                    t.deepEqual(files, ['./a']);
                     t.done();
                 })
             },
@@ -2682,7 +2682,7 @@ module.exports = {
             function makeState(instance) { return state };
             function stepIterator(st, instance, tuple) {
                 callArgs = arguments;
-                // stepper passed in state created by 
+                // stepper passed in state created by
                 t.equal(st, state);
                 // the instance is the object on which the iterator was invoked
                 if (instance) t.equal(instance, obj);

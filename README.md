@@ -660,7 +660,7 @@ Remove the named file or directory.  If directory, removes all its contents too.
 
 Recursively walk the directory looking for files matching the pattern, and return to the
 callback the list of matching filepaths.  The filenames will be full paths with the
-directory name prepended.
+directory name prepended, similarly to how the filenames are returned by `find(1)`.
 
 If the filename template is not already a regular expression it will be converted with
 `qibl.globRegex()`
@@ -734,7 +734,8 @@ Changelog
 ---------
 
 - 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`, `globdir`, `concatBuf`; make `walkdir` accept `""` as synonym for ".",
-           make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6
+           make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6,
+           fix globdir filename matching in `'.'`
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
 - 1.15.1 - fix flipTo unit test to work with older node

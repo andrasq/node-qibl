@@ -915,7 +915,7 @@ function walkdir( dirname, visitor, callback ) {
         }, cb);
     }
     function lstatSync(filepath) { try { return fs.lstatSync(filepath) } catch (err) { emitter.emit('error', err, filepath) } }
-    function pathJoin(dirname, filename) { return filename === null ? dirname : (dirname ? dirname + '/' : '') + filename }
+    function pathJoin(dirname, filename) { return filename === null ? dirname : (dirname || '.') + '/' + filename }
 }
 
 /*
@@ -960,7 +960,8 @@ function rmdir_r( dirpath, callback ) {
  * Returns the list of filenames matched.
  */
 function globdir( dirname, pattern, callback ) {
-    pattern = (pattern instanceof RegExp) ? pattern : new RegExp(qibl.globRegex(String(pattern)));
+    dirname = dirname || '.';
+    pattern instanceof RegExp || (pattern = new RegExp('^' + qibl.escapeRegex(dirname + '/') + qibl.globRegex(pattern).slice(1)));
     var files = [], error = null;
     var visitor = function(path, stat, depth) { if (pattern.test(path)) files.push(path); return error ? 'stop' : '' }
     var emitter = qibl.walkdir(dirname, visitor, function(err) {
