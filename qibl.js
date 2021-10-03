@@ -99,6 +99,7 @@ var qibl = module.exports = {
     repeatUntil: repeatUntil,
     repeatFor: repeatFor,       repeatForCb: repeatFor,
     forEachCb: forEachCb,
+    runSteps: runSteps,
     walkdir: walkdir,
     mkdir_p: mkdir_p,
     rmdir_r: rmdir_r,
@@ -884,6 +885,17 @@ function forEachCb( items, proc, callback ) {
     }, callback)
 }
 
+// iterateSteps from minisql < miniq, originally from qrepeat and aflow
+function _tryCallCbAB(fn, cb, a, b) { try { fn(cb, a, b) } catch (e) { cb(e) } }
+function runSteps(steps, callback) {
+    var ix = 0;
+    (function _loop(err, a1, a2) {
+        if (err || ix >= steps.length) return callback(err, a1, a2);
+        // todo: break up the call stack every now and then
+        _tryCallCbAB(steps[ix++], _loop, a1, a2);
+    })()
+}
+
 /*
  * Simple stateless directory tree walker.  Files are reported and recursed into in order.
  * Reports all contained files and directories, including the search root dirname itself.
@@ -941,7 +953,7 @@ function mkdir_p( dirname, callback ) {
  */
 function rmdir_r( dirpath, callback ) {
     fs.stat(dirpath, function(err, stat) {
-        if (err) return callback(err);
+        if (err) return fs.unlink(dirpath, callback); // cannot stat eg dangling symlink
         if (!stat.isDirectory()) return fs.unlink(dirpath, callback);
         fs.readdir(dirpath, function(err, files) {
             if (err) return callback(err);

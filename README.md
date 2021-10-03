@@ -126,7 +126,7 @@ an object other than `qibl`, it will set properties on that instance.
     obj.set('b', 2)                     // { a: { b: 1 }, b: 2 }
     obj                                 // { a: { b: 1 }, b: 2 }
 
-### qibl.getLastDefined( /* VARARGS */ )
+### qibl.getLastDefined( val1, val2, ... )
 
 Return the last defined argument.  An argument is defined if it is not `null` or `undefined`.
 Useful counterpart to a value-OR chain `a || b || c` that return the first set value (works
@@ -732,7 +732,7 @@ Changelog
 ---------
 
 - 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,
-           call it `forEachCb`
+           call it `forEachCb`, fix `rmdir_r` on dangling symlinks, new undocumented `runSteps`
 - 1.16.0 - new `forEachCb`, `mkdir_p`, `rmdir_r`, `globdir`, `concatBuf`; make `walkdir` accept `""` as synonym for ".",
            make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,

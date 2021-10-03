@@ -1925,6 +1925,25 @@ module.exports = {
         },
     },
 
+    'runSteps': {
+        'catches and returns errors': function(t) {
+            qibl.runSteps([
+                function(next) { throw new Error('test error') },
+            ], function(err) {
+                t.ok(err);
+                t.equal(err.message, 'test error');
+                t.done();
+            })
+        },
+
+        'iterates steps passing along results': function(t) {
+            qibl.runSteps([
+                function(next) { next(null, 1, 2) },
+                function(next, a, b) { t.equal(a, 1); t.equal(b, 2); next() },
+            ], t.done);
+        },
+    },
+
     'walkdir': {
         'emits error on invalid dirname': function(t) {
             var called = false;
@@ -1991,14 +2010,34 @@ module.exports = {
 
         'accepts "" meaning "."': function(t) {
             var files = [];
-            qibl.walkdir('', function(path, stat) { files.push(stat) }, function(err) {
+            qibl.walkdir('', function(path, stat) { files.push(path) }, function(err) {
                 t.ifError(err);
                 t.ok(files.length > 4);
                 t.done();
             })
         },
 
-        // fixme: traverses symlinked-to directories
+        'traverses symlinked-to directories': function(t) {
+            var dirname = '/tmp/utest-' + process.pid;
+            var files = [];
+            qibl.runSteps([
+                function(next) { qibl.mkdir_p(dirname + '/a', next) },
+                function(next) { fs.writeFile(dirname + '/a/file', 'test file\n', next) },
+                function(next) { fs.symlink(dirname + '/a', dirname + '/b', next) },
+                function(next) {
+                    qibl.walkdir(dirname, function(path, stat) { files.push(path); return stat.isSymbolicLink() && 'visit' }, next);
+                },
+                function(next) { qibl.rmdir_r(dirname, next) },
+                function(next) {
+                    t.deepEqual(files.length, 5);
+                    t.deepEqual(files, [dirname, dirname + '/a', dirname + '/a/file', dirname + '/b', dirname + '/b/file']);
+                    next();
+                }
+            ], function(err) {
+                t.done(err);
+            });
+        },
+
         // todo: does not report ENOTDIR as error
     },
 
@@ -2053,12 +2092,14 @@ module.exports = {
     },
 
     'rmdir_r': {
-        'removes the directory and its contents': function(t) {
+        'removes the directory and its contents, including symlinks': function(t) {
             var dirname = '/tmp/test.' + process.pid;
             qibl.mkdir_p(dirname, function(err) {
                 fs.statSync(dirname);           // assert directory exists
                 t.ifError(err);
                 fs.writeFileSync(dirname + '/a', 'one');
+                fs.symlinkSync(dirname + '/a', dirname + '/ap'); // symlink to file that exists
+                fs.symlinkSync(dirname + '/x', dirname + '/xp'); // danging symlink
                 qibl.mkdir_p(dirname + '/b', function(err) {
                     t.ifError(err);
                     qibl.rmdir_r(dirname, function(err) {
