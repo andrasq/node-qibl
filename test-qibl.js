@@ -1892,11 +1892,11 @@ module.exports = {
         },
     },
 
-    'forEach': {
+    'forEachCb': {
         'loops repeatFor on arg array': function(t) {
             var spy = t.spyOnce(qibl, 'repeatFor');
             var args = [];
-            qibl.forEach(['a', 'b', 'c'], function(cb, x, ix) { args.push(x, ix); cb() }, function callback(err) {
+            qibl.forEachCb(['a', 'b', 'c'], function(cb, x, ix) { args.push(x, ix); cb() }, function callback(err) {
                 t.ifError(err);
                 t.ok(spy.called);
                 t.deepEqual(spy.args[0][0], 3);
@@ -1909,7 +1909,7 @@ module.exports = {
             var ncalls = 0;
             var arr = qibl.fill(new Array(1001), 0);
             var t1 = qibl.microtime();
-            qibl.forEach(arr, function(cb) { ncalls += 1; cb() }, function(err) {
+            qibl.forEachCb(arr, function(cb) { ncalls += 1; cb() }, function(err) {
                 var t2 = qibl.microtime();
                 console.log("AR: looped %d in %d ms", arr.length, (t2 - t1) * 1000);
                 t.ifError(err);
@@ -1918,7 +1918,7 @@ module.exports = {
             })
         },
         'catches and returns errors': function(t) {
-            qibl.forEach([1, 2, 3], function(cb) { throw 'mock error' }, function(err) {
+            qibl.forEachCb([1, 2, 3], function(cb) { throw 'mock error' }, function(err) {
                 t.equal(err, 'mock error');
                 t.done();
             })

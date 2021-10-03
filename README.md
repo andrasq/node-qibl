@@ -620,7 +620,7 @@ the cpu unless the looped function does.
         // => count === 3
     })
 
-### forEach( itemsArray, visitorFunction(done(err), item, ix, itemsArray), callback )
+### forEachCb( itemsArray, visitorFunction(done(err), item, ix, itemsArray), callback )
 
 Call the visitor function with each element of the array.  The visitor is passed, in order,
 a callback that must be invoked when the visitor is done, the array item, the index of the
@@ -731,8 +731,9 @@ the resource will remain locked until freed, no timeout.
 Changelog
 ---------
 
-- 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs
-- 1.16.0 - new `forEach`, `mkdir_p`, `rmdir_r`, `globdir`, `concatBuf`; make `walkdir` accept `""` as synonym for ".",
+- 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,
+           call it `forEachCb`
+- 1.16.0 - new `forEachCb`, `mkdir_p`, `rmdir_r`, `globdir`, `concatBuf`; make `walkdir` accept `""` as synonym for ".",
            make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self

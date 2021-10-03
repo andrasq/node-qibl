@@ -97,8 +97,8 @@ var qibl = module.exports = {
     escapeRegex: escapeRegex,
     globRegex: globRegex,
     repeatUntil: repeatUntil,
-    repeatFor: repeatFor,
-    forEach: forEach,
+    repeatFor: repeatFor,       repeatForCb: repeatFor,
+    forEachCb: forEachCb,
     walkdir: walkdir,
     mkdir_p: mkdir_p,
     rmdir_r: rmdir_r,
@@ -857,12 +857,12 @@ function _copyFunctionProperties( target, src ) {
 }
 **/
 
-function _tryCall(fn, cb, i) { try { fn(cb, i) } catch (e) { cb(e) } }
+function _tryCallCbIx(fn, cb, i) { try { fn(cb, i) } catch (e) { cb(e) } }
 function repeatUntil( fn, callback ) {  // adapted from miniq:
     var ncalls = 0, i = 0;
     (function relaunch(err, stop) {
         if (err || stop) callback(err);
-        else if (ncalls++ < 100) _tryCall(fn, relaunch, i++);
+        else if (ncalls++ < 100) _tryCallCbIx(fn, relaunch, i++);
         else { ncalls = 0; process.nextTick(relaunch) }
     })();
 }
@@ -872,13 +872,13 @@ function repeatFor( n, proc, callback ) {
     var ix = 0, ncalls = 0;
     (function _loop(err) {
         if (err || n-- <= 0) return callback(err);
-        (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : _tryCall(proc, _loop, (ix++));
+        (ncalls++ > 100) ? process.nextTick((++n, (ncalls = 0), _loop)) : _tryCallCbIx(proc, _loop, (ix++));
         // 300k in 10ms @100, 16ms @10 @20, 7.75ms @200, 5ms @1000
     })()
 }
 
 // async [].forEach, passing the callback first
-function forEach( items, proc, callback ) {
+function forEachCb( items, proc, callback ) {
     qibl.repeatFor(items.length, function(done, ix) {
         proc(done, items[ix], ix, items);
     }, callback)
