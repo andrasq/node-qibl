@@ -627,6 +627,22 @@ a callback that must be invoked when the visitor is done, the array item, the in
 item in the array, and the array itself.  Missing elements will be passed as `undefined`.
 This function uses `repeatFor` and does not yield the cpu unless the called visitor does.
 
+### runSteps( steps, callback(err) )
+
+Experimental:  run each of the functions in the `steps` array.  Each step takes a callback
+and two optional arguments passed to it from the previous step.  The callback is called with
+any error and the first two arguments returned by the last step.
+This function currently does not break up the call stack and does not yield the cpu between steps.
+
+    qibl.runSteps([
+        (done) => done(null, 1),
+        (done, x) => done(null, 2, x),
+        (done, y, x) => done(null, x, y),
+    ],
+    (err, a, b) => {
+        // err == null, a == 1, b == 2
+    })
+
 ### errorEmitter = walkdir( dirname, visitor(path, stat, depth), callback )
 
 Simple stateless directory tree walker.  Files are reported and recursed into in order.
@@ -732,7 +748,8 @@ Changelog
 ---------
 
 - 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,
-           call it `forEachCb`, fix `rmdir_r` on dangling symlinks, new undocumented `runSteps`
+           call it `forEachCb`, fix `rmdir_r` on dangling symlinks, new undocumented `runSteps`,
+           fix `globdir` to not report files visited after error
 - 1.16.0 - new `forEachCb`, `mkdir_p`, `rmdir_r`, `globdir`, `concatBuf`; make `walkdir` accept `""` as synonym for ".",
            make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,

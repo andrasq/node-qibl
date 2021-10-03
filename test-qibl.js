@@ -2190,17 +2190,19 @@ module.exports = {
 
             'stops on error': function(t) {
                 t.stubOnce(fs, 'readdir').yields(null, ['a', 'b', 'c']);
-                var mockDir = { isDirectory: function() { return true } };
-                var mockFile = { isDirectory: function() { return false } };
+                var mockDirStat = { isDirectory: function() { return true } };
+                var mockFileStat = { isDirectory: function() { return false } };
                 var spy = t.stub(fs, 'lstatSync')
-                    .onCall(0).returns(mockDir)                 // '.'
-                    .onCall(1).returns(mockFile)                // './a'
-                    .onCall(2).throws('mock stat error');       // './b'
+                    .onCall(0).returns(mockDirStat)             // '.'
+                    .onCall(1).returns(mockFileStat)            // './a'
+                    .onCall(2).throws('mock stat error')        // './b'
+                    .onCall(3).returns(mockFileStat)            // './c'
+                    ;
                 qibl.globdir('.', '*', function(err, files) {
                     spy.restore();
                     t.ok(err);
                     t.equal(err, 'mock stat error');
-                    // because lstat(b) fails, the visitor is not called for ./b
+                    // because lstat(b) fails, the visitor is not called for ./b, so ./c signals 'stop'
                     t.deepEqual(files, ['./a']);
                     t.done();
                 })

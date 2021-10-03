@@ -887,7 +887,7 @@ function forEachCb( items, proc, callback ) {
 
 // iterateSteps from minisql < miniq, originally from qrepeat and aflow
 function _tryCallCbAB(fn, cb, a, b) { try { fn(cb, a, b) } catch (e) { cb(e) } }
-function runSteps(steps, callback) {
+function runSteps( steps, callback ) {
     var ix = 0;
     (function _loop(err, a1, a2) {
         if (err || ix >= steps.length) return callback(err, a1, a2);
@@ -973,9 +973,10 @@ function rmdir_r( dirpath, callback ) {
  */
 function globdir( dirname, pattern, callback ) {
     dirname = dirname || '.';
-    pattern instanceof RegExp || (pattern = new RegExp('^' + qibl.escapeRegex(dirname + '/') + qibl.globRegex(pattern).slice(1)));
+    pattern = pattern instanceof RegExp ? pattern
+        : new RegExp('^' + qibl.escapeRegex(dirname + '/') + qibl.globRegex(pattern).slice(1));
     var files = [], error = null;
-    var visitor = function(path, stat, depth) { if (pattern.test(path)) files.push(path); return error ? 'stop' : '' }
+    var visitor = function(path) { return error ? 'stop' : ((pattern.test(path) && files.push(path)), '') }
     var emitter = qibl.walkdir(dirname, visitor, function(err) {
         callback(err || error, files);
     })
