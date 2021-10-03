@@ -12,7 +12,7 @@ node_js:
 before_install:
   - npm install -g qnit
 after_success:
-  - if [ `node -p 'process.version.slice(0, 4)'` != "v14." ]; then exit; fi
+  - if [ `node -p 'process.version.slice(0, 4)'` != "v12." ]; then exit; fi
   - npm install -g nyc coveralls
   - nyc -r text --reporter lcov npm test
   - nyc report -r text-lcov | coveralls

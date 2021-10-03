@@ -1,6 +1,6 @@
 qibl
 ====
-[![Build Status](https://travis-ci.com/andrasq/node-qibl.svg?branch=master)](https://travis-ci.com/andrasq/node-qibl)
+[![Build Status](https://app.travis-ci.com/andrasq/node-qibl.svg?branch=master)](https://travis-ci.com/andrasq/node-qibl)
 [![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qibl/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qibl?branch=master)
 
 Quick Itty-Bitty Library.
@@ -12,12 +12,12 @@ than the equivalent built-in.
 Use either directly as a dependency, or as a library of cut-and-paste functions.  If using cut-and-paste,
 add an attribution comment line identifying the qibl source version that it came from, e.g.
 
+    qibl = require('qibl');
+
     // adapted from qibl@1.4.0
     function subsample() { ... }
 
 To run the tests, check out the repo.
-
-    qibl = require('qibl');
 
 Topics:
 - Objects
