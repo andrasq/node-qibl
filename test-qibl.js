@@ -1989,6 +1989,15 @@ module.exports = {
             })
         },
 
+        'accepts "" meaning "."': function(t) {
+            var files = [];
+            qibl.walkdir('', function(path, stat) { files.push(stat) }, function(err) {
+                t.ifError(err);
+                t.ok(files.length > 4);
+                t.done();
+            })
+        },
+
         // fixme: traverses symlinked-to directories
         // todo: does not report ENOTDIR as error
     },
