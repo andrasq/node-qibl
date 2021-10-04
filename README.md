@@ -661,6 +661,9 @@ Errors accessing the visited files are reported out of band via 'error' events o
 emitter, and the visitor is not called on them.  The emitter does not throw, un-listened for
 errors are ignored.  Errors accessing the top-level `dirname` are returned to the callback.
 
+Note: the files are visited in `fs.readdir()` order, which varies by node version.  Older node
+returned files in as-is storage order, newer node returns them in sorted order.
+
 ### mkdir_p( dirname, callback(err) )
 
 Create the named directory, including all enclosing directories as necessary.  It is not an

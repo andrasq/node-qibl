@@ -952,9 +952,8 @@ function mkdir_p( dirname, callback ) {
  * Recursively remove the directory (or file) dirpath, including all its files and sub-directories.
  */
 function rmdir_r( dirpath, callback ) {
-    fs.stat(dirpath, function(err, stat) {
-        if (err) return fs.unlink(dirpath, callback); // cannot stat eg dangling symlink
-        if (!stat.isDirectory()) return fs.unlink(dirpath, callback);
+    fs.lstat(dirpath, function(err, stat) {
+        if (!stat || !stat.isDirectory()) return fs.unlink(dirpath, callback);
         fs.readdir(dirpath, function(err, files) {
             if (err) return callback(err);
             qibl.repeatFor(files.length, function(next, ix) {

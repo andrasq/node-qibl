@@ -2025,12 +2025,12 @@ module.exports = {
                 function(next) { fs.writeFile(dirname + '/a/file', 'test file\n', next) },
                 function(next) { fs.symlink(dirname + '/a', dirname + '/b', next) },
                 function(next) {
-                    qibl.walkdir(dirname, function(path, stat) { files.push(path); return stat.isSymbolicLink() && 'visit' }, next);
+                    qibl.walkdir(dirname, function(path, stat) { files.push(path); return 'visit' }, next);
                 },
                 function(next) { qibl.rmdir_r(dirname, next) },
                 function(next) {
                     t.deepEqual(files.length, 5);
-                    t.deepEqual(files, [dirname, dirname + '/a', dirname + '/a/file', dirname + '/b', dirname + '/b/file']);
+                    t.deepEqual(files.sort(), [dirname, dirname + '/a', dirname + '/a/file', dirname + '/b', dirname + '/b/file']);
                     next();
                 }
             ], function(err) {
@@ -2124,7 +2124,7 @@ module.exports = {
             },
 
             'returns readdir error': function(t) {
-                t.stubOnce(fs, 'stat').yields(null, { isDirectory: function() { return true } });
+                t.stubOnce(fs, 'lstat').yields(null, { isDirectory: function() { return true } });
                 t.stubOnce(fs, 'readdir').yields(new Error('mock readdir error'));
                 qibl.rmdir_r('/something', function(err) {
                     t.ok(err);
@@ -2134,7 +2134,7 @@ module.exports = {
             },
 
             'returns unlink error': function(t) {
-                t.stubOnce(fs, 'stat').yields(null, { isDirectory: function() { return false } });
+                t.stubOnce(fs, 'lstat').yields(null, { isDirectory: function() { return false } });
                 qibl.rmdir_r('/something', function(err) {
                     t.ok(err);
                     t.equal(err.code, 'ENOENT');
