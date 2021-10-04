@@ -1939,8 +1939,12 @@ module.exports = {
         'iterates steps passing along results': function(t) {
             qibl.runSteps([
                 function(next) { next(null, 1, 2) },
-                function(next, a, b) { t.equal(a, 1); t.equal(b, 2); next() },
-            ], t.done);
+                function(next, a, b) { t.equal(a, 1); t.equal(b, 2); next(null, a, b) },
+            ], function(err, a, b) {
+                t.equal(a, 1);
+                t.equal(b, 2);
+                t.done();
+            })
         },
     },
 
