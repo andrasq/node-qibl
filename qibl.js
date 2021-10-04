@@ -121,7 +121,7 @@ var qibl = module.exports = {
     groupById: groupById,
     groupBy: groupBy,
     sortBy: sortBy,
-    distinct: distinct,
+    distinct: distinct,         uniq: distinct,
     makeIterator: makeIterator,
     setIterator: setIterator,
     getIterator: getIterator,
@@ -1225,13 +1225,12 @@ function distinct( items, getKey ) {
     var vals = found.values();
     return Array.isArray(vals) ? vals : qibl.toArray(vals);
 }
-// function _identity(x) { return x }
-function _toString(x) { return typeof x === 'string' ? x : '' + x }     // TODO: time '' + x vs typeof
+function _toString(x) { return typeof x === 'string' ? x : '' + x }
 // quick-and-dirty Map polyfill to use where needed, works for strings and numbers
 function _Hashmap() {};
 _Hashmap.prototype.set = function(k, v) { this[k] = v; return this }
 _Hashmap.prototype.get = function(k) { return this[k] }
-_Hashmap.prototype.values = function() { return qibl.values(this) }
+_Hashmap.prototype.values = function() { return qibl.values(this) }     // Map returns an iterator, we return array
 
 function groupBy( items, getKey, target ) {
     target = target || {};
