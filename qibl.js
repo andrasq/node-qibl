@@ -110,6 +110,7 @@ var qibl = module.exports = {
     diffarray: diffarray,
     retry: retry,
     Mutex: Mutex,
+    Cron: Cron,
     keys: keys,
     values: values,
     entries: entries,
@@ -151,7 +152,7 @@ function isMethodContext( self ) {
 function assignTo( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
         // node-v10 and up assign() is faster than a manual loop, but on older node is 5-10x slower
-        /* istanbul ignore if */
+        /* istanbul ignore next */
         if (nodeMajor >= 10) Object.assign(target, arguments[i]);
         else {
             src = arguments[i];
@@ -1114,6 +1115,51 @@ function Mutex( limit ) {
     }
 }
 
+/*
+ * interval jobs, launched at fixed intervals relative to their scheduled runtime, non-overlapping
+ * Cron adapted from miniq
+ */
+function Cron( ) {
+    this.jobs = [];     // {interval, start, next, fn, errCb}
+    this.schedule = function schedule(interval, fn, startMs, errorCallback) {
+        var now = Date.now(), interval = this._parseMs(interval);
+        if (isNaN(interval)) throw new Error('invalid interval, expected [0-9]+[hms]');
+        var nextRunTime = this._findNextRunTime(now, startMs || now, interval);
+        this.jobs.push({interval: interval, start: now, next: nextRunTime, fn: fn, errCb: errorCallback });
+    }
+    this.cancel = function cancel(fn) {
+        var len = this.jobs.length;
+        this.jobs = this.jobs.filter(function(job) { return job.fn !== fn });
+        return this.jobs.length < len;
+    }
+    this.run = function run(now, callback) {
+        var jobIdx = 0, jobs = this.jobs.slice(), self = this, doneCb = null;
+        function nextCb(err) {
+            var job = jobs[jobIdx];
+            job.next = self._findNextRunTime(now, job.start, job.interval);
+            if (err && job.errCb) job.errCb(err);
+            doneCb();
+        }
+        qibl.forEachCb(jobs, function(done, job, idx) {
+            if (job.next > now) return done();
+            jobIdx = idx; doneCb = done; jobs[idx].next = Infinity;
+            job.fn(nextCb);
+        }, callback || this._noop);
+    }
+    this._findNextRunTime = function _findNextRunTime(nowMs, startMs, interval) {
+        var msRunning = nowMs - startMs;
+        return nowMs + (interval - (msRunning % interval));
+    }
+    // parse time notation like '2h' into 7200000 milliseconds
+    this._timeUnits = { w: 7*24*3600*1000, d: 24*3600*1000, h: 3600*1000, m: 60*1000, s: 1000 };
+    this._parseMs = function _parseMs(interval) {
+        if (interval === '' || +interval == interval) return +interval; // numeric or blank = 0
+        var units = interval.match(/([^\s]\s*$)/);
+        return parseFloat(interval) * this._timeUnits[units[1]];
+    }
+    this._noop = function(){};
+    return this;
+}
 
 // backslash-escape the chars that have special meaning in regex strings
 // See also microrest, restiq.

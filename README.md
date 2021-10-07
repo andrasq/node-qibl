@@ -746,10 +746,49 @@ the resource will remain locked until freed, no timeout.
         done();
     });
 
+### new Cron( )
+
+Schedule precise-interval cronjobs.  A cronjob is a function taking a callback that it calls
+when done and uses to report errors.  `Cron` schedules runtimes at exact multiples of the
+configured interval, and calls the cron function once it has come due.  The next run will
+only be scheduled after the previous run has finished, job runs will never overlap.  The
+duration of the job does not affect the schedule, but an overdue job can cause the following
+run to be skipped.  The different jobs are run in turn, in the order scheduled.
+
+Note that `Cron` is explicitly strobed, it does not run its own timer:  `cron.run` must be
+called with the current time at the cron scheduling granularity, eg every minute.
+
+    cron = new qibl.Cron();
+    cronTimer = setInterval(() => cron.run(Date.now()), 60000);
+
+#### cron.schedule( intervalMs, cronjob(cb), [startMs, [errorCallback(err)]] )
+
+Schedule a cronjob to run every `intervalMs` milliseconds from now, or from the optional
+`startMs` time.  If provided, `errorCallback` will be called with any errors the cronjob
+encounters each time it is run.  Cronjob exceptions are redirected to the error callback,
+but errorCallback exceptions are fatal.
+
+#### cron.cancel( cronjob )
+
+Remove a cronjob from the list and do not run it any more.  Returns true if removed, false
+if the `cronjob` was not scheduled.
+
+#### cron.run( nowMs, callback )
+
+Run the cronjobs that have come due, and call the `callback` when finished running them.
+This call never returns errors, error reporting is done per job via their scheduled `errorCallback`.
+
+    cron = new qibl.Cron();
+    cron.schedule(60 * 1000, () => console.log('1 minute elapsed'));
+    cron.run(Date.now() + 30000);
+    // (nothing)
+    cron.run(Date.now() + 60000);
+    // => "1 minute elapsed"
 
 Changelog
 ---------
 
+- 1.17.0 - `Cron` periodic interval job runner adapted from `miniq`
 - 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,
            call it `forEachCb`, fix `rmdir_r` on dangling symlinks, new undocumented `runSteps`,
            fix `globdir` to not report files visited after error

@@ -2495,6 +2495,113 @@ module.exports = {
         },
     },
 
+    'Cron': {
+        setUp: function(done) {
+            this.uut = new qibl.Cron();
+            done();
+        },
+
+        'schedules jobs': function(t) {
+            function noop() {}
+            this.uut.schedule(10, noop);
+            this.uut.schedule('200', noop);
+            this.uut.schedule('3s', noop);
+            this.uut.schedule('.5s', noop);
+            this.uut.schedule('0.5s', noop);
+            this.uut.schedule('5.s', noop);
+            t.equal(this.uut.jobs.length, 6);
+            // NOTE: this assertion can fail on slower computers:
+            const now = Date.now();
+            t.ok(this.uut.jobs[0].next > now + 10-2 && this.uut.jobs[0].next < now + 10+2);
+            t.ok(this.uut.jobs[1].next > now + 200-2 && this.uut.jobs[1].next < now + 200+2);
+            t.ok(this.uut.jobs[2].next > now + 3000-2 && this.uut.jobs[2].next < now + 3000+2);
+            t.ok(this.uut.jobs[3].next > now + 500-2 && this.uut.jobs[3].next < now + 500+2);
+            t.ok(this.uut.jobs[4].next > now + 500-2 && this.uut.jobs[4].next < now + 500+2);
+            t.ok(this.uut.jobs[5].next > now + 5000-2 && this.uut.jobs[5].next < now + 5000+2);
+            t.done();
+        },
+
+        'cancels jobs': function(t) {
+            var fn1 = function(){};
+            var fn2 = function(){};
+            this.uut.schedule(10, fn1);
+            this.uut.schedule(20, fn2);
+            t.equal(this.uut.cancel(fn1), true);        // returns true if job removed
+            t.equal(this.uut.cancel(fn1), false);       // returns false if job was not scheduled
+            t.equal(this.uut.jobs.length, 1);
+            t.equal(this.uut.jobs[0].fn, fn2);
+            t.done();
+        },
+
+        'throws on invalid interval': function(t) {
+            t.throws(function(){ new qibl.Cron().schedule('one', function(){}) }, /invalid .* expected/);
+            t.throws(function(){ new qibl.Cron().schedule('2x', function(){}) }, /invalid .* expected/);
+            t.done();
+        },
+
+        'runs 0 jobs': function(t) {
+            this.uut.run(Date.now(), function() {
+                t.done();
+            })
+        },
+
+        'runs 1 jobs at scheduled time': function(t) {
+            var ncalls = 0;
+            this.uut.schedule(10, function(cb) {
+                ncalls++;
+                cb();
+            })
+            var uut = this.uut;
+            var now = Date.now();
+            uut.run(now + 5, function(err) {
+                t.ifError(err);
+                t.equal(ncalls, 0);
+                uut.run(now + 15, function(err) {
+                    t.ifError(err);
+                    t.equal(ncalls, 1);
+                    uut.run(now + 15, function(err) {
+                        t.ifError(err);
+                        t.equal(ncalls, 1);
+                        uut.run(now + 25, function(err) {
+                            t.ifError(err);
+                            t.equal(ncalls, 2);
+                            uut.run(now + 50);
+                            setTimeout(function() {
+                                t.equal(ncalls, 3);
+                                t.done();
+                            }, 2)
+                        })
+                    })
+                })
+            })
+        },
+
+        'runs calls without a callback': function(t) {
+            var called = false;
+            this.uut.schedule(10, function(cb) {
+                called = true;
+                cb();
+            })
+            this.uut.run(Date.now() + 15);
+            setTimeout(function() {
+                t.ok(called);
+                t.done();
+            }, 2)
+        },
+
+        'reports errors to the callback': function(t) {
+            var error;
+            this.uut.schedule(10, function(cb) { cb() });
+            this.uut.schedule(10, function(cb) { cb('mock error') }, null, function(err) { error = err });
+            this.uut.schedule(10, function(cb) { cb('another error') });
+            this.uut.run(Date.now() + 11, function(err) {
+                t.ifError(err);
+                t.equal(error, 'mock error');
+                t.done();
+            })
+        },
+    },
+
     'escapeRegex': {
         'should escape all metachars': function(t) {
             var chars = [];
