@@ -135,6 +135,7 @@ var qibl = module.exports = {
     endsWith: endsWith,
     makeError: makeError,
     microtime: microtime,
+    parseMs: parseMs,
 };
 
 // hashes are generic objects without a class
@@ -1122,7 +1123,7 @@ function Mutex( limit ) {
 function Cron( ) {
     this.jobs = [];     // {interval, start, next, fn, errCb}
     this.schedule = function schedule(interval, fn, startMs, errorCallback) {
-        var now = Date.now(), interval = this._parseMs(interval);
+        var now = Date.now(), interval = qibl.parseMs(interval);
         if (isNaN(interval)) throw new Error('invalid interval, expected [0-9]+[hms]');
         var nextRunTime = this._findNextRunTime(now, startMs || now, interval);
         this.jobs.push({interval: interval, start: now, next: nextRunTime, fn: fn, errCb: errorCallback });
@@ -1150,15 +1151,7 @@ function Cron( ) {
         var msRunning = nowMs - startMs;
         return nowMs + (interval - (msRunning % interval));
     }
-    // parse time notation like '2h' into 7200000 milliseconds
-    this._timeUnits = { w: 7*24*3600*1000, d: 24*3600*1000, h: 3600*1000, m: 60*1000, s: 1000 };
-    this._parseMs = function _parseMs(interval) {
-        if (interval === '' || +interval == interval) return +interval; // numeric or blank = 0
-        var units = interval.match(/([^\s]\s*$)/);
-        return parseFloat(interval) * this._timeUnits[units[1]];
-    }
     this._noop = function(){};
-    return this;
 }
 
 // backslash-escape the chars that have special meaning in regex strings
@@ -1512,6 +1505,16 @@ function _hrCalibrate() {
 }
 // NOTE: occasionally the runtime adds a burst of delay between t1 and t2, if so try again
 do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTick() / 1000 - microtime() > .000002);
+
+/*
+ * parse time notation like '2h' into 7200000 milliseconds
+ */
+var msUnits = { w: 7*24*3600*1000, d: 24*3600*1000, h: 3600*1000, m: 60*1000, s: 1000 };
+function parseMs( interval ) {
+    if (interval === '' || +interval == interval) return +interval; // numeric or blank = 0
+    var units = interval.match(/([^\s]\s*$)/);
+    return parseFloat(interval) * msUnits[units[1]];
+}
 
 /**
 var _warnings = {};

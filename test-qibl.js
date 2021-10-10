@@ -3304,4 +3304,33 @@ module.exports = {
             t.done();
         },
     },
+
+    'parseMs': {
+        'parses time notation': function(t) {
+            var tests = [
+                ['', 0],
+                [123, 123.0],
+                ['123', 123],
+                ['1.5', 1.5],
+                ['1.1s', 1100],
+                ['1.5m', 90000],
+                ['2.25h', 2.25 * 3600 * 1000],
+                ['3.5d', 3.5 * 24 * 3600 * 1000],
+                ['2w', 14 * 24 * 3600 * 1000],
+
+                ['  2.5m', 150000],
+                ['Infinity', Infinity],
+                ['Infinity h', Infinity],
+                ['-Infinityh', -Infinity],
+
+                ['one', NaN],
+                ['7x', NaN],
+            ];
+            for (var i = 0; i < tests.length; i++) {
+                if (isNaN(tests[i][1])) t.ok(isNaN(qibl.parseMs(tests[i][0])));
+                else t.strictEqual(qibl.parseMs(tests[i][0]), tests[i][1], tests[i][0] + ' <> ' + tests[i][1]);
+            }
+            t.done();
+        },
+    },
 }
