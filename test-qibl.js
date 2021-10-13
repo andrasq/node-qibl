@@ -2511,7 +2511,7 @@ module.exports = {
             this.uut.schedule('5.s', noop);
             t.equal(this.uut.jobs.length, 6);
             // NOTE: this assertion can fail on slower computers:
-            const now = Date.now();
+            var now = Date.now();
             t.ok(this.uut.jobs[0].next > now + 10-2 && this.uut.jobs[0].next < now + 10+2);
             t.ok(this.uut.jobs[1].next > now + 200-2 && this.uut.jobs[1].next < now + 200+2);
             t.ok(this.uut.jobs[2].next > now + 3000-2 && this.uut.jobs[2].next < now + 3000+2);
