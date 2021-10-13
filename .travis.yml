@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   #- 0.6 -- travis.ci breaks on node-v0.6, skip for now
-  - 0.8
+  - 0.8.28
   - 0.10
   - 4
   - 5.8.0
@@ -10,7 +10,7 @@ node_js:
   - 12
   - 15
 before_install:
-  - node "/home/travis/.nvm/v0.10.42/bin/npm" install -g npm@2.15.0
+  - VER=`node -v` ; [ "$VER" = "0.8.28" ] && nvm install 5.8.0 && npm install -g npm@2.15.0 && nvm install $VER || true
   - npm install -g qnit
 after_success:
   - if [ `node -p 'process.version.slice(0, 4)'` != "v5.8" ]; then exit; fi
