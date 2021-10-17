@@ -10,13 +10,14 @@ node_js:
   #- 14
   #- 15
 before_install:
-  - echo AR: "PATH = $PATH"
-  - mkdir -p "$HOME/bin" "$HOME/lib"
-  - echo prefix=$HOME >> $HOME/.npmrc
-  - npm install -g qnit npm@2.15.0
+  - mkdir -p $HOME/bin $HOME/lib
+  - npm install qnit npm@2.15.0
+  - cp -rp node_modules $HOME/lib/
+  - ln -sf ../lib/node_modules/.bin/qnit $HOME/bin/qnit
+  - ln -sf ../lib/node_modules/.bin/npm $HOME/bin/npm2
   # travis uses nvm to install npm-v1 for node-v0.8, which can no longer download from npmjs.com
   # So test with 0.8 explicitly from inside the 5.8.0 test run
-  - test `node -v` = "v5.8.0" && nvm 0.8.28 && $HOME/bin/npm test && nvm 5.8.0
+  - test `node -v` = "v5.8.0" && nvm 0.8.28 && npm2 test && nvm 5.8.0
 after_success:
   - if [ `node -p 'process.version.slice(0, 4)'` != "v5.8" ]; then exit; fi
   - npm install -g nyc coveralls
