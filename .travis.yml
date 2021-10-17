@@ -10,8 +10,8 @@ node_js:
   #- 14
   #- 15
 before_install:
-  - echo AR: PATH = $PATH
-  - mkdir -p $HOME/bin $HOME/lib
+  - echo AR: "PATH = $PATH"
+  - mkdir -p "$HOME/bin" "$HOME/lib"
   - echo prefix=$HOME >> $HOME/.npmrc
   - npm install -g qnit npm@2.15.0
   # travis uses nvm to install npm-v1 for node-v0.8, which can no longer download from npmjs.com
