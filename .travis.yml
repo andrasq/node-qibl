@@ -19,6 +19,12 @@ before_install:
   # npm ERR! Error: 139905814947648:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol ... s23_clnt.c:658
   # So test with 0.8 explicitly from inside the 5.8.0 test run
   - test `node -v` = "v5.8.0" && nvm install 0.8.28 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
+  - test `node -v` = "v5.8.0" && nvm install 0.10 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
+  - test `node -v` = "v5.8.0" && nvm install 4 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
+  - test `node -v` = "v5.8.0" && nvm install 5.12 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
+  - test `node -v` = "v5.8.0" && nvm install 12 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
+  - test `node -v` = "v5.8.0" && nvm install 15 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
+  - test `node -v` = "v5.8.0" && nvm install 16 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
 after_success:
   - if [ `node -v` != "v5.8.0" ]; then exit; fi
   - npm install -g nyc coveralls
