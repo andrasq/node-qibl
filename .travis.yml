@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   #- 0.6 -- travis.ci breaks on node-v0.6, skip for now
-  - 0.8.28
+  #- 0.8.28 -- travis.ci breaks on node-v0.8 (npm-v1.2.30 cannot install from registry.npmjs.org)
   #- 0.10
   #- 4
   - 5.8.0
@@ -15,11 +15,12 @@ before_install:
   - cp -rp node_modules $HOME/lib/
   - ln -sf ../lib/node_modules/.bin/qnit $HOME/bin/qnit
   - ln -sf ../lib/node_modules/.bin/npm $HOME/bin/npm2
-  # travis uses nvm to install npm-v1 for node-v0.8, which can no longer download from npmjs.com
+  # travis uses nvm to install npm-v1 for node-v0.8, which can no longer download from registry.npmjs.org:
+  # npm ERR! Error: 139905814947648:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol ... s23_clnt.c:658
   # So test with 0.8 explicitly from inside the 5.8.0 test run
-  - test `node -v` = "v5.8.0" && nvm install 0.8.28 && npm2 intall && npm2 -v && node -v && npm2 test && nvm install 5.8.0
+  - test `node -v` = "v5.8.0" && nvm install 0.8.28 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
 after_success:
-  - if [ `node -v` != 'v5.8.0' ]; then exit; fi
+  - if [ `node -v` != "v5.8.0" ]; then exit; fi
   - npm install -g nyc coveralls
   - nyc -r text --reporter lcov npm test
   - nyc report -r text-lcov | coveralls
