@@ -677,7 +677,7 @@ function endsWith( string, suffix ) {
 // NOTE: this function is not reentrant
 // On first call the string is remembered, on subsequent calls it should be null.
 // Once the string is consumed the remembered string is cleared to null.
-// FIXME: getProperty runs 6x faster split to array than tokenized.
+// nb: getProperty runs 6x faster split to array than tokenized.
 var _strtokStr = null, _strtokBase = 0;
 function strtok( str, sep ) {
     if (str != null) { _strtokStr = str; _strtokBase = 0 }
@@ -1507,13 +1507,15 @@ function _hrCalibrate() {
 do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTick() / 1000 - microtime() > .000002);
 
 /*
- * parse time notation like '2h' into 7200000 milliseconds
+ * Parse time notation like '2h' into 7200000 milliseconds.
+ * Supported units are hms and d -- hours, minutes, seconds, and days.
  */
 var msUnits = { w: 7*24*3600*1000, d: 24*3600*1000, h: 3600*1000, m: 60*1000, s: 1000 };
 function parseMs( interval ) {
-    if (interval === '' || +interval == interval) return +interval; // numeric or blank = 0
-    var units = interval.match(/([^\s]\s*$)/);
-    return parseFloat(interval) * msUnits[units[1]];
+    var value = parseFloat(interval);
+    if (value === +interval) return value; // number or numeric value
+    var units = String(interval).trim().slice(-1);
+    return value * msUnits[units];
 }
 
 /**

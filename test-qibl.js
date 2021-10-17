@@ -3308,7 +3308,6 @@ module.exports = {
     'parseMs': {
         'parses time notation': function(t) {
             var tests = [
-                ['', 0],
                 [123, 123.0],
                 ['123', 123],
                 ['1.5', 1.5],
@@ -3323,6 +3322,7 @@ module.exports = {
                 ['Infinity h', Infinity],
                 ['-Infinityh', -Infinity],
 
+                ['', NaN],
                 ['one', NaN],
                 ['7x', NaN],
             ];

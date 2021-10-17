@@ -590,10 +590,10 @@ accurate to 1-10 ms because it is synced to a remote time service over a bursty 
 
 ### parseMs( interval )
 
-Convert a simple time duration like '2h' (no whitespace) into milliseconds, `7200000`.
+Convert a simple time duration like `'2h'` (no whitespace) into milliseconds, `7200000`.
 Recognizes the modifiers `s`, `m`, `h`, `d` and `w` meaning seconds, minutes, hours, days
 and weeks.  Numeric input is assume to represent milliseconds and is returned as is.
-Returns `NaN` if unable to parse the format.
+Returns `NaN` if unable to parse the value or the format.
 
     qibl.parseMs('2m');
     // => 120000
@@ -798,6 +798,7 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
+- 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval
 - 1.17.0 - `Cron` periodic interval job runner adapted from `miniq`, simple `parseMs` time interval notation
 - 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,
            call it `forEachCb`, fix `rmdir_r` on dangling symlinks, new undocumented `runSteps`,
