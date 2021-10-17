@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   #- 0.6 -- travis.ci breaks on node-v0.6, skip for now
-  - 0.8.28 -- travis.ci installs npm1 for v0.8, which can no longer download from npmjs.com
+  - 0.8.28
   #- 0.10
   #- 4
   - 5.8.0
@@ -19,7 +19,7 @@ before_install:
   # So test with 0.8 explicitly from inside the 5.8.0 test run
   - test `node -v` = "v5.8.0" && nvm install 0.8.28 && npm2 intall && npm2 -v && node -v && npm2 test && nvm install 5.8.0
 after_success:
-  - if [ `node -p 'process.version.slice(0, 4)'` != "v5.8" ]; then exit; fi
+  - if [ `node -v` != 'v5.8.0' ]; then exit; fi
   - npm install -g nyc coveralls
   - nyc -r text --reporter lcov npm test
   - nyc report -r text-lcov | coveralls
