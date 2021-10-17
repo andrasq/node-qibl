@@ -14,7 +14,7 @@ before_install:
   - mkdir -p $HOME/bin $HOME/lib
   - echo prefix=$HOME >> $HOME/.npmrc
   - npm install -g qnit npm@2.15.0
-  - [ `node -v` = "v5.8.0" ] && nvm 0.8.28 && $HOME/bin/npm test && nvm 5.8.0
+  #- [ `node -v` = "v5.8.0" ] && nvm 0.8.28 && $HOME/bin/npm test && nvm 5.8.0
 after_success:
   - if [ `node -p 'process.version.slice(0, 4)'` != "v5.8" ]; then exit; fi
   - npm install -g nyc coveralls
