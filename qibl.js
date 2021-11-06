@@ -100,6 +100,7 @@ var qibl = module.exports = {
     repeatFor: repeatFor,       repeatForCb: repeatFor,
     forEachCb: forEachCb,
     runSteps: runSteps,
+    batchCalls: batchCalls,
     walkdir: walkdir,
     mkdir_p: mkdir_p,
     rmdir_r: rmdir_r,
@@ -277,6 +278,7 @@ function setPropertyMode( target, property, value, mode ) {
 
 /*
  * Return the last argument that is defined, ie is not null or undefined.
+ * A counterpart to (a || b || c), usable to select eg (builtin, configured, provided)
  */
 function getLastDefined( /* VARARGS */ ) {
     var len = arguments.length, arg;
@@ -896,6 +898,40 @@ function runSteps( steps, callback ) {
         // todo: break up the call stack every now and then
         _tryCallCbAB(steps[ix++], _loop, a1, a2);
     })()
+}
+
+// adapted from qfifo
+function batchCalls( options, processBatch ) {
+    if (!processBatch) { processBatch = options; options = {} };
+    var state = { timer: null, count: 0, batch: null, callbacks: [] };
+
+    var startBatch = options.startBatch || function() { return [] };
+    var growBatch = options.growBatch || function(batch, item) { return batch.push(item) };
+    var maxBatchSize = options.maxBatchSize > 0 ? options.maxBatchSize : 10;
+    var maxWaitMs = options.maxWaitMs > 0 ? options.maxWaitMs : 0;
+
+    return function processItem(item, callback) {
+        if (!state.batch) {
+            state.batch = startBatch();
+            // always defer processing until after the current event loop tick
+            state.timer = maxWaitMs ? setTimeout(doProcessBatch, maxWaitMs) : process.nextTick(doProcessBatch);
+        }
+        growBatch(state.batch, item);
+        state.callbacks.push(callback);
+        state.count += 1;
+        if (state.count >= maxBatchSize) doProcessBatch(state);
+    }
+
+    function doProcessBatch() {
+        clearTimeout(state.timer);
+        var batch = state.batch;
+        var callbacks = state.callbacks;
+        state = { timer: null, count: 0, batch: null, callbacks: [] };
+
+        processBatch(batch, function(err) {
+            for (var i = 0; i < callbacks.length; i++) callbacks[i] && callbacks[i](err);
+        })
+    }
 }
 
 /*

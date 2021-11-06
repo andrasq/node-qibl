@@ -1948,6 +1948,79 @@ module.exports = {
         },
     },
 
+    'batchCalls': {
+        'options are optional': function(t) {
+            var fn = qibl.batchCalls(function(batch, cb) {
+                t.deepEqual(batch, ['a', 'b']);
+                t.done();
+            });
+            fn('a');
+            fn('b');
+        },
+
+        'calls handler with arrays of batches': function(t) {
+            var fn = qibl.batchCalls({maxBatchSize: 2}, function(batch, cb) {
+                batches.push(batch);
+                cb();
+                if (batches.length === 3) {
+                    t.deepEqual(batches, [[1, 2], [3, 4], [5]]);
+                    t.done();
+                }
+            })
+            var batches = [];
+            for (var i = 1; i <= 5; i++) fn(i);
+        },
+
+        'calls callbacks': function(t) {
+            var callCount = 0;
+            var fn = qibl.batchCalls(function(batch, cb) {
+                cb();
+            })
+            fn(1, function() { callCount += 1 });
+            fn(2, function() { callCount += 1 });
+            fn(3, function() { callCount += 1 });
+            process.nextTick(function() {
+                t.equal(callCount, 3);
+                t.done();
+            })
+        },
+
+        'waits configured amount to grow batch': function(t) {
+            var t1 = Date.now();
+            var fn = qibl.batchCalls({maxWaitMs: 10}, function(batch, cb) {
+                t.ok(Date.now() - t1 >= 10 - 1);
+                t.done();
+            })
+            fn(1);
+        },
+
+        'returns errors to callbacks': function(t) {
+            var errors = [];
+            var fn = qibl.batchCalls(function(batch, cb) {
+                cb('mock error');
+            })
+            fn(1, function(err) { errors.push(err) });
+            fn(2, function(err) { errors.push(err) });
+            process.nextTick(function() {
+                t.deepEqual(errors, ['mock error', 'mock error']);
+                t.done();
+            })
+        },
+
+        'uses provided startBatch and growBatch to gather batches': function(t) {
+            var fn = qibl.batchCalls({
+                startBatch: function() { return { items: [] } },
+                growBatch: function(batch, item) { batch.items.push(item) },
+            }, function(batch, cb) {
+                t.deepEqual(batch, { items: [1, 'b', 3] });
+                t.done();
+            })
+            fn(1);
+            fn('b');
+            fn(3);
+        },
+    },
+
     'walkdir': {
         'emits error on invalid dirname': function(t) {
             var called = false;

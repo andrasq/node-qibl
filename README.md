@@ -653,6 +653,33 @@ This function currently does not break up the call stack and does not yield the 
         // err == null, a == 1, b == 2
     })
 
+### processItem = batchCalls( [options,] processBatch(items, cb) )
+
+Return a function that will accept a single argument and an optional callback, and will
+periodically call `processBatch` with batches of the arguments the returned function is
+invoked with.  The function callback, if given, will be invoked with the error returned
+by the callback from `processBatch`.
+
+Options:
+- `maxWaitMs` - how many milliseconds to wait for additional items, default 0 to process the
+  batch at the end of the current event loop tick.
+- `maxBatchSize` - do not let batches grow above this number of items, default 10.  Zero selects
+  the default.
+- `startBatch()` - function that returns a new empty batch.  The default is to use an empty
+  array `[]`.
+- `growBatch(batch, item)` - function to add the item to the batch.  The batch is the last batch
+  returned by `growBatch`.  The default is a function to `batch.push(item)`.
+
+E.g.,
+    const processItem = qibl.batchCalls({maxBatchSize: 2}, processBatch);
+    processItem(1);
+    processItem(2);
+    processItem(3);
+
+    function processBatch(items, callback) {
+        // called with item batches of [1, 2] then [3]
+    }
+
 ### errorEmitter = walkdir( dirname, visitor(path, stat, depth), callback )
 
 Simple stateless directory tree walker.  Files are reported and recursed into in order.
@@ -745,7 +772,7 @@ Makes an attempt at the very start, and a final one at the very end of the timeo
 ### new Mutex( limit )
 
 Create a mutual exclusion semaphore that allows `limit` concurrent users to a limited-use
-resource; default `1` one.  A Mutex has one methods: `acquire(func)`.  It queues `func`
+resource; default `1` one.  A Mutex has one method: `acquire(func)`.  It queues `func`
 waiting for the resource to be free, locks one unit of the resource, and calls
 `func(release)`.  `release` is a callback that must be called to release the resource unit,
 the resource will remain locked until freed, no timeout.
@@ -798,6 +825,7 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
+- 1.18.0 - new function `batchCalls` adapted from `qfifo`
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval
 - 1.17.0 - `Cron` periodic interval job runner adapted from `miniq`, simple `parseMs` time interval notation
 - 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,
