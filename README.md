@@ -333,7 +333,7 @@ Return true if `substr` is a prefix of the string `str`.  Equivalent to String.p
 
 ### qibl.endsWith( str, substr )
 
-Return true if `substr` is a suffix of the string `str`.  Equivalent to String.prototype.startsWith.
+Return true if `substr` is a suffix of the string `str`.  Equivalent to String.prototype.endsWith.
 
 ### qibl.strtok( str, sep )
 
@@ -749,7 +749,7 @@ callback the list of matching filepaths.  The filenames will be full paths with 
 directory name prepended, similarly to how the filenames are returned by `find(1)`.
 
 If the filename template is not already a regular expression it will be converted with
-`qibl.globRegex()`
+`new RegExp(qibl.globRegex(template))`
 
     // find all files in ./src/ whose names end in '.js'
     globdir('./src', '*.js', (err, files) => {
@@ -775,16 +775,17 @@ to make objects containing cycles safe for serialization, e.g. for JSON.stringif
 ### difftree( node1, node2 )
 
 Return a recursive copy of `node2` with all properties that are also present in `node1` removed,
-leaving only the properties where node2 differs from node1.  Properties must be `===` strict
-equal to match.  Only `isHash()` hashes and arrays are recursed into, not class instances.
-If two arrays differ, the differing elements are returned at their original offsets.
-An element or property set to `undefined` matches a missing or unset one.
+leaving only the properties where node2 differs from node1.  Array properties are compared with
+`diffarray` (see below).  Properties must be `===` strict equal to match.  Only `isHash()`
+hashes and arrays are recursed into, not class instances.  If two arrays differ, the differing
+elements are returned at their original offsets.  An element or property set to `undefined`
+matches a missing or unset one.
 
     qibl.difftree(
-        { v: 1, a: { b: 2 } },
-        { v: 1, a: { b: 2, c: 3 }, d: 4 }
+        { v: 1, a: { b: 2 }, e: [1, 2] },
+        { v: 1, a: { b: 2, c: 3 }, d: 4, e: [1, 3] }
     );
-    // => { a: { c: 3 }, d: 4 }
+    // => { a: { c: 3 }, d: 4, e: [ , 3] }
 
 ### diffarray( array1, array2 )
 
@@ -795,10 +796,11 @@ matches the `undefined` value.
     qibl.diffarray([ , 2, 3], [undefined, 2, 4]);
     // => [ , , 4]
 
-### retry( getDelay(tryCount), timeout, func(cb), callback(err) )
+### retry( getDelay(retryCount), timeout, func(cb), callback(err) )
 
 Try calling `func` until it succeeds or have waited `timeout` total milliseconds pausing
-`getDelay(retryCount)` ms between attempts.  Returns the result of the last attempt.
+`getDelay(retryCount)` ms between attempts.  The first `retryCount` passed to `getDelay`
+is `1` (the very first call was not a retry).  Returns the result of the last attempt.
 Makes an attempt at the very start, and a final one at the very end of the timeout period.
 
 ### new Mutex( limit )
@@ -806,13 +808,13 @@ Makes an attempt at the very start, and a final one at the very end of the timeo
 Create a mutual exclusion semaphore that allows `limit` concurrent users to a limited-use
 resource; default `1` one.  A Mutex has one method: `acquire(func)`.  It queues `func`
 waiting for the resource to be free, locks one unit of the resource, and calls
-`func(release)`.  `release` is a callback that must be called to release the resource unit,
+`func(release)`.  `release` is a callback that must be called to release the resource unit;
 the resource will remain locked until freed, no timeout.
 
     mutex = new qibl.Mutex();
-    mutex.acquire((done) => {
+    mutex.acquire((release) => {
         useResource();
-        done();
+        release();
     });
 
 ### new Cron( )
