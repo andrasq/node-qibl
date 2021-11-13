@@ -139,8 +139,6 @@ var qibl = module.exports = {
     microtime: microtime,
     parseMs: parseMs,
     QuickId: QuickId,
-    // getId: getId,
-    // parseId: parseId,
     // _configure: _configure,
 };
 
@@ -1616,11 +1614,9 @@ QuickId.prototype.parseId = function parseId(id) {
         sys: id.slice(9, -4),
         seq: parseInt(id.slice(-4), 32) };
 }
-/**
-var _ids = {'': new QuickId()};
-function getId(sysid) { if (!_ids[sysid]) { _ids[sysid] = new QuickId(sysid); qibl.toStruct(_ids) }; return _ids[sysid].getId() };
-function parseId(id) { return _ids[''].parseId(id) };
-**/
+// var _ids = new Hashmap(); _ids.set('', new QuickId());
+// function getId(sysid) { var ids = _ids.get(sysid) || _ids.set(sysid, new QuickId(sysid)).get(sysid); return ids.getId() }
+// function parseId(id) { return _ids.get('').parseId(id) };
 
 /*
  * hook for testing: compile and run the function in local file context,

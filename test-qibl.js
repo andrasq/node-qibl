@@ -3501,20 +3501,4 @@ module.exports = {
             },
         },
     },
-
-    'getId': {
-        'is fast': function(t) {
-            t.skip();
-            var nloops = 2e6;
-            for (var i = 0; i < 10000; i++) var x = qibl.getId();
-
-            var t1 = qibl.microtime();
-            for (var i = 0; i < nloops; i++) var x = qibl.getId();
-            var t2 = qibl.microtime();
-
-            // t.printf('last id %s\n', x);
-            t.printf('getId: %d ids / sec (%dk ids in %4.3f ms)\n', nloops / (t2 - t1), nloops / 1000, (t2 - t1) * 1000);
-            t.done();
-        },
-    },
 }
