@@ -27,6 +27,6 @@ before_install:
   - test `node -v` = "v5.8.0" && nvm install 16 && npm2 -v && node -v && npm2 test && nvm install 5.8.0
 after_success:
   - if [ `node -v` != "v5.8.0" ]; then exit; fi
-  - npm install -g nyc@8.4.0 coveralls
+  - npm install -g nyc@8.4.0 coveralls@3.0.2
   - nyc -r text --reporter lcov npm test
   - nyc report -r text-lcov | coveralls
