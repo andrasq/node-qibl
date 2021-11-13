@@ -3084,6 +3084,18 @@ module.exports = {
             t.deepEqual(qibl.entries({a:1, b:2}), [['a', 1], ['b', 2]]);
             t.done();
         },
+
+        'fromEntries builds object': function(t) {
+            var expectTarget = {};
+            t.deepEqual(qibl.fromEntries(expectTarget, []), expectTarget);
+            t.deepEqual(qibl.fromEntries({}, []), {});
+            t.deepEqual(qibl.fromEntries({a: 1}, [['b', 2.5]]), {a: 1, b: 2.5});
+            t.deepEqual(qibl.fromEntries({a: 1}, [['b', 2.5]]), {a: 1, b: 2.5});
+            t.deepEqual(qibl.fromEntries({}, [['a', 1], ['bee', 2], ['c', 'three']]), {a: 1, bee: 2, c: 'three'});
+            var expect = [1, 2]; expect.a = 3; expect.b = 4;
+            t.deepEqual(qibl.fromEntries([1, 2], [['a', 3], ['b', 4]]), expect);
+            t.done();
+        },
     },
 
     'pairTo': {

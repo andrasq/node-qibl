@@ -237,6 +237,11 @@ Return an array with the own properties of the object.  Equivalent to `Object.va
 
 Return an array of key-value pairs of the own properties of the object.  Equivalent to `Object.entries`.
 
+### qibl.fromEntries( target, keyvals )
+
+Return target annotated with the properties specified by the entries.  The entries is an array of key-value
+properties as returned by `Object.entries()`.  Equivalent to `Object.fromEntries`.
+
 ### qibl.pairTo( target, keys, values )
 
 Set all `keys` in turn as properties on `target` having the corresponding values from `values`.
@@ -825,7 +830,7 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
-- 1.18.0 - new function `batchCalls` adapted from `qfifo`
+- 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval
 - 1.17.0 - `Cron` periodic interval job runner adapted from `miniq`, simple `parseMs` time interval notation
 - 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,

@@ -115,6 +115,7 @@ var qibl = module.exports = {
     keys: keys,
     values: values,
     entries: entries,
+    fromEntries: fromEntries,
     pairTo: pairTo,
     flipTo: flipTo,
     extractTo: extractTo,
@@ -812,6 +813,17 @@ function once( fn ) {
     })
 }
 
+/**
+var _warnings = {};
+function warnOnce( key, message ) {
+    if (key === undefined) throw new Error('missing key');
+    if (_warnings[key] === undefined) {
+        _warnings[key] = true;
+        console.warn(message);
+    }
+}
+**/
+
 function tryRequire( name ) {
     try { return require(name) } catch (e) { }
 }
@@ -1417,10 +1429,11 @@ function entries( object ) {
     for (var i = 0; i < keys.length; i++) keyvals.push([keys[i], object[keys[i]]]);
     return keyvals;
 }
-// function mergeEntries( target, keyvals ) {
-//     for (var i = 0; i < keyvals && keyvals.length; i++) target[keyvals[i][0]] = keyvals[i][1];
-//     return target;
-//}
+// Object.fromEntries
+function fromEntries( target, keyvals ) {
+    for (var i = 0; i < keyvals.length; i++) target[keyvals[i][0]] = keyvals[i][1];
+    return target;
+}
 
 // from mysqule aka node-minisql
 function pairTo( target, keys, values ) {
@@ -1554,13 +1567,3 @@ function parseMs( interval ) {
     return value * msUnits[units];
 }
 
-/**
-var _warnings = {};
-function warnOnce( key, message ) {
-    if (key === undefined) throw new Error('missing key');
-    if (_warnings[key] === undefined) {
-        _warnings[key] = true;
-        console.warn(message);
-    }
-}
-**/
