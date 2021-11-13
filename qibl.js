@@ -138,6 +138,10 @@ var qibl = module.exports = {
     makeError: makeError,
     microtime: microtime,
     parseMs: parseMs,
+    QuickId: QuickId,
+    // getId: getId,
+    // parseId: parseId,
+    // _configure: _configure,
 };
 
 // hashes are generic objects without a class
@@ -1567,3 +1571,64 @@ function parseMs( interval ) {
     return value * msUnits[units];
 }
 
+// source of very fast monotonically increasing not-quite-realtime timestamps, vaguely like qtimebase
+function Timebase() {
+    this.tbTime = 0; this.tbCalls = 0; this.tbTimer = 0;
+    this.clear = (function() { this.tbTime = 0; this.tbCalls = 0; this.tbTimer = 0 }).bind(this);
+}
+Timebase.prototype.getNewerTimestamp = function getNewerTimestamp(when) {
+    if (when < this.tbTime && this.tbCalls++ < 50) return this.tbTime;
+    this.tbCalls = 0;
+    if (!this.tbTimer) this.tbTimer = setTimeout(this.clear, 5);
+    do { this.tbTime = Date.now() } while (this.tbTime <= when);
+    return this.tbTime;
+}
+
+var charset36 = '0123456789abcdefghijklmnopqrstuvwxyz'.split('');
+function _encode32(v) {
+    var ret = '';
+    while (v >= 1024) { ret = _encode32_2(v & 0x3ff) + ret; v /= 1024 }
+    return v >= 32 ? _encode32_2(v) + ret : charset36[v & 0x1f] + ret;
+}
+function _encode32_2(v) {
+    return charset36[(v >>> 5) & 0x1f] + charset36[v & 0x1f];
+}
+// very very fast globally unique id generator, similar in concept to mongoid-js
+function QuickId( uniqueSystemId ) {
+    this.sysid = String(uniqueSystemId || '');
+    this.idTime = 0, this.idSeq = 0, this.idPrefix = '', this.idTimebase = new Timebase();
+}
+QuickId.prototype.getId = function getId() {
+    var now = this.idTimebase.getNewerTimestamp((this.idSeq >= 1024 * 1024) ? this.idTime : 0);
+    if (now !== this.idTime || (this.idSeq & 0x3ff) === 0) {
+        if (now !== this.idTime) {
+            this.idTime = now;
+            if (this.idSeq >= 1024 * 1024 / 2) this.idSeq = 0;
+        }
+        this.idPrefix = _encode32(now) + this.sysid + _encode32_2(this.idSeq >>> 10);
+    }
+    var ret = this.idPrefix + _encode32_2(this.idSeq++);
+    return ret;
+}
+QuickId.prototype.parseId = function parseId(id) {
+    return {
+        time: parseInt(id.slice(0, 9), 32),
+        sys: id.slice(9, -4),
+        seq: parseInt(id.slice(-4), 32) };
+}
+/**
+var _ids = {'': new QuickId()};
+function getId(sysid) { if (!_ids[sysid]) { _ids[sysid] = new QuickId(sysid); qibl.toStruct(_ids) }; return _ids[sysid].getId() };
+function parseId(id) { return _ids[''].parseId(id) };
+**/
+
+/*
+ * hook for testing: compile and run the function in local file context,
+ * letting it examine and change the file globals.
+ */
+/**
+function _configure( fn ) {
+    fn = eval('true && ' + fn);
+    return fn();
+}
+**/

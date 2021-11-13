@@ -603,6 +603,33 @@ Returns `NaN` if unable to parse the value or the format.
     qibl.parseMs('2m');
     // => 120000
 
+### qids = QuickId( uniqueSystemId )
+
+Very very fast globally unique id generator, similar in structure to MongoDB ids, composed of
+a time, a system identifier that uniquely distinguishes id sources, and a sequence number.
+Uniqueness is ensured by the system id, which must be unique for each id source.  The default
+system id is the empty string `''`.
+
+#### qids.getId( )
+
+Return a globally unique id composed of a 9-char monotonic time value, the system-wide
+unique origin identifier provided to `QuickId`, and a 4-char sequence number.  The time and
+sequence are base-32 encoded.  The time values are not realtime accurate, but are usually
+close.  The ids are in ascending sort order and are guaranteed to be unique for each
+system id.  `getId` is very very fast, it can generate tens of millions of unique ids per
+second.
+
+    new QuickId('-sys2-').getId();
+    // => "1fkbndu7p-sys2-0000"
+
+#### qids.parseId( id )
+
+Decompose an id returned by `getId` into its component timestamp, system id and sequence number.
+Only handles the standard 9-char timestamp / 4-char sequence id formats.
+
+    new QuickId().parseId('1fkbndu7p-sys2-0008');
+    // => { time: 1636776212729, sys: '-sys2-', seq: 8 }
+
 ### repeatUntil( loopedFunction(done(err, done)), callback )
 
 Keep calling `loopedFunction()` until it calls its callback with an error or a truthy `done`
@@ -830,7 +857,7 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
-- 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`
+- 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval
 - 1.17.0 - `Cron` periodic interval job runner adapted from `miniq`, simple `parseMs` time interval notation
 - 1.16.1 - fix globdir filename matching in `'.'`, make `assignTo` the primary and remove `copyObject` from the docs,

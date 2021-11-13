@@ -3418,4 +3418,103 @@ module.exports = {
             t.done();
         },
     },
+
+    'QuickId': {
+        'beforeEach': function(done) {
+            this.ids = new qibl.QuickId('-');
+            done();
+        },
+
+        'getId': {
+            'returns monotonically increasing ids': function(t) {
+                var id = this.ids.getId();
+                for (var i = 0; i < 1000000; i++) {
+                    var id2 = this.ids.getId();
+                    t.ok(id2 > id);
+                    id = id2;
+                }
+                t.done();
+            },
+            'embeds a recent timestamp': function(t) {
+                var now = Date.now();
+                var id = this.ids.getId();
+                t.ok(parseInt(id.slice(0, 9), 32) >= now - 5);
+                t.done();
+            },
+            'rolls the sequence number': function(t) {
+                for (var i = 0; i < 3; i++) this.ids.getId();
+                var id1 = this.ids.getId();
+                this.ids.idSeq = 1024 * 1024;
+                var id2 = this.ids.getId();
+                this.ids.idSeq = 1024 * 1024;
+                var id3 = this.ids.getId();
+                t.ok(this.ids.parseId(id1).time < this.ids.parseId(id2).time);
+                t.ok(this.ids.parseId(id2).time < this.ids.parseId(id3).time);
+                t.equal(this.ids.parseId(id2).seq, 0);
+                t.equal(this.ids.parseId(id3).seq, 0);
+                t.done();
+            },
+            'formats even-length times': function(t) {
+                this.ids.idTimebase.tbTime = 123;
+                this.ids.idSeq = 1234;
+                var id = this.ids.getId();
+                t.equal(id, '3r-016i');
+                t.done();
+            },
+            'tracks elapsed time': function(t) {
+                var ids = this.ids;
+                var id1, id2, id3;
+                qibl.runSteps([
+                    function(next) { next(null, id1 = ids.getId()) },
+                    function(next) { setTimeout(next, 7) },
+                    function(next) { next(null, id2 = ids.getId()) },
+                    function(next) { setTimeout(next, 7) },
+                    function(next) { next(null, id3 = ids.getId()) },
+                ], function(err) {
+                    t.ok(ids.parseId(id1).time <= ids.parseId(id2).time);
+                    t.ok(ids.parseId(id2).time <= ids.parseId(id3).time);
+                    t.ok(ids.parseId(id3).time >= Date.now() - 5);
+                    t.done();
+                });
+            },
+
+            'is fast': function(t) {
+                var ids = this.ids;
+                var nloops = 2e6;
+                for (var i = 0; i < 10000; i++) var x = ids.getId();
+
+                var t1 = qibl.microtime();
+                for (var i = 0; i < nloops; i++) var x = ids.getId();
+                var t2 = qibl.microtime();
+
+                // t.printf('last id %s\n', x);
+                t.printf('getId: %d ids / sec (%dk ids in %4.3f ms)\n', nloops / (t2 - t1), nloops / 1000, (t2 - t1) * 1000);
+                t.done();
+            },
+        },
+        'parseId': {
+            'parses ids': function(t) {
+                var parseId = new qibl.QuickId().parseId;
+                t.deepEqual(parseId('000000001-foo-0002'), { time: 1, sys: '-foo-', seq: 2 });
+                t.deepEqual(parseId('1fkbndu7p-sys2-0008'), { time: 1636776212729, sys: '-sys2-', seq: 8 });
+                t.done();
+            },
+        },
+    },
+
+    'getId': {
+        'is fast': function(t) {
+            t.skip();
+            var nloops = 2e6;
+            for (var i = 0; i < 10000; i++) var x = qibl.getId();
+
+            var t1 = qibl.microtime();
+            for (var i = 0; i < nloops; i++) var x = qibl.getId();
+            var t2 = qibl.microtime();
+
+            // t.printf('last id %s\n', x);
+            t.printf('getId: %d ids / sec (%dk ids in %4.3f ms)\n', nloops / (t2 - t1), nloops / 1000, (t2 - t1) * 1000);
+            t.done();
+        },
+    },
 }
