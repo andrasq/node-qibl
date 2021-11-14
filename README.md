@@ -472,6 +472,19 @@ Return an array containing the 3 items in ascending order.  Much faster than `[a
 Rearrange the array contents at offsets i, j and k so that array[i], array[j] and array[k]
 are in ascending order.
 
+### qibl.shuffle( array [,base [,bound]] )
+
+Randomize the order of the elements in the array, or just between `base` and `bound` if provided.
+Uses and efficent in-place reorder algorithm.  Returns the `array`.
+
+### qibl.interleave2( targetArray, sourceArray1, sourceArray2 )
+
+Append the items from the two source arrays to the target array in alternating order
+1, 2, 1, 2, etc.  Any extra elements are appeneded contiguously.
+
+    qibl.interleave2([0], [1, 3, 5, 7], [2, 4]);
+    // => [0, 1, 2, 3, 4, 5, 7]
+
 ### qibl.newBuf( arg, encodingOrOffset, length )
 
 Construct a Buffer like `new Buffer()` used to before it was deprecated.

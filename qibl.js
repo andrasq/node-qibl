@@ -88,6 +88,7 @@ var qibl = module.exports = {
     qsearch: qsearch,
     sort3: sort3,
     sort3i: sort3i,
+    shuffle: randomize,
     randomize: randomize,
     interleave2: interleave2,
     range: range,
