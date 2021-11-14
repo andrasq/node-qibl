@@ -140,6 +140,7 @@ var qibl = module.exports = {
     microtime: microtime,
     parseMs: parseMs,
     QuickId: QuickId,
+    makeGetId: makeGetId,
     // _configure: _configure,
 };
 
@@ -1618,6 +1619,11 @@ QuickId.prototype.parseId = function parseId(id) {
 // var _ids = new Hashmap(); _ids.set('', new QuickId());
 // function getId(sysid) { var ids = _ids.get(sysid) || _ids.set(sysid, new QuickId(sysid)).get(sysid); return ids.getId() }
 // function parseId(id) { return _ids.get('').parseId(id) };
+
+function makeGetId( sysId ) {
+    var quickId = new QuickId(sysId);
+    return qibl.assignTo(function() { return quickId.getId() }, { quickId: quickId });
+}
 
 /*
  * hook for testing: compile and run the function in local file context,

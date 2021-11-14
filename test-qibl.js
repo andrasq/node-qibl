@@ -3501,4 +3501,21 @@ module.exports = {
             },
         },
     },
+
+    'makeGetId': {
+        'returns a function': function(t) {
+            t.equal(typeof qibl.makeGetId(), 'function');
+            t.done();
+        },
+        'function returns ids': function(t) {
+            var getId = qibl.makeGetId('-sys2-');
+            var id1 = getId();
+            var id2 = getId();
+            t.notEqual(id1, id2);
+            t.equal(getId.quickId.parseId(id1).sys, '-sys2-');
+            t.equal(getId.quickId.parseId(id1).seq, '0000');
+            t.equal(getId.quickId.parseId(id2).seq, '0001');
+            t.done();
+        },
+    },
 }

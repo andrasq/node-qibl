@@ -644,6 +644,11 @@ Only handles the standard 9-char timestamp / 4-char sequence id formats.
     new QuickId().parseId('1fkbndu7p-sys2-0008');
     // => { time: 1636776212729, sys: '-sys2-', seq: 8 }
 
+### makeGetId( uniqueSystemId )
+
+Return a function that will generate unique ids for the given system.  This is a convenience
+wrapper around `QuickId`.
+
 ### repeatUntil( loopedFunction(done(err, done)), callback )
 
 Keep calling `loopedFunction()` until it calls its callback with an error or a truthy `done`
