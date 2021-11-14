@@ -204,21 +204,22 @@ array.  The value is `undefined` if the property is not set.
         return array.map((item) => item[name]);
     }
 
-### qibl.mapById( items, idName [,target] )
+### qibl.mapById( objects, idName [,target] )
 
-Map the objects by a property value.  Returns a hash mapping each value to the
-first object whose `idName` is set to that value.  Null and undefined objects are skipped.
-Objects that do not have that property are skipped.
-Id values should be strings or numbers.  Returns the target object, which is `{}` by default.
+Map the `objects` by a property value.  The property can be any property, not just `id`.
+Returns a hash mapping each value to the first object whose `idName` is set to that value.  Null
+and undefined objects are skipped.  Objects that do not have that property are skipped.  Id
+values should be strings or numbers.  Returns the target object, which is `{}` by default.
 
     var items = [{ id: 'a', v: 1 }, { id: 'b' }, { id: 'a', v: 2 }, { v: 3 }];
     qibl.mapById(items, 'id')
     // => { a: {id: 'a'}, b: {id: 'b'} }
 
-### qibl.groupById( items, idName [,target] )
+### qibl.groupById( objects, idName [,target] )
 
-Similar to `mapById`, but group objects by property value into arrays.  Returns a mapping
-of ids to lists of objects.  Objects that do not have the `idName` property set are omitted.
+Similar to `mapById`, but group the `objects` by property value into arrays.  The property can
+be any property, not just `id`.  Objects that do not have the `idName` property set are omitted.
+Returns a mapping of ids to lists of objects set on the `target` object, `{}` by default.
 
     var items = [{ id: 'a', v: 1 }, { id: 'b' }, { id: 'a', v: 2 }, { v: 3 }];
     qibl.mapById(items, 'id')
