@@ -1286,6 +1286,30 @@ module.exports = {
         },
     },
 
+    'startsWith': {
+        'should check prefix': function(t) {
+            t.ok(qibl.startsWith('foobar', 'foobar'));
+            t.ok(qibl.startsWith('foobar', 'foo'));
+            t.ok(qibl.startsWith('foobar', 'f'));
+            t.ok(qibl.startsWith('foobar', ''));
+            t.ok(!qibl.startsWith('foobar', 'bar'));
+            t.ok(!qibl.startsWith('foobar', 'o'));
+            t.done();
+        },
+    },
+
+    'endsWith': {
+        'should check suffix': function(t) {
+            t.ok(qibl.endsWith('foobar', 'foobar'));
+            t.ok(qibl.endsWith('foobar', 'bar'));
+            t.ok(qibl.endsWith('foobar', 'r'));
+            t.ok(qibl.endsWith('foobar', ''));
+            t.ok(!qibl.endsWith('foobar', 'a'));
+            t.ok(!qibl.endsWith('foobar', 'foobark'));
+            t.done();
+        },
+    },
+
     'semverCompar': {
         'exposed under both old and new name': function(t) {
             t.equal(qibl.compareVersions, qibl.semverCompar);
@@ -3211,30 +3235,6 @@ module.exports = {
             var patt = /([\\"';|&$])/g;
             t.equal(qibl.addslashes(';|$"', patt), '\\;\\|\\$\\"');
             t.equal(qibl.addslashes("'", patt), "\\'");
-            t.done();
-        },
-    },
-
-    'startsWith': {
-        'should check prefix': function(t) {
-            t.ok(qibl.startsWith('foobar', 'foobar'));
-            t.ok(qibl.startsWith('foobar', 'foo'));
-            t.ok(qibl.startsWith('foobar', 'f'));
-            t.ok(qibl.startsWith('foobar', ''));
-            t.ok(!qibl.startsWith('foobar', 'bar'));
-            t.ok(!qibl.startsWith('foobar', 'o'));
-            t.done();
-        },
-    },
-
-    'endsWith': {
-        'should check suffix': function(t) {
-            t.ok(qibl.endsWith('foobar', 'foobar'));
-            t.ok(qibl.endsWith('foobar', 'bar'));
-            t.ok(qibl.endsWith('foobar', 'r'));
-            t.ok(qibl.endsWith('foobar', ''));
-            t.ok(!qibl.endsWith('foobar', 'a'));
-            t.ok(!qibl.endsWith('foobar', 'foobark'));
             t.done();
         },
     },
