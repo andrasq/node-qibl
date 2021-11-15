@@ -3480,9 +3480,9 @@ module.exports = {
 
             'is fast': function(t) {
                 var ids = this.ids;
-                var nloops = 2e6;
                 for (var i = 0; i < 10000; i++) var x = ids.getId();
 
+                var nloops = 2e6;
                 var t1 = qibl.microtime();
                 for (var i = 0; i < nloops; i++) var x = ids.getId();
                 var t2 = qibl.microtime();
@@ -3515,6 +3515,66 @@ module.exports = {
             t.equal(getId.quickId.parseId(id1).sys, '-sys2-');
             t.equal(getId.quickId.parseId(id1).seq, '0000');
             t.equal(getId.quickId.parseId(id2).seq, '0001');
+            t.done();
+        },
+    },
+
+    'getConfig': {
+        'returns null if not configured': function(t) {
+            t.strictEqual(qibl.getConfig({ dir: '../nonesuch' }), null);
+            t.done();
+        },
+
+        'reads ../config and layers in default, development and local': function(t) {
+            var spy = t.stub(qibl, 'require', function require(path) { return /development.json$/.test(path) && {} })
+                .configure('saveLimit', 20);
+            qibl.getConfig();
+            spy.restore();
+            t.equal(spy.callCount, 6);
+            t.contains(spy.args[0][0], '/config/default');
+            t.contains(spy.args[1][0], '/config/default.json');
+            t.contains(spy.args[2][0], '/config/development');
+            t.contains(spy.args[3][0], '/config/development.json');
+            t.contains(spy.args[4][0], '/config/local');
+            t.contains(spy.args[5][0], '/config/local.json');
+            t.done();
+        },
+
+        'reads from the specified config directory': function(t) {
+            var spy = t.spy(qibl, 'require');
+            qibl.getConfig({ dir: '../foo/bar/myConfig' });
+            spy.restore();
+            t.contains(spy.args[3][0], '../foo/bar/myConfig/development');
+            t.done();
+        },
+
+        'looks by default in $PWD/config': function(t) {
+            var localConfig = process.cwd() + '/config/';
+            var spy = t.stub(qibl, 'require').configure('saveLimit', 10);
+            qibl.getConfig();
+            spy.restore();
+            t.contains(spy.args[0][0], localConfig);
+            t.done();
+        },
+
+        'loads the config for NODE_ENV': function(t) {
+            var env = process.env.NODE_ENV;
+            process.env.NODE_ENV = 'mytest';
+            var spy = t.spy(qibl, 'require');
+            qibl.getConfig();
+            spy.restore();
+            // process.env is magic, it stores the stringified value so must delete to restore undefined
+            env === undefined ? delete process.env.NODE_ENV : process.env.NODE_ENV = env;
+            t.contains(spy.args[2][0], '/config/mytest');
+            t.done();
+        },
+
+        'uses provided loaders': function(t) {
+            var stub = t.stub().throws(new Error('not found'));
+            qibl.getConfig({ dir: '/nonesuch/config', loaders: { yml: stub } });
+            t.equal(stub.callCount, 6);
+            t.contains(stub.args[0][0], '/config/default');
+            t.contains(stub.args[1][0], '/config/default.yml');
             t.done();
         },
     },

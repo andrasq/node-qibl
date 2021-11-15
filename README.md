@@ -666,6 +666,33 @@ unless the looped function does.
         // => count === 3
     })
 
+### config = getConfig( [options] )
+
+Read the environment-specific configs from the configs directory.  Similar to `config` or `qconfig`,
+but just 10% the size for 90% of the functionality.  The config settings are returned as a hierarchical
+name-value hash.
+
+The config files are read from the given directory (`./config` by default) and are named the same as the
+evironment being configured, eg `'test` or `'production'`.  All environment configs inherit the commonly
+shared settings configured in `'default'`, and are overridden by any overrides found in `'local'`.
+Arbitrary format config files are supported with custom loaders configured by filename extension.
+
+Unlike `qconfig`, the config directory is not searched for, it must be named explicitly or be `./config`
+in the current working directory.  Unlike `config`, the elaborate override logic is simplified to just 3
+layers.
+
+Options:
+- `dir` - the directory holding the files with config settings.  The default is `./config` in the
+  same directory as the running process, typically the root of the source tree.
+- `env` - the config environment to load, typically `'test'`, `'development'` or `'production'`.
+  The environment to load is read from `options.env`, else from `process.env.NODE_ENV`, else the
+  default used is `'development'`.
+- `loaders` - custom config file loader functions, specified as a mapping of filename extensions to loader
+  functions.  The loaders are tried in the order specified, first on the bare filename without any extesion,
+  then on the filename with the loader-specific extension appended.  The config returned by the first
+  loader to succeed is the one used.  Loaders for the native (no extension) javascript and `.json`
+  are built in and are always tried first.  The load functions must return a name-value hash.
+
 ### repeatFor( count, loopedFunction(done(err), ix), callback )
 
 Call `loopedFunction()` exactly `count` times.  Each call is passed a callback followed by the
@@ -878,6 +905,8 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
+- 1.19.0 - new `getConfig`
+- 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval
 - 1.17.0 - `Cron` periodic interval job runner adapted from `miniq`, simple `parseMs` time interval notation

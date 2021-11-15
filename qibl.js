@@ -141,6 +141,8 @@ var qibl = module.exports = {
     parseMs: parseMs,
     QuickId: QuickId,
     makeGetId: makeGetId,
+    require: require, // for stubbing
+    getConfig: getConfig,
     // _configure: _configure,
 };
 
@@ -829,7 +831,7 @@ function warnOnce( key, message ) {
 **/
 
 function tryRequire( name ) {
-    try { return require(name) } catch (e) { }
+    try { return qibl.require(name) } catch (e) { }
 }
 
 // remove and return all listeners for the specified event.
@@ -1624,6 +1626,31 @@ function makeGetId( sysId ) {
     var quickId = new QuickId(sysId);
     return qibl.assignTo(function() { return quickId.getId() }, { quickId: quickId });
 }
+
+// object to hold the config
+function Config(obj) { qibl.merge(this, obj) }
+Config.prototype._merge = function(obj) { return qibl.merge(new Config(this), obj) };
+Config.tryLoad = function(loader, file) { try { return loader(file) } catch (err) {} };
+Config.fetchConfig = function(dirname, filename, loaders) {
+    var filepath = dirname + '/' + filename;
+    var pkg = qibl.tryRequire(filepath) || qibl.tryRequire(filepath + '.json');
+    for (var extn in loaders || {}) pkg = pkg ||
+        Config.tryLoad(loaders[extn], filepath) ||
+        Config.tryLoad(loaders[extn], filepath + '.' + extn);
+    return pkg;
+}
+// like config and qconfig, but simpler (from miniq)
+function getConfig( options ) {
+    options = options || {};
+    var configDir = options.dir || process.cwd() + '/config';
+    var env = options.env || process.env.NODE_ENV || 'development';
+    var envConf, conf = new Config()
+        ._merge(Config.fetchConfig(configDir, 'default', options.loaders))
+        ._merge((envConf = Config.fetchConfig(configDir, env, options.loaders)))
+        ._merge(Config.fetchConfig(configDir, 'local', options.loaders));
+    return envConf ? conf : null;
+}
+
 
 /*
  * hook for testing: compile and run the function in local file context,
