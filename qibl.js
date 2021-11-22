@@ -10,6 +10,7 @@
 
 'use strict';
 
+var cp = require('child_process');
 var fs = require('fs');
 var events = require('events');
 var path = require('path');
@@ -145,6 +146,7 @@ var qibl = module.exports = {
     getConfig: getConfig,
     errorToObject: errorToObject,
     objectToError: objectToError,
+    WorkerProcess: WorkerProcess,
     // _configure: _configure,
 };
 
@@ -1664,6 +1666,75 @@ function objectToError( obj ) {
     var err = qibl.assignTo(new (obj.__ctor && global[obj.__ctor] || Error)('objectToError'), qibl.omitUndefined(obj));
     delete err.__ctor;
     return err;
+}
+
+/*
+ * Class to wrapper a forked child process in a local instance-like api.
+ * This same class is used by the child to wait for calls and return results.
+ */
+function WorkerProcess( options ) {
+    options = options || {};
+    this.calls = {};
+    this.callbacks = {};
+    this.listeners = {};
+    this.nextId = 1;
+    var self = this;
+    var closeWaitMs = options.closeWaitMs || 10;
+    var errorCb = options.onError || function(){};
+
+    this.fork = function fork(script, callback) {
+        this.child = cp.fork(script);
+        this.child.once('message', function(msg) {
+            if (msg === 'ready-' + self.child.pid) {
+                self.child.on('message', function(msg) {
+                    if (!msg || !msg.id) return errorCb(qibl.makeError({ message: msg }, 'garbled response'));
+                    var cb = self.callbacks[msg.id] || self.listeners[msg.id];
+                    if (!cb) return errorCb(qibl.makeError({ message: msg }, 'unexpected response'));
+                    delete self.callbacks[msg.id];
+                    if (msg.value !== undefined) return cb(null, msg.value);
+                    if (msg.err) return cb(qibl.objectToError(msg.error));
+                    return cb(qibl.makeError({ message: msg }, 'garbled response'));
+                })
+                callback && callback();
+            }
+        })
+        this.call = function call(name, arg, callback) {
+            var msg = { id: self.nextId++, name: name, value: arg };
+            callback && (self.callbacks[msg.id] = callback);
+            self._sendTo(self.child, msg, callback);
+            return self;
+        }
+        this.close = function(callback) {
+            callback = callback || function(){};
+            this.child.connected && this.child.disconnect();
+            var killProcess = function() { try { self.child.kill('SIGKILL'); callback() } catch (err) { callback(err) } };
+            setTimeout(killProcess, closeWaitMs);
+        }
+        return this;
+    }
+
+    this.connect = function connect(calls) {
+        if (!calls || !(calls instanceof Object)) throw new Error('calls must be a hash');
+        qibl.assignTo(this.calls, calls);
+        process.on('message', function(msg) {
+            if (!msg || !msg.id || !msg.name) return errorCb({ message: msg }, 'missing message id or name');
+            self.calls[msg.name](msg.value, function(err, ret) {
+                self._sendTo(process, { id: msg.id, name: msg.name, err: err, value: ret }, errorCb);
+            })
+        })
+        this.disconnect = function() {
+            process.disconnect();
+        }
+        self._sendTo(process, 'ready-' + process.pid, errorCb);
+        return this;
+    }
+
+    this._sendTo = function _sendTo( target, msg, reportError ) {
+        // EPIPE is returned to the send() callback, but ERR_IPC_CHANNEL_CLOSED always throws
+        if (!target.connected) { delete this.callbacks[msg.id]; return reportError(new Error('not connected')) }
+        try { target.send(msg, null, function(err) { err && reportError && reportError(err) }); return true }
+        catch (err) { delete this.callbacks[msg.id]; reportError(err); return false }
+    }
 }
 
 

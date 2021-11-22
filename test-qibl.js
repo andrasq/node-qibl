@@ -3626,4 +3626,82 @@ module.exports = {
             t.done();
         },
     },
+
+    'WorkerProcess': {
+        before: function(done) {
+            this.scriptName = require.resolve('./mock-worker');
+            done();
+        },
+
+        'creates a worker without methods': function(t) {
+            var wp = new qibl.WorkerProcess();
+            t.ok(!wp.child);
+            t.ok(!wp.call);
+            t.ok(!wp.close);
+            t.done();
+        },
+
+        'forks and closes the worker process': function(t) {
+            var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                t.ifError(err);
+                t.ok(wp.child);
+                t.ok(wp.child.pid > 0);
+                t.ok(wp.child.connected);
+                wp.close();
+                t.ok(!wp.child.connected);
+                t.done();
+            })
+        },
+
+        'returns a response': function(t) {
+            var wp = new qibl.WorkerProcess();
+            wp.fork(this.scriptName, function(err) {
+                t.ifError(err);
+                wp.call('echo', 1, function(err, ret) {
+                    t.ifError(err);
+                    t.strictEqual(ret, 1);
+                    t.done();
+                })
+            })
+        },
+
+        'performance': {
+            'back-to-back calls': function(t) {
+                var wp = new qibl.WorkerProcess({ onError: console.error }).fork(this.scriptName, function(err) {
+                    t.ifError(err);
+                    var nloops = 1000;
+                    var t1 = qibl.microtime();
+                    var next, value;
+                    qibl.repeatFor(
+                        nloops,
+                        function(done, ix) { wp.call('echo', ix, function(err, res) { value = err || res; done() }) },
+                        function(err) {
+                            var t2 = qibl.microtime();
+                            t.printf('%dk back-to-back calls in %4.3f ms', nloops / 1000, (t2 - t1) * 1000);
+                            t.strictEqual(value, nloops - 1);
+                            t.done();
+                        }
+                    )
+                })
+                // 100k calls at 80k/s (node-v13.8.0)
+            },
+
+            'concurrent calls': function(t) {
+                var wp = new qibl.WorkerProcess({ onError: console.error }).fork(this.scriptName, function(err) {
+                    t.ifError(err);
+                    var nloops = 1000, ndone = 0;
+                    var t1 = qibl.microtime();
+                    for (var i = 0; i < nloops; i++) wp.call('echo', i, function(err, ret) {
+                        ndone += 1;
+                        if (ndone === nloops) {
+                            var t2 = qibl.microtime();
+                            t.printf('%dk concurrent calls in %4.3f ms', nloops / 1000, (t2 - t1) * 1000);
+                            t.done();
+                        }
+                    })
+                })
+                // 100k calls at 235k/s (node-v13.8.0)
+            },
+        },
+    },
 }
