@@ -3578,4 +3578,52 @@ module.exports = {
             t.done();
         },
     },
+
+    'errorToObject': {
+        'retains properties and sets __ctor': function(t) {
+            var obj = qibl.errorToObject(qibl.makeError({ code: 'etest' }, 'test error'));
+            t.strictEqual(obj.__ctor, 'Error');
+            t.strictEqual(obj.message, 'test error');
+            t.strictEqual(obj.code, 'etest');
+            t.strictEqual(obj.syscall, undefined);
+            t.done();
+        },
+
+        'sets constructor': function(t) {
+            var obj = qibl.errorToObject(new TypeError('test type err'));
+            t.strictEqual(obj.__ctor, 'TypeError');
+            t.strictEqual(obj.message, 'test type err');
+            t.done();
+        },
+    },
+
+    'objectToError': {
+        'retains properties': function(t) {
+            var err1 = qibl.makeError({ code: 'etest', a: 123 }, 'test error');
+            var obj = qibl.errorToObject(err1);
+            var err = qibl.objectToError(obj);
+            t.strictEqual(err.message, 'test error');
+            t.strictEqual(err.code, 'etest');
+            t.strictEqual(err.a, 123);
+            t.ok(!('syscall' in err));
+            t.done();
+        },
+
+        'uses saved constructor': function(t) {
+            var obj = qibl.errorToObject(new TypeError('test type err'));
+            var err = qibl.objectToError(obj);
+            t.ok(err instanceof TypeError);
+            t.done();
+        },
+
+        'constructs Error if constructor unavailable': function(t) {
+            function Foo() { this.message = 'some foo'; this.a = 1; this.b = 2 }
+            var obj = qibl.errorToObject(new Foo());
+            var err = qibl.objectToError(obj);
+            t.ok(err instanceof Error);
+            t.strictEqual(err.a, 1);
+            t.strictEqual(err.b, 2);
+            t.done();
+        },
+    },
 }

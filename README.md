@@ -693,6 +693,16 @@ Options:
   loader to succeed is the one used.  Loaders for the native (no extension) javascript and `.json`
   are built in and are always tried first.  The load functions must return a name-value hash.
 
+### errorToObject( err )
+
+Convert the error with its non-enumerable fields into a serializable object, and return the
+object.  All own properties of `err` are retained.
+
+### objectToError( obj )
+
+Create an error having all the same properties as `obj`.  If `obj` was created with
+`errorToObject`, will also try to restore an instance of the original error type.
+
 ### repeatFor( count, loopedFunction(done(err), ix), callback )
 
 Call `loopedFunction()` exactly `count` times.  Each call is passed a callback followed by the
@@ -905,7 +915,7 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
-- 1.19.0 - new `getConfig`
+- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval

@@ -143,6 +143,8 @@ var qibl = module.exports = {
     makeGetId: makeGetId,
     require: require, // for stubbing
     getConfig: getConfig,
+    errorToObject: errorToObject,
+    objectToError: objectToError,
     // _configure: _configure,
 };
 
@@ -1649,6 +1651,19 @@ function getConfig( options ) {
         ._merge((envConf = Config.fetchConfig(configDir, env, options.loaders)))
         ._merge(Config.fetchConfig(configDir, 'local', options.loaders));
     return envConf ? conf : null;
+}
+
+// convert the error with its non-enumerable fields into a serializable object (adapted from qinvoke)
+var hiddenErrorFields = { message: 1, name: 1, code: 1, errno: 1, syscall: 1, path: 1, address: 1, port: 1, stack: 1 };
+function errorToObject( err ) {
+    if (!(err instanceof Error)) return err;
+    return qibl.assignTo({}, err, qibl.omitUndefined(qibl.extractTo({}, err, hiddenErrorFields)),
+        { __ctor: err.constructor.name });
+}
+function objectToError( obj ) {
+    var err = qibl.assignTo(new (obj.__ctor && global[obj.__ctor] || Error)('objectToError'), qibl.omitUndefined(obj));
+    delete err.__ctor;
+    return err;
 }
 
 
