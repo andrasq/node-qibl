@@ -1687,13 +1687,18 @@ function WorkerProcess( options ) {
         this.child.once('message', function(msg) {
             if (msg === 'ready-' + self.child.pid) {
                 self.child.on('message', function(msg) {
-                    if (!msg || !msg.id) return errorCb(qibl.makeError({ message: msg }, 'garbled response'));
-                    var cb = self.callbacks[msg.id] || self.listeners[msg.id];
-                    if (!cb) return errorCb(qibl.makeError({ message: msg }, 'unexpected response'));
-                    delete self.callbacks[msg.id];
-                    if (msg.value !== undefined) return cb(null, msg.value);
-                    if (msg.err) return cb(qibl.objectToError(msg.error));
-                    return cb(qibl.makeError({ message: msg }, 'garbled response'));
+                    if (!msg) return errorCb(qibl.makeError({ message: msg }, 'garbled response, no message'));
+                    if (msg.id) {
+                        var cb = self.callbacks[msg.id];
+                        if (!cb) return errorCb(qibl.makeError({ message: msg }, 'unexpected response'));
+                        delete self.callbacks[msg.id];
+                        return msg.err ? cb(qibl.objectToError(msg.error)) : cb(null, msg.value);
+                    } else if (msg.event) {
+                        var listener = self.listeners[msg.event];
+                        return listener && listener(msg.value);
+                    } else {
+                        return cb(qibl.makeError({ message: msg }, 'garbled response'));
+                    }
                 })
                 callback && callback();
             }
@@ -1710,6 +1715,12 @@ function WorkerProcess( options ) {
             var killProcess = function() { try { self.child.kill('SIGKILL'); callback() } catch (err) { callback(err) } };
             setTimeout(killProcess, closeWaitMs);
         }
+        this.listen = function listen(event, listener) {
+            this.listeners.push = listener;
+        }
+        this.unlisten = function unlisten(event, listener) {
+            this.listeners = this.listeners.filter(function(lis) { return lis !== listner });
+        }
         return this;
     }
 
@@ -1724,6 +1735,9 @@ function WorkerProcess( options ) {
         })
         this.disconnect = function() {
             process.disconnect();
+        }
+        this.emit = function emit(event, data) {
+            self._sendTo(process, { event: event, data: data }, errorCb);
         }
         self._sendTo(process, 'ready-' + process.pid, errorCb);
         return this;
