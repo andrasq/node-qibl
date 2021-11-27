@@ -3633,11 +3633,13 @@ module.exports = {
             done();
         },
 
-        'creates a worker without methods': function(t) {
+        'constructor creates an instance with parent and worker methods': function(t) {
             var wp = new qibl.WorkerProcess();
             t.ok(!wp.child);
             t.ok(!wp.call);
-            t.ok(!wp.close);
+            t.equal(typeof wp.fork, 'function');
+            t.equal(typeof wp.connect, 'function');
+            t.equal(typeof wp.close, 'function');
             t.done();
         },
 
@@ -3648,7 +3650,6 @@ module.exports = {
                 t.ok(wp.child.pid > 0);
                 t.ok(wp.child.connected);
                 wp.close();
-                t.ok(!wp.child.connected);
                 t.done();
             })
         },
@@ -3660,16 +3661,180 @@ module.exports = {
                 wp.call('echo', 1, function(err, ret) {
                     t.ifError(err);
                     t.strictEqual(ret, 1);
+                    wp.close();
                     t.done();
                 })
             })
         },
 
+        'returns an error response': function(t) {
+            var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                t.ifError(err);
+                wp.call('returnError', { code: 'ERR_TEST', message: 'mock error', __ctor: TypeError }, function(err, ret) {
+                    t.ok(err instanceof Error);
+                    t.equal(err.code, 'ERR_TEST');
+                    t.equal(err.message, 'mock error');
+                    wp.close();
+                    t.done();
+                })
+            })
+        },
+
+        'can listen to events': function(t) {
+            var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                t.ifError(err);
+                var uniq = Math.random();
+                wp.call('emit100k', { count: 1, event: 'uniq', value: uniq });
+                wp.listen('uniq', function(value) {
+                    t.equal(value, uniq);
+                    wp.close();
+                    t.done();
+                })
+            })
+        },
+
+        'parent can close child': function(t) {
+            var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                t.ifError(err);
+                wp.close(function() {
+                    t.ok(!wp.child.connected);
+                    wp.call('echo', 1, function(err) {
+                        t.ok(err);
+                        t.ok(/channel closed/i.test(err.message));
+                        t.done();
+                    })
+                })
+            })
+        },
+
+        'child can close self': function(t) {
+            var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                t.ifError(err);
+                wp.call('close', 1, function(err) {
+                    t.ifError(err);
+                    setTimeout(function() {
+                        t.ok(!wp.child.connected);
+                        t.done();
+                    }, 5)
+                })
+            })
+        },
+
+        'errors': {
+            'returns error if not forked': function(t) {
+                var wp = new qibl.WorkerProcess();
+                wp._sendTo(process, {}, function(err) {
+                    t.ok(err);
+                    t.done();
+                })
+            },
+            'returns error if disconnected': function(t) {
+                var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                    wp.child.disconnect();
+                    wp.call('echo', 1, function(err) {
+                        t.ok(err);
+                        // older node error is 'channel closed', newer is 'Channel closed'
+                        // newer node also set err.code = 'ERR_IPC_CHANNEL_CLOSED'
+                        t.ok(/channel closed/i.test(err.message));
+                        t.done();
+                    })
+                })
+            },
+            'connect rejects invalid calls': function(t) {
+                var wp = new qibl.WorkerProcess();
+                t.throws(function() { wp.connect() }, /must be a hash/);
+                t.throws(function() { wp.connect(1) }, /must be a hash/);
+                t.done();
+            },
+            'caller rejects invalid messages': function(t) {
+                var error;
+                var wp = new qibl.WorkerProcess({ onError: function(err) { error = err } });
+                wp.fork(this.scriptName, function(err) {
+                    t.ifError(err);
+                    var error;
+                    wp.onError = function(err) { error = err };
+                    qibl.runSteps([
+                        function(next) {
+                            wp.child.emit('message', null);
+                            t.ok(/garbled response/.test(error.message));
+                            next();
+                        },
+                        function(next) {
+                            wp.child.emit('message', {});
+                            t.ok(/garbled response/.test(error.message));
+                            next();
+                        },
+                        function(next) {
+                            wp.child.emit('message', { id: 'x' });
+                            t.ok(/unexpected callback/.test(error.message));
+                            next();
+                        },
+                    ], function(err) {
+                        t.ifError(err);
+                        wp.close();
+                        t.done();
+                    })
+                })
+            },
+            'worker rejects invalid messages': function(t) {
+                var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                    t.ifError(err);
+                    qibl.runSteps([
+                        function(next) {
+                            wp.call('emitProcessMessage', {}, function(err, ret) {
+                                t.ifError(err);
+                                t.ok(/missing message id/, ret.message);
+                                next();
+                            })
+                        },
+                        function(next) {
+                            wp.call('emitProcessMessage', { id: 'x', name: 'nonesuch' }, function(err, ret) {
+                                t.ifError(err);
+                                t.ok(/unknown call/, ret.message);
+                                next();
+                            })
+                        },
+                    ], function(err) {
+                        t.ifError(err);
+                        wp.close();
+                        t.done();
+                    });
+                })
+            },
+            'worker catches errors': function(t) {
+                var wp;
+                var scriptName = this.scriptName;
+                qibl.runSteps([
+                    function(next) {
+                        wp = new qibl.WorkerProcess().fork(scriptName, next);
+                    },
+                    function(next) {
+                        wp.call('throwError', qibl.errorToObject(qibl.makeError({ code: 'TEST' }, 'mock worker error')), next);
+                    },
+                    function(next) {
+                        wp.call('echo', 1234, next);
+                    },
+                    function(next, value) {
+                        t.equal(value, 1234);
+                        next();
+                    }
+                ], function(err) {
+                    t.ifError(err);
+                    t.done();
+                })
+            },
+        },
+
         'performance': {
+            before: function(done) {
+                this.nloops = 1000;
+                done();
+            },
+
             'back-to-back calls': function(t) {
+                var nloops = this.nloops;
                 var wp = new qibl.WorkerProcess({ onError: console.error }).fork(this.scriptName, function(err) {
                     t.ifError(err);
-                    var nloops = 1000;
                     var t1 = qibl.microtime();
                     var next, value;
                     qibl.repeatFor(
@@ -3679,6 +3844,7 @@ module.exports = {
                             var t2 = qibl.microtime();
                             t.printf('%dk back-to-back calls in %4.3f ms', nloops / 1000, (t2 - t1) * 1000);
                             t.strictEqual(value, nloops - 1);
+                            wp.close();
                             t.done();
                         }
                     )
@@ -3687,20 +3853,42 @@ module.exports = {
             },
 
             'concurrent calls': function(t) {
+                var nloops = this.nloops, ndone = 0;
                 var wp = new qibl.WorkerProcess({ onError: console.error }).fork(this.scriptName, function(err) {
                     t.ifError(err);
-                    var nloops = 1000, ndone = 0;
                     var t1 = qibl.microtime();
                     for (var i = 0; i < nloops; i++) wp.call('echo', i, function(err, ret) {
                         ndone += 1;
                         if (ndone === nloops) {
                             var t2 = qibl.microtime();
                             t.printf('%dk concurrent calls in %4.3f ms', nloops / 1000, (t2 - t1) * 1000);
+                            wp.close();
                             t.done();
                         }
                     })
                 })
                 // 100k calls at 235k/s (node-v13.8.0)
+            },
+
+            'emit events': function(t) {
+                var nloops = this.nloops, ndone = 0;
+                var wp = new qibl.WorkerProcess({ onError: console.error }).fork(this.scriptName, function(err) {
+                    t.ifError(err);
+                    wp.call('emit100k', { event: 'testEvent', count: nloops, value: 1234 }, function(err) {
+                        var t1 = qibl.microtime();
+                        wp.listen('testEvent', function listener(value) {
+                            ndone += 1;
+                            if (ndone === nloops) {
+                                var t2 = qibl.microtime();
+                                t.printf('%dk received events in %4.3f ms', nloops / 1000, (t2 - t1) * 1000);
+                                wp.unlisten('testEvent', listener);
+                                wp.close();
+                                t.done();
+                            }
+                        })
+                    })
+                })
+                // 100k events at 380-465k/s
             },
         },
     },
