@@ -12,7 +12,6 @@ var wp = new qibl.WorkerProcess().connect({
         cb();
     },
     throwError: function(err, cb) {
-        cb();
         throw qibl.objectToError(err);
     },
     returnError: function(err, cb) {
@@ -27,8 +26,15 @@ var wp = new qibl.WorkerProcess().connect({
         cb(null, qibl.errorToObject(error));
     },
     close: function(arg, cb) {
-        // disconnect only after callback, to receive response
+        // callback first, to send response before ipc channel is closed
         cb();
-        wp.close();
+        wp.close(function() {
+            // invoke close with a callback for better code coverage
+            console.log("worker closed self");
+        });
+    },
+    sleep: function(ms, cb) {
+        var timer = setTimeout(cb, ms);
+        timer.unref && timer.unref();
     },
 })
