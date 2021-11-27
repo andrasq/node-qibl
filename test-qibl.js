@@ -3755,6 +3755,17 @@ module.exports = {
                 t.ok(error && error.message === 'not connected');
                 t.done();
             },
+            'call returns send error': function(t) {
+                var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                    t.ifError(err);
+                    t.stubOnce(wp.child, 'send', function(){ throw 'mock-send-error' });
+                    wp.call('echo', 1, function(err) {
+                        wp.close();
+                        t.ok(err && err === 'mock-send-error');
+                        t.done();
+                    })
+                })
+            },
             'reports error to stderr it no onError': function(t) {
                 var output = '';
                 var wp = new qibl.WorkerProcess();

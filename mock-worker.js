@@ -31,7 +31,7 @@ var wp = new qibl.WorkerProcess().connect({
         wp.close(function() {
             // invoke close with a callback for better code coverage
             console.log("worker closed self");
-        });
+        })
     },
     sleep: function(ms, cb) {
         var timer = setTimeout(cb, ms);

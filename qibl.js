@@ -1679,7 +1679,7 @@ function WorkerProcess( options ) {
     this.nextCallbackId = 1;
     this.connected = false;     // worker is ready to receive calls
     this.child = null;          // worker process
-    this.onError = options.onError || function(err){ console.error('qibl.WorkerProcess error:', err) };
+    this.onError = options.onError || function(err){ console.error('qibl.WorkerProcess:', err) };
 
     var self = this;
     var closeWaitMs = options.closeWaitMs || 10;
@@ -1715,7 +1715,7 @@ function WorkerProcess( options ) {
     this.close = function close( callback ) {
         this.child ? this.child.connected && this.child.disconnect() : this.connected && process.disconnect();
         this.connected = false;
-        this.child ? callback && this.child.on('disconnect', callback) : callback && callback();
+        callback && setImmediate(callback);
         // TODO: maybe kill the child process after some timeout
     }
 
@@ -1758,7 +1758,7 @@ function WorkerProcess( options ) {
     this._sendTo = function _sendTo( target, msg, reportError ) {
         // EPIPE is returned to the send() callback, but ERR_IPC_CHANNEL_CLOSED always throws
         try { target.send(msg, null, _onSendError) }
-        catch (err) { _onSendError((err && (target.send || target.connected)) || new Error('not connected')) }
+        catch (err) { _onSendError((target.send || target.connected) ? err : new Error('not connected')) }
         // if the worker can not return the error, report it with the instance onError
         function _onSendError(err) {
             if (err) { reportError = reportError || self.onError;
