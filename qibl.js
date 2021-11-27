@@ -1716,13 +1716,19 @@ function WorkerProcess( options ) {
         this.unlisten = function unlisten( event, listener ) {
             this.listeners[event] === listener && delete this.listeners[event];
         }
+        this.child.on('disconnect', function onDisconnect() {
+            setImmediate(function() {
+                var err = new Error('disconnected');
+                for (var id in self.callbacks) { self.callbacks[id](err); delete self.callbacks[id] }
+            })
+        })
         return this;
     }
 
-    this.close = function( callback ) {
+    this.close = function close( callback ) {
         this.child ? this.child.connected && this.child.disconnect() : this.connected && process.disconnect();
         this.connected = false;
-        callback && callback();
+        this.child ? callback && this.child.on('disconnect', callback) : callback && callback();
         // TODO: maybe kill the child process after some timeout
     }
 
