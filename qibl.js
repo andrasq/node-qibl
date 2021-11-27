@@ -1673,12 +1673,12 @@ function objectToError( obj ) {
  */
 function WorkerProcess( options ) {
     options = options || {};
-    this.calls = {};
-    this.callbacks = {};
-    this.listeners = {};
-    this.nextId = 1;
-    this.connected = false;
-    this.child = null;
+    this.calls = {};            // worker functions indexed by callName
+    this.callbacks = {};        // caller call callbacks indexed by callbackId
+    this.listeners = {};        // caller listeners functions indexed by event
+    this.nextCallbackId = 1;
+    this.connected = false;     // worker is ready to receive calls
+    this.child = null;          // worker process
     this.onError = options.onError || function(err){ console.error('qibl.WorkerProcess error:', err) };
 
     var self = this;
@@ -1688,34 +1688,9 @@ function WorkerProcess( options ) {
         this.child = cp.fork(script);
         this.child.once('message', function(msg) {
             // the child process always sends a first message 'ready' once listening
-            self.child.on('message', function(msg) {
-                if (!msg) return self.onError(qibl.makeError({ mesg: msg }, 'garbled response: no message'));
-                if (msg.id) {
-                    var cb = self.callbacks[msg.id];
-                    cb === false && (cb = self._noop);
-                    if (!cb) return self.onError(qibl.makeError({ mesg: msg }, 'unexpected callback'));
-                    delete self.callbacks[msg.id];
-                    return msg.error ? cb(qibl.objectToError(msg.error)) : cb(null, msg.value);
-                } else if (msg.event) {
-                    var listener = self.listeners[msg.event];
-                    return listener && listener(msg.value);
-                } else {
-                    return self.onError(qibl.makeError({ mesg: msg }, 'garbled response: not callback or event'));
-                }
-            })
+            self.child.on('message', function(msg){ self._receiveWorkerReply(msg) });
             callback && callback();
         })
-        this.call = function call( name, arg, callback ) {
-            var msg = { id: this.nextId++, name: name, value: arg };
-            this.callbacks[msg.id] = callback || false;
-            this._sendTo(this.child, msg, callback || self.onError);
-        }
-        this.listen = function listen( event, listener ) {
-            this.listeners[event] = listener;
-        }
-        this.unlisten = function unlisten( event, listener ) {
-            this.listeners[event] === listener && delete this.listeners[event];
-        }
         this.child.on('disconnect', function onDisconnect() {
             setImmediate(function() {
                 var err = new Error('disconnected');
@@ -1723,6 +1698,18 @@ function WorkerProcess( options ) {
             })
         })
         return this;
+    }
+    this.call = function call( name, arg, callback ) {
+        if (!this.child || !this.child.send) return callback(new Error('not forked yet'));
+        var mesg = { id: this.nextCallbackId++, name: name, value: arg };
+        self.callbacks[mesg.id] = callback || false;
+        this._sendTo(this.child, mesg, callback);
+    }
+    this.listen = function listen( event, listener ) {
+        this.listeners[event] = listener;
+    }
+    this.unlisten = function unlisten( event, listener ) {
+        this.listeners[event] === listener && delete this.listeners[event];
     }
 
     this.close = function close( callback ) {
@@ -1735,30 +1722,48 @@ function WorkerProcess( options ) {
     this.connect = function connect( calls ) {
         if (!calls || !(calls instanceof Object)) throw new Error('calls must be a hash');
         qibl.assignTo(this.calls, calls);
-        this.connected = true;
         process.on('message', function(msg) {
             if (!msg || !msg.id) return self.onError(qibl.makeError({ mesg: msg }, 'missing message id or name'));
             if (!self.calls[msg.name]) return self.onError(qibl.makeError({ mesg: msg }, msg.name + ': unknown call'));
-            try {
-                function sendResponse(err, ret) {
-                    err && (err = qibl.errorToObject(err));
-                    self._sendTo(process, { id: msg.id, name: msg.name, error: err, value: ret }, self.onError) };
-                self.calls[msg.name](msg.value, sendResponse);
-            } catch (err) { self.onError(err) }
+            function _sendReply(err, value) {
+                self._sendTo(process, { id: msg.id, name: msg.name, error: err && qibl.errorToObject(err), value: value });
+            }
+            // TODO: convert falsy errors to (typeof err + ' error')?
+            try { self.calls[msg.name](msg.value, _sendReply) } catch (err) { _sendReply(err) }
         })
-        this.emit = function emit( event, value ) {
-            self._sendTo(process, { event: event, value: value }, self.onError);
-        }
-        self._sendTo(process, 'ready', self.onError);
+        this.connected = true;
+        this._sendTo(process, 'ready');
         return this;
     }
+    this.emit = function emit( event, value ) {
+        this._sendTo(process, { event: event, value: value });
+    }
 
+    this._receiveWorkerReply = function _receiveReply( msg ) {
+        if (!msg) {
+            return this.onError(qibl.makeError({ mesg: msg }, 'garbled response: no message'));
+        } else if (msg.id) {
+            var cb = this.callbacks[msg.id];
+            if (cb === false) cb = this._noop;
+            if (!cb) return this.onError(qibl.makeError({ mesg: msg }, 'unexpected callback'));
+            delete this.callbacks[msg.id];
+            return msg.error ? cb(qibl.objectToError(msg.error)) : cb(null, msg.value);
+        } else if (msg.event) {
+            var listener = this.listeners[msg.event];
+            return listener ? listener(msg.value) : this.onError({ message: 'unknown event "' + msg.event + '"' });
+        } else {
+            return this.onError(qibl.makeError({ mesg: msg }, 'garbled response: not callback or event'));
+        }
+    }
     this._sendTo = function _sendTo( target, msg, reportError ) {
         // EPIPE is returned to the send() callback, but ERR_IPC_CHANNEL_CLOSED always throws
-        try { target.send(msg, null, function(err) { err && self._failSend(err, msg.id, reportError) }) }
-        catch (err) { this._failSend(err, msg.id, reportError) }
+        try { target.send(msg, null, _onSendError) }
+        catch (err) { _onSendError((err && (target.send || target.connected)) || new Error('not connected')) }
+        // if the worker can not return the error, report it with the instance onError
+        function _onSendError(err) {
+            if (err) { reportError = reportError || self.onError;
+                       delete self.callbacks[msg && msg.id]; reportError(err) } }
     }
-    this._failSend = function(err, id, errCb) { delete this.callbacks[id]; errCb(err) };
     this._noop = function(){};
 }
 
