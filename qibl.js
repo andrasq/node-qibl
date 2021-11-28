@@ -1699,12 +1699,15 @@ function WorkerProcess( options ) {
         })
         return this;
     }
-    this.call = function call( name, arg, callback ) {
-        if (!this.child || !this.child.send) return callback(new Error('not forked yet'));
-        var mesg = { id: this.nextCallbackId++, name: name, value: arg };
-        self.callbacks[mesg.id] = callback || false;
-        this._sendTo(this.child, mesg, callback);
-    }
+    this.call = qibl.varargs(function call(args) {
+        // var callback = typeof args[args.length - 1] === 'function' && args.pop();
+        var callback = args.pop();
+        if (typeof callback !== 'function') throw new Error('callback required');
+        if (!self.child || !self.child.send) return  callback && callback(new Error('not forked yet'));
+        var mesg = { id: self.nextCallbackId++, name: args.shift(), value: args };
+        self.callbacks[mesg.id] = callback;
+        self._sendTo(self.child, mesg, callback);
+    })
     this.listen = function listen( event, listener ) {
         this.listeners[event] = listener;
     }
@@ -1729,7 +1732,8 @@ function WorkerProcess( options ) {
                 self._sendTo(process, { id: msg.id, name: msg.name, error: err && qibl.errorToObject(err), value: value });
             }
             // TODO: convert falsy errors to (typeof err + ' error')?
-            try { self.calls[msg.name](msg.value, _sendReply) } catch (err) { _sendReply(err) }
+            msg.value.push(_sendReply);
+            try { qibl.invoke(self.calls[msg.name], msg.value) } catch (err) { _sendReply(err) }
         })
         this.connected = true;
         this._sendTo(process, 'ready');
@@ -1744,7 +1748,6 @@ function WorkerProcess( options ) {
             return this.onError(qibl.makeError({ mesg: msg }, 'garbled response: no message'));
         } else if (msg.id) {
             var cb = this.callbacks[msg.id];
-            if (cb === false) cb = this._noop;
             if (!cb) return this.onError(qibl.makeError({ mesg: msg }, 'unexpected callback'));
             delete this.callbacks[msg.id];
             return msg.error ? cb(qibl.objectToError(msg.error)) : cb(null, msg.value);

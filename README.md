@@ -954,7 +954,7 @@ worker is ready to listen for calls.  Returns itself, the caller instance.
         // worker process now ready and is listening for calls
     })
 
-#### callerWp.call( functionName, argument, callback(err, result) )
+#### callerWp.call( functionName, argument, [arg2, arg3, ...] [,callback(err, result)] )
 
 Invoke the named handler function in the worker, and return the computed result or error to
 the callback.  The call waits for the computation to finish, there is no timeout.  If no

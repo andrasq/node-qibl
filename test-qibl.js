@@ -3655,13 +3655,25 @@ module.exports = {
             })
         },
 
-        'returns a response': function(t) {
+        'call returns a response': function(t) {
             var wp = new qibl.WorkerProcess();
             wp.fork(this.scriptName, function(err) {
                 t.ifError(err);
                 wp.call('echo', 1, function(err, ret) {
                     t.ifError(err);
                     t.strictEqual(ret, 1);
+                    wp.close();
+                    t.done();
+                })
+            })
+        },
+
+        'can call with multiple arguments': function(t) {
+            var wp = new qibl.WorkerProcess().fork(this.scriptName, function(err) {
+                t.ifError(err);
+                wp.call('echo5', 1, 2, 3, 4, function(err, ret) {
+                    t.ifError(err);
+                    t.deepStrictEqual(ret, { a: 1, b: 2, c: 3, d: 4 });
                     wp.close();
                     t.done();
                 })
@@ -3694,7 +3706,7 @@ module.exports = {
             var wp = new qibl.WorkerProcess({ onError: function(err) { error = err } }).fork(this.scriptName, function(err) {
                 t.ifError(err);
                 var uniq = Math.random();
-                wp.call('emit100k', { count: 1, event: 'uniq', value: uniq });
+                wp.call('emit100k', { count: 1, event: 'uniq', value: uniq }, function(){});
                 wp.listen('uniq', function listener(value) {
                     t.equal(value, uniq);
                     t.equal(wp.listeners['uniq'], listener);
@@ -3702,7 +3714,7 @@ module.exports = {
                     // note: this prints an "unhandled event" notice
                     wp.unlisten('uniq', listener);
                     t.equal(wp.listeners['uniq'], undefined);
-                    wp.call('emit100k', { count: 1, event: 'uniq', value: 2 });
+                    wp.call('emit100k', { count: 1, event: 'uniq', value: 2 }, function(){});
                     setTimeout(function() {
                         wp.close();
                         t.ok(error);
@@ -3901,7 +3913,7 @@ module.exports = {
                         }
                     )
                 })
-                // 100k calls at 80k/s (node-v13.8.0)
+                // 100k calls at 75k/s (node-v13.8.0) (79k/s w/o varargs call support)
             },
 
             'concurrent calls': function(t) {
@@ -3939,9 +3951,9 @@ module.exports = {
                         }
                     })
                     var t1 = qibl.microtime();
-                    wp.call('emit100k', { event: 'testEvent', count: nloops, value: 1234 });
+                    wp.call('emit100k', { event: 'testEvent', count: nloops, value: 1234 }, function(){});
                 })
-                // 100k events at 380-465k/s
+                // 100k events at 380-490k/s
             },
         },
     },
