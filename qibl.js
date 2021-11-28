@@ -1684,7 +1684,7 @@ function WorkerProcess( options ) {
     var self = this;
     var closeWaitMs = options.closeWaitMs || 10;
 
-    this.fork = function fork(script, callback) {
+    this.fork = function fork( script, callback ) {
         this.child = cp.fork(script);
         this.child.once('message', function(msg) {
             // the child process always sends a first message 'ready' once listening

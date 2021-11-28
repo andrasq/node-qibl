@@ -859,7 +859,7 @@ Try calling `func` until it succeeds or have waited `timeout` total milliseconds
 is `1` (the very first call was not a retry).  Returns the result of the last attempt.
 Makes an attempt at the very start, and a final one at the very end of the timeout period.
 
-### new Mutex( limit )
+### new qibl.Mutex( limit )
 
 Create a mutual exclusion semaphore that allows `limit` concurrent users to a limited-use
 resource; default `1` one.  A Mutex has one method: `acquire(func)`.  It queues `func`
@@ -873,7 +873,7 @@ the resource will remain locked until freed, no timeout.
         release();
     });
 
-### new Cron( )
+### new qibl.Cron( )
 
 Schedule precise-interval cronjobs.  A cronjob is a function taking a callback that it calls
 when done and uses to report errors.  `Cron` schedules runtimes at exact multiples of the
@@ -912,10 +912,91 @@ This call never returns errors, error reporting is done per job via their schedu
     cron.run(Date.now() + 60000);
     // => "1 minute elapsed"
 
+### new qibl.WorkerProcess( [options] )
+
+Create a dedicated compute agent, accessed as a pair of objects running in different
+threads, the `caller` and the `worker`.  Calls are made to the worker with the caller `call`
+method.  The worker returns results with the callback passed to the named function.
+
+The worker is a simple process communicating with the parent via the shared `child_process`
+IPC channel.  Each worker implements a simple server that receives calls via the ipc channel
+from the parent, and returns results back to the parent.  The child's standard input and
+output are shared with the parent.
+
+    // main.js
+    const callerWp = new qibl.WorkerProcess({ onError: (err) => console.error(err) });
+    callerWp.fork(__dirname + '/echo.js');
+    callerWp.call('echo', 1234, (err, value) => {
+        // value === 1234
+    })
+
+    // echo.js
+    const workerWp = new qibl.WorkerProcess().connect({
+        echo: function(value, cb) {
+            cb(null, value);
+        })
+    })
+
+Options:
+- `onError` - function to call on errors if there is no callback to notify
+
+#### callerWp.fork( scriptName [,onReady(err)] )
+
+Create the worker thread.  The `onReady` function, if provided, will be called once the
+worker is ready to listen for calls.  Returns itself, the caller instance.
+
+    const callerWp = new qibl.WorkerProces({
+        onError: function(err) {
+            console.error('wp caller:', err);
+        },
+    })
+    .fork(scriptName, function(err) {
+        // worker process now ready and is listening for calls
+    })
+
+#### callerWp.call( functionName, argument, callback(err, result) )
+
+Invoke the named handler function in the worker, and return the computed result or error to
+the callback.  The call waits for the computation to finish, there is no timeout.  If no
+callback is provided, the remote call will not return confirmation of completion.
+
+#### callerWp.listen( event, listener(value) )
+
+Listen for events emitted by the worker.  Only one listener is supported per `event` type.
+Events are emitted asynchronously, and invoke the handler when they arrive.
+
+#### callerWp.unlisten( event, listener )
+
+Stop the `listener` function from being called with more events of type `event`.
+
+#### workerWp.connect( handlerFunctions )
+
+Start the worker listening for calls.  `handlerFunctions` is a hash of functions keyed by
+their advertised function name.  Each handler function will br passed the call argument and
+a callback taking an `error` and the result value.
+
+    const workerWp = new qibl.WorkerProcess();
+    workerWp.connect({
+        ping: function(cb) {
+            return cb(null, 'pong');
+        },
+        echo: function(arg, cb) {
+            return cb(null, arg);
+        },
+        sleep: function(ms, cb) {
+            setTimeout(cb, ms);
+        },
+    })
+
+#### workerWp.emit( event, value )
+
+Send an event value to the caller.
+
+
 Changelog
 ---------
 
-- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`
+- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new experimental `WorkerProcess`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval
