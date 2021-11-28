@@ -1699,15 +1699,20 @@ function WorkerProcess( options ) {
         })
         return this;
     }
-    this.call = qibl.varargs(function call(args) {
-        // var callback = typeof args[args.length - 1] === 'function' && args.pop();
-        var callback = args.pop();
+    this.call = function(name /* , varargs, cb */) {
+        var callback = arguments[arguments.length - 1];
         if (typeof callback !== 'function') throw new Error('callback required');
-        if (!self.child || !self.child.send) return  callback && callback(new Error('not forked yet'));
-        var mesg = { id: self.nextCallbackId++, name: args.shift(), value: args };
+        if (arguments.length <= 3) {
+            var arg = arguments.length === 2 ? undefined : arguments[1];
+            var mesg = { id: self.nextCallbackId++, name: name, value: arg };
+        } else {
+            var args = new Array(arguments.length - 2);
+            for (var i = 0; i < args.length; i++) args[i] = arguments[i + 1];
+            var mesg = { id: self.nextCallbackId++, name: name, argv: args };
+        }
         self.callbacks[mesg.id] = callback;
-        self._sendTo(self.child, mesg, callback);
-    })
+        self._sendTo(self.child, mesg);
+    }
     this.listen = function listen( event, listener ) {
         this.listeners[event] = listener;
     }
@@ -1716,7 +1721,7 @@ function WorkerProcess( options ) {
     }
 
     this.close = function close( callback ) {
-        this.child ? this.child.connected && this.child.disconnect() : this.connected && process.disconnect();
+        this.child ? (this.child.connected && this.child.disconnect()) : (this.connected && process.disconnect());
         this.connected = false;
         callback && setImmediate(callback);
         // TODO: maybe kill the child process after some timeout
@@ -1727,13 +1732,12 @@ function WorkerProcess( options ) {
         qibl.assignTo(this.calls, calls);
         process.on('message', function(msg) {
             if (!msg || !msg.id) return self.onError(qibl.makeError({ mesg: msg }, 'missing message id or name'));
-            if (!self.calls[msg.name]) return self.onError(qibl.makeError({ mesg: msg }, msg.name + ': unknown call'));
-            function _sendReply(err, value) {
-                self._sendTo(process, { id: msg.id, name: msg.name, error: err && qibl.errorToObject(err), value: value });
-            }
-            // TODO: convert falsy errors to (typeof err + ' error')?
-            msg.value.push(_sendReply);
-            try { qibl.invoke(self.calls[msg.name], msg.value) } catch (err) { _sendReply(err) }
+            var name = msg.name, func = self.calls[name];
+            if (!func) return self.onError(qibl.makeError({ mesg: msg }, name + ': unknown call'));
+            var _sendReply = function _sendReply(err, value) {
+                self._sendTo(process, { id: msg.id, name: name, error: err && qibl.errorToObject(err), value: value }) };
+                // TODO: convert falsy errors to (typeof err + ' error')?
+            self._makeWorkerCall(func, msg.value, msg.argv, _sendReply);
         })
         this.connected = true;
         this._sendTo(process, 'ready');
@@ -1758,13 +1762,18 @@ function WorkerProcess( options ) {
             return this.onError(qibl.makeError({ mesg: msg }, 'garbled response: not callback or event'));
         }
     }
-    this._sendTo = function _sendTo( target, msg, reportError ) {
+    this._makeWorkerCall = function _makeWorkerCall(func, value, argv, cb) {
+        try { argv ? (argv.push(cb), invoke1(func, argv)) : func(value, cb) } catch (err) { cb(err) }
+    }
+    this._sendTo = function _sendTo( target, msg ) {
         // EPIPE is returned to the send() callback, but ERR_IPC_CHANNEL_CLOSED always throws
+        // some node versions delay the 'disconnect' event, need to call back just once
         try { target.send(msg, null, _onSendError) }
-        catch (err) { _onSendError((target.send || target.connected) ? err : new Error('not connected')) }
+        catch (err) { _onSendError(!target ? new Error('not forked yet')
+            : (target.send || target.connected) ? err : new Error('not connected')) }
         // if the worker can not return the error, report it with the instance onError
         function _onSendError(err) {
-            if (err) { reportError = reportError || self.onError;
+            if (err) { var reportError = self.callbacks[msg && msg.id] || self.onError;
                        delete self.callbacks[msg && msg.id]; reportError(err) } }
     }
     this._noop = function(){};

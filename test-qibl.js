@@ -3732,7 +3732,9 @@ module.exports = {
                     t.ok(!wp.child.connected);
                     wp.call('echo', 1, function(err) {
                         t.ok(err);
-                        t.ok(/channel closed/i.test(err.message));
+                        // some node versions delay the 'disconnect' event long enough for the call to launch,
+                        // other versions emit it on the next clock tick so the call sees 'Channel closed'
+                        t.ok(/channel closed/i.test(err.message) || err.message === 'disconnected');
                         t.done();
                     })
                 })
@@ -3953,7 +3955,7 @@ module.exports = {
                     var t1 = qibl.microtime();
                     wp.call('emit100k', { event: 'testEvent', count: nloops, value: 1234 }, function(){});
                 })
-                // 100k events at 380-490k/s
+                // 100k events at 380-520k/s
             },
         },
     },

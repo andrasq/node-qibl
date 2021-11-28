@@ -5,7 +5,7 @@ var wp = new qibl.WorkerProcess().connect({
         var cb = arguments[arguments.length - 1];
         cb(null, arg);
     },
-    echo5: function(/* varargs */) {
+    echo5: function(/* varargs, cb */) {
         var args = [].slice.call(arguments, 0);
         var cb = args.pop();
         cb(null, { a: args[0], b: args[1], c: args[2], d: args[3], e: args[4], f: args[5] });
