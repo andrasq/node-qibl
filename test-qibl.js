@@ -2300,7 +2300,14 @@ module.exports = {
     },
 
     'tmpfile': {
+        before: function(done) {
+            process.env.PRE_TEST_TMPDIR = process.env.TMPDIR;
+            delete process.env.TMPDIR;
+            done();
+        },
         after: function(done) {
+            process.env.TMPDIR = process.env.PRE_TEST_TMPDIR;
+            delete process.env.PRE_TEST_TMPDIR;
             process.emit('SIGTERM');
             done();
         },
@@ -2316,6 +2323,12 @@ module.exports = {
             var filename = qibl.tmpfile({ dir: '.', name: 'foo-', ext: '.tmp' });
             t.ok(new RegExp('./foo-[0-9a-z]{6}.tmp').test(filename));
             fs.closeSync(fs.openSync(filename, 0));
+            t.done();
+        },
+        'creates a file in TMPDIR': function(t) {
+            process.env.TMPDIR = '/var//tmp';
+            var filename = qibl.tmpfile({ name: 'FOOBAR.' });
+            t.ok(qibl.startsWith(filename, '/var//tmp/FOOBAR'));
             t.done();
         },
         'creates many files': function(t) {

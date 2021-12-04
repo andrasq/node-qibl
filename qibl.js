@@ -1080,7 +1080,7 @@ function _unlinkFilesOnExit() {
 }
 function tmpfile( options ) {
     options = options || {};
-    var prefix = (options.dir || '/tmp') + '/' + (options.name || '/node-tmpfile-');
+    var prefix = (options.dir || process.env.TMPDIR || '/tmp') + '/' + (options.name || '/node-tmpfile-');
 
     // if tmpfile namespace is 99% full, 460 attempts will find an open slot 99% of the time
     for (var i = 0; i <= 460; i++) {
@@ -1296,7 +1296,7 @@ function socketpair( callback ) {
         socket1 = sock;
     })
 
-    var socketPath = qibl.tmpfile({ dir: '/tmp', name: '/node-socketpair.', ext: '' });
+    var socketPath = qibl.tmpfile({ name: 'node-socketpair.' });
     fs.unlinkSync(socketPath); // if socket file exists then throws EADDRINUSE
     server.listen(socketPath);
 

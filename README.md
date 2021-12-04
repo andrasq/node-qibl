@@ -829,7 +829,7 @@ concatenating the directory name, core filename, a six-character random suffix, 
 extension.  If the file cannot be created an error is thrown.
 
 Options:
-- `dir` - name of the directory to hold the file, default `/tmp`
+- `dir` - name of the directory to hold the file, default is `process.env.TMPDIR` else `/tmp`
 - `name` - core filename without the leading path separators, default `node-tmpfile-`
 - `ext` - filename extension to append, default `''` empty string
 
@@ -955,8 +955,9 @@ This call never returns errors, error reporting is done per job via their schedu
 
 Return via the callback a pair of connected unix domain sockets.  Returns two open instances of
 `net.Socket` where the data written to `sockets[0]` will be readable from `sockets[1]`, and vice
-versa.  The socket filename is `/tmp/node-socketpair.XXXXXX` where the `XXXXXX` is a random suffix.
-The file is created with `qibl.tmpfile` and is automatically removed when the current process exits.
+versa.  The socket filename is e.g. `/var/tmp/node-socketpair.XXXXXX` where `/var/tmp` is the value
+of the `TMPDIR` environment variable (default `/tmp`) and `XXXXXX` is a random suffix.  The file is
+created with `qibl.tmpfile` and is automatically removed when the current process exits.
 
 Changelog
 ---------
