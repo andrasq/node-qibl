@@ -2262,6 +2262,53 @@ module.exports = {
         },
     },
 
+    'tmpfile': {
+        after: function(done) {
+            process.emit('SIGTERM');
+            done();
+        },
+
+        'creates a file': function(t) {
+            var filename = qibl.tmpfile();
+            t.ok(filename);
+            t.equal(filename[0], '/');
+            fs.closeSync(fs.openSync(filename, 0));
+            t.done();
+        },
+        'creates a local file': function(t) {
+            var filename = qibl.tmpfile({ dir: '.', name: 'foo-', ext: '.tmp' });
+            t.ok(new RegExp('./foo-[0-9a-z]{6}.tmp').test(filename));
+            fs.closeSync(fs.openSync(filename, 0));
+            t.done();
+        },
+        'creates many files': function(t) {
+            var files = [];
+            qibl.repeatFor(100, function(next) { files.push(qibl.tmpfile()); next() }, function(err) {
+                files.sort();
+                for (var i = 1; i < files.length; i++) t.ok(files[i - 1] < files[i]);
+                t.done();
+            })
+        },
+        'removes files on exit': function(t) {
+            var filename = qibl.tmpfile();
+            fs.closeSync(fs.openSync(filename, 0));
+            setTimeout(function() {
+                // tmpfile listens for 'exit' and 'SIGTERM' events
+                process.emit('SIGTERM');
+                t.throws(function() { fs.openSync(filename, 0) }, /ENOENT/);
+                qibl.tmpfile();
+                t.done();
+                // NOTE: node-v0.6 setTimeout never triggers without a second arg
+            }, 0)
+        },
+        'errors': {
+            'throws if unable to create file': function(t) {
+                t.throws(function(){ qibl.tmpfile({ dir: '/nonesuch' }) }, /ENOENT/);
+                t.done();
+            },
+        },
+    },
+
     'globdir': {
         'returns filepaths matching pattern': function(t) {
             qibl.globdir('', '*qibl.*', function(err, files) {

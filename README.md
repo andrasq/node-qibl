@@ -798,6 +798,23 @@ error for the directory to already exist.
 
 Remove the named file or directory.  If directory, removes all its contents too.
 
+### filename = tmpfile( [options] )
+
+Create a new empty temporary file for exclusive use and return its filename.  The file is
+guaranteed not to have existed before the call, and will be automatically removed when the
+process exits (by normal exit, SIGTERM or SIGHUP).  The filename is constructed by
+concatenating the directory name, core filename, a six-character random suffix, and filename
+extension.  If the file cannot be created an error is thrown.
+
+Options:
+- `dir` - name of the directory to hold the file, default `/tmp`
+- `name` - core filename without the leading path separators, default `node-tmpfile-`
+- `ext` - filename extension to append, default `''` empty string
+
+
+    const filename = qibl.tmpfile();
+    // => "/tmp/node-tmpfile-wp3tio"
+
 ### globdir( dirname, templateOrRegex, callback(err, filepathArray) )
 
 Recursively walk the directory looking for files matching the pattern, and return to the
@@ -915,7 +932,7 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
-- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`
+- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, `tmpfile`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval

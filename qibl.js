@@ -107,6 +107,7 @@ var qibl = module.exports = {
     walkdir: walkdir,
     mkdir_p: mkdir_p,
     rmdir_r: rmdir_r,
+    tmpfile: tmpfile,
     globdir: globdir,
     walktree: walktree,
     copytreeDecycle: copytreeDecycle,
@@ -1022,6 +1023,43 @@ function rmdir_r( dirpath, callback ) {
             })
         })
     })
+}
+
+
+/*
+ * Create a new file that will be automatically removed when the process exits.
+ * Similar to tmpfile(3), but returns the name of the created file.
+ * This function installs a process.on('exit') hook.
+ * FIXME: does not remove the tmpfiles if the process is killed with ^C or HUP etc
+ */
+var _filesToRemoveOnExit = [];
+function _unlinkFilesOnExit() {
+    var exitSignals = ['exit', 'SIGTERM', 'SIGHUP'];
+    var onExit = function onExit() {
+        _filesToRemoveOnExit.forEach(function(name) { try { fs.unlinkSync(name) } catch (err) {} });
+        exitSignals.forEach(function(sig){ process.removeListener(sig, onExit) });
+        _filesToRemoveOnExit = [];
+    }
+    exitSignals.forEach(function(sig){ process.on(sig, onExit) });
+}
+function tmpfile( options ) {
+    options = options || {};
+    var prefix = (options.dir || '/tmp') + '/' + (options.name || '/node-tmpfile-');
+
+    // if tmpfile namespace is 99% full, 460 attempts will find an open slot 99% of the time
+    for (var i = 0; i <= 460; i++) {
+        var suffix = Math.random().toString(36).slice(2, 8);
+        var filename = prefix + suffix + (options.ext || '');
+        try {
+            var fd = fs.openSync(filename, (0x80 + 0x40 + 0x01) >>> 0); // O_EXCL + O_CREAT + O_WRONLY
+            fs.closeSync(fd);
+            _filesToRemoveOnExit.push(filename);
+            if (_filesToRemoveOnExit.length === 1) _unlinkFilesOnExit();
+            return filename;
+        } catch (err) {
+            if (i === 460) throw qibl.assignTo(err, { message: 'tmpfile: too many attempts: ' + err.message });
+        }
+    }
 }
 
 /*
