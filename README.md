@@ -951,10 +951,17 @@ This call never returns errors, error reporting is done per job via their schedu
     cron.run(Date.now() + 60000);
     // => "1 minute elapsed"
 
+### socketpair( callback(err, sockets) )
+
+Return via the callback a pair of connected unix domain sockets.  Returns two open instances of
+`net.Socket` where the data written to `sockets[0]` will be readable from `sockets[1]`, and vice
+versa.  The socket filename is `/tmp/node-socketpair.XXXXXX` where the `XXXXXX` is a random suffix.
+The file is created with `qibl.tmpfile` and is automatically removed when the current process exits.
+
 Changelog
 ---------
 
-- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`
+- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`, `socketpair`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval

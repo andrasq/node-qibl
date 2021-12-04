@@ -12,6 +12,7 @@
 
 var fs = require('fs');
 var events = require('events');
+var net = require('net');
 var path = require('path');
 var util = require('util');
 
@@ -117,6 +118,7 @@ var qibl = module.exports = {
     retry: retry,
     Mutex: Mutex,
     Cron: Cron,
+    socketpair: socketpair,
     keys: keys,
     values: values,
     entries: entries,
@@ -1280,6 +1282,34 @@ function Cron( ) {
         return nowMs + (interval - (msRunning % interval));
     }
     this._noop = function(){};
+}
+
+/*
+ * Return a pair of unix domain (file) sockets connected to each other.
+ * see https://stackoverflow.com/questions/45624671/communication-between-child-processes-in-node-js
+ */
+function socketpair( callback ) {
+    if (typeof callback !== 'function') throw new Error('callback not a function');
+
+    var socket1, socket2;
+    var server = net.createServer(function(sock) {
+        socket1 = sock;
+    })
+
+    var socketPath = qibl.tmpfile({ dir: '/tmp', name: '/node-socketpair.', ext: '' });
+    fs.unlinkSync(socketPath); // if socket file exists then throws EADDRINUSE
+    server.listen(socketPath);
+
+    // connect to the server to trigger a 'connection' event with sockets
+    socket2 = net.connect(socketPath, function() {
+        // connection established, return after letting the server set socket1
+        // some node versions set socket1 first, others socket2
+        setImmediate(function() {
+            // server is no longer needed, and if left open it prevents normal process exit
+            server.close();
+            callback(null, [socket1, socket2]);
+        })
+    })
 }
 
 // backslash-escape the chars that have special meaning in regex strings

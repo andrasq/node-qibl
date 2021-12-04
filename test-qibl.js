@@ -9,6 +9,7 @@ var util = require('util');
 var path = require('path');
 var events = require('events');
 var fs = require('fs');
+var net = require('net');
 var qibl = require('./');
 var nodeMajor = parseInt(process.versions.node);
 
@@ -2779,6 +2780,38 @@ module.exports = {
                 t.equal(error, 'mock error');
                 t.done();
             })
+        },
+    },
+
+    'socketpair': {
+        'returns two sockets': function(t) {
+            qibl.socketpair(function(err, socks) {
+                t.ok(socks && socks[0] && socks[1]);
+                t.ok(socks[0] instanceof net.Socket);
+                t.ok(socks[1] instanceof net.Socket);
+                t.done();
+            })
+        },
+        'sockets are connected': function(t) {
+            qibl.socketpair(function(err, socks) {
+                var sock1Lines = [], sock1 = socks[0];
+                var sock2Lines = [], sock2 = socks[1];
+                qibl.emitlines(sock1); sock1.on('line', function(line){ sock1Lines.push(String(line)) });
+                qibl.emitlines(sock2); sock2.on('line', function(line){ sock2Lines.push(String(line)) });
+                sock1.write('hello\n');
+                sock2.write('there\n');
+                sock1.write('world!\n');
+                setTimeout(function() {
+                    // lines written to sock1 show up on sock2, and vice versa
+                    t.deepEqual(sock2Lines, ['hello\n', 'world!\n']);
+                    t.deepEqual(sock1Lines, ['there\n']);
+                    t.done();
+                }, 2);
+            })
+        },
+        'throws if no callback': function(t) {
+            t.throws(function(){ qibl.socketpair() }, /callback/);
+            t.done();
         },
     },
 
