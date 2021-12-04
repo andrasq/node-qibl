@@ -589,6 +589,28 @@ Listen for 'data' events from the emitter and assemble the data chunks into the 
 Data may be either all strings or all Buffers.  The returned body is a string for string data,
 else a Buffer for Buffer data.  The callback is invoked when the 'end' event is received.
 
+### qibl.emitlines( emitter )
+
+Annotate the emitter to listen for `'data'` events, re-split the byte stream on `\x0A` newline
+terminated byte boundaries, and re-emit each line found as a `'line'` event.  A single data
+chunk may emit zero, one, or multiple lines.  Returns the installed `'data'` listener function.
+Similar to `readline.createInterface(emitter)` but emits from the same emitter as the data, and
+does not convert to string.
+
+Lines are emitted when their terminating newline arrives, partial lines are buffered.  The
+terminating newline is inclued in the emitted line.  Line events are emitted synchronously by
+the data listener in the same event loop cycle that the data chunk arrives.  Data chunks are
+expected in Buffers and lines are emitted as Buffers, the caller must convert to strings.
+
+    const emitter = new events.EventEmitter();
+    qibl.emitlines(emitter);
+    emitter.on('line', (line) => {
+        // => Buffer('line 1\n')
+        // => Buffer('line 2\n')
+    })
+    emitter.emit('data', Buffer.from('line 1\nline'));
+    emitter.emit('data', Buffer.from('2\nline'));
+
 ### makeError( [properties,] message [,arg1 ,arg2, ...] )
 
 Create a new `Error` object with the error message `message` and having the given properties.
@@ -932,7 +954,7 @@ This call never returns errors, error reporting is done per job via their schedu
 Changelog
 ---------
 
-- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, `tmpfile`
+- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval

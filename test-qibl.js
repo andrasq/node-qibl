@@ -1544,6 +1544,42 @@ module.exports = {
                 emitter.emit('end');
             },
         },
+
+        'emitlines': {
+            'returns the listener function': function(t) {
+                var emitter = new events.EventEmitter();
+                var listener = qibl.emitlines(emitter);
+                t.deepEqual(emitter.listeners('data'), [listener]);
+                t.done();
+            },
+            'emits the lines found in the input': function(t) {
+                var tests = [
+                    // complete lines
+                    [['foo\n'], ['foo\n']],
+                    [['foo\nline2\nline 3\n'], ['foo\n', 'line2\n', 'line 3\n']],
+
+                    // out of combined chunks
+                    [['foo', 'bar\n'], ['foobar\n']],
+                    [['foo', 'bar', 'baz\nz'], ['foobarbaz\n']],
+                    [['foo\nbar', 'bat', '\nx'], ['foo\n', 'barbat\n']],
+
+                    // partial lines
+                    [[], []],
+                    [['x', '\n\n', 'y'], ['x\n', '\n']],
+                    [['foo\nbar'], ['foo\n']],
+                    [['', 'x', 'foo'], []],
+                ];
+                for (var i = 0; i < tests.length; i++) {
+                    var lines = [];
+                    var emitter = new events.EventEmitter();
+                    qibl.emitlines(emitter);
+                    emitter.on('line', function(line) { lines.push(String(line)) });
+                    tests[i][0].forEach(function(chunk){ emitter.emit('data', qibl.fromBuf(chunk)) });
+                    t.deepEqual(lines, tests[i][1]);
+                }
+                t.done();
+            },
+        },
     },
 
     'varargs': {

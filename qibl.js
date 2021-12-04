@@ -75,6 +75,7 @@ var qibl = module.exports = {
     clearListeners: clearListeners,
     restoreListeners: restoreListeners,
     readBody: readBody,
+    emitlines: emitlines,
     varargs: varargs,
     _varargs: _varargs,
     varargsRenamed: varargsRenamed,
@@ -871,6 +872,39 @@ function readBody( emitter, cb ) {
     emitter.on('error', function(err) {
         cb(err);
     })
+}
+
+/*
+ * Similar to readline, but emit the lines from the same data emitter,
+ * as raw buffer slices without string conversion, and include the terminating newline.
+ * Line fragments are not emitted, not even when the data source is closed.
+ */
+function emitlines( emitter ) {
+    var CH_NL = ('\n').charCodeAt(0);
+    var chunk1, chunks;
+
+    emitter.on('data', onData);
+    function onData(chunk) {
+        !chunk1 ? (chunk1 = chunk) : !chunks ? (chunks = new Array(chunk1, chunk)) : chunks.push(chunk);
+        var pos = offsetOf(chunk, CH_NL, 0);
+        if (pos >= 0) emitLines(pos);
+    }
+    return onData;
+
+    function emitLines(pos) {
+        if (!chunks) emitter.emit('line', chunk1.slice(0, pos += 1)); else pos = 0;
+        var bytes = chunks ? qibl.concatBuf(chunks) : chunk1;
+        for (var base = pos; (pos = offsetOf(bytes, CH_NL, base)) >= 0; base = pos) {
+            emitter.emit('line', bytes.slice(base, pos += 1));
+        }
+        // only emit completed lines, behave as if partials had not arrived yet
+        chunk1 = (base < bytes.length) ? bytes.slice(base) : undefined;
+        chunks = undefined;
+    }
+}
+function offsetOf( buf, ch, base ) {
+    for (var i = base || 0; i < buf.length; i++) if (buf[i] === ch) return i;
+    return -1;
 }
 
 /**
