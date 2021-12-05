@@ -1294,6 +1294,11 @@ function socketpair( callback ) {
     var socket1, socket2;
     var server = net.createServer(function(sock) {
         socket1 = sock;
+        setImmediate(function() {
+            // server is no longer needed, and if left open it prevents normal process exit
+            server.close();
+            callback(null, [socket1, socket2]);
+        })
     })
 
     var socketPath = qibl.tmpfile({ name: 'node-socketpair.' });
@@ -1304,11 +1309,7 @@ function socketpair( callback ) {
     socket2 = net.connect(socketPath, function() {
         // connection established, return after letting the server set socket1
         // some node versions set socket1 first, others socket2
-        setImmediate(function() {
-            // server is no longer needed, and if left open it prevents normal process exit
-            server.close();
-            callback(null, [socket1, socket2]);
-        })
+        // node-v0.6 fails if callback from here on nextTick, but ok from server connection
     })
 }
 
