@@ -23,6 +23,8 @@ function repeatFor(n, proc, callback) {
     })()
 }
 
+var savedTmpdir = process.env.TMPDIR;
+
 module.exports = {
     'isHash should identify hashes': function(t) {
         var tests = [
@@ -2301,13 +2303,11 @@ module.exports = {
 
     'tmpfile': {
         before: function(done) {
-            process.env.PRE_TEST_TMPDIR = process.env.TMPDIR;
             delete process.env.TMPDIR;
             done();
         },
         after: function(done) {
-            process.env.TMPDIR = process.env.PRE_TEST_TMPDIR;
-            delete process.env.PRE_TEST_TMPDIR;
+            if (savedTmpdir !== undefined) process.env.TMPDIR = savedTmpdir;
             process.emit('SIGTERM');
             done();
         },
