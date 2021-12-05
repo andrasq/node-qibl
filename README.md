@@ -959,6 +959,8 @@ versa.  The socket filename is e.g. `/var/tmp/node-socketpair.XXXXXX` where `/va
 of the `TMPDIR` environment variable (default `/tmp`) and `XXXXXX` is a random suffix.  The file is
 created with `qibl.tmpfile` and is automatically removed when the current process exits.
 
+An open socket can be passed to a `child_process` as the second argument to `child.send()`.
+
 Changelog
 ---------
 
