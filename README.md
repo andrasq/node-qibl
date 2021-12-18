@@ -611,6 +611,33 @@ expected in Buffers and lines are emitted as Buffers, the caller must convert to
     emitter.emit('data', Buffer.from('line 1\nline'));
     emitter.emit('data', Buffer.from('2\nline'));
 
+### qibl.emitchunks( emitter, eventName, findChunkEnd(newChunk, chunks, base) )
+
+Re-chunk the emitted `'data'` bytes and emit them as `eventName` events.  The 'data' buffers
+must have bytes in Buffers, and not have been converted to strings.  The delivered 'chunk'
+events will likewise be in Buffers.  The boundaries of the chunks are computed by the
+`findChunkEnd` function.  Returns the 'data' event listener that was installed on the
+`emitter`.
+
+Chunks are emitted as soon as their end is received, from within the `'data'` event
+listener.  Partial chunks are buffered until their end arrives.
+
+`findChunkEnd` is called with the new 'data' buffer and, for multi-buffer chunks, the array of
+data buffers received so far (including the newest), and should return the byte offset in
+`newChunk` of the end of the chunk starting at `base` offset.  Note that whenever `base` is
+non-zero the chunk will always start in `newChunk` and `chunks` will be unefined; when `base`
+is `0` zero the chunk will start at offset 0 in either `chunks[0]` or `newChunk`, depending
+on whether `chunks` is set..
+
+See also the description of `emitlines`, which is built on top of `emitchunks`.
+
+    function emitlines( emitter ) {
+        return qibl.emitchunks(emitter, 'line', function endOfLine(chunk, chunks, base) {
+            var end = chunk.indexOf("\n", base);
+            return end < 0 ? -1 : end + 1;
+        })
+    }
+
 ### makeError( [properties,] message [,arg1 ,arg2, ...] )
 
 Create a new `Error` object with the error message `message` and having the given properties.
@@ -964,7 +991,8 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
-- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`, `socketpair`
+- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`, `socketpair`,
+           `emitchunks`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval

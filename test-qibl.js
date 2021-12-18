@@ -1582,7 +1582,31 @@ module.exports = {
                 }
                 t.done();
             },
+            'is fast': function(t) {
+                var nlines = 100000, ndone = 0;
+                var line1 = qibl.str_repeat("x", 199) + "\n";
+                var data1 = qibl.fromBuf(line1);
+                var data2 = qibl.fromBuf(line1 + line1.slice(0, 20));
+                var data3 = qibl.fromBuf(line1.slice(20) + line1);
+                var emitter = new events.EventEmitter();
+                qibl.emitlines(emitter);
+                emitter.on('line', function(line) {
+                    ndone += 1;
+                    // if (line + '' !== line1) throw new Error("mismatch");
+                    if (ndone === nlines) t.done();
+                })
+                if (0) for (var i=0; i<nlines; i++) emitter.emit('data', data1);
+                if (1) for (var i=0; i<nlines; i+=3) {
+                    emitter.emit('data', data1);
+                    emitter.emit('data', data2);
+                    emitter.emit('data', data3);
+                }
+            },
         },
+    },
+
+    'emitchunks': {
+        // is tested by emitlines
     },
 
     'varargs': {

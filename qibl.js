@@ -77,6 +77,7 @@ var qibl = module.exports = {
     restoreListeners: restoreListeners,
     readBody: readBody,
     emitlines: emitlines,
+    emitchunks: emitchunks,
     varargs: varargs,
     _varargs: _varargs,
     varargsRenamed: varargsRenamed,
@@ -883,30 +884,44 @@ function readBody( emitter, cb ) {
  */
 function emitlines( emitter ) {
     var CH_NL = ('\n').charCodeAt(0);
+    return qibl.emitchunks(emitter, 'line', function endOfLine(chunk, chunks, base) {
+        var end = offsetOf(chunk, CH_NL, base);
+        return end < 0 ? -1 : end + 1;
+    })
+}
+function offsetOf( buf, ch, base ) {
+    for (var i = base || 0; i < buf.length; i++) if (buf[i] === ch) return i;
+    return -1;
+}
+
+/*
+ * Re-chunk the 'data' bytes emitted by `emitter` on a parametric chunk boundary.
+ * `findChunkEnd(chunk, [chunks], base)` returns the byte offset in the latest `chunk`
+ * of the ending bound of the rechunk starting at `base` in `chunks`, else -1.
+ * Consumes 'data' events and emits `chunkEventName` events on the same emitter.
+ * Does not handle feedback loops where the emit itself generates more chunks.
+ */
+function emitchunks( emitter, chunkEventName, findChunkEnd ) {
     var chunk1, chunks;
 
     emitter.on('data', onData);
     function onData(chunk) {
         !chunk1 ? (chunk1 = chunk) : !chunks ? (chunks = [chunk1, chunk]) : chunks.push(chunk);
-        var pos = offsetOf(chunk, CH_NL, 0);
-        if (pos >= 0) emitLines(pos);
+        var bound = findChunkEnd(chunk, chunks, 0);
+        if (bound >= 0) emitChunks(bound);
     }
     return onData;
 
-    function emitLines(pos) {
-        if (!chunks) emitter.emit('line', chunk1.slice(0, pos += 1)); else pos = 0;
+    function emitChunks(bound) {
         var bytes = chunks ? qibl.concatBuf(chunks) : chunk1;
-        for (var base = pos; (pos = offsetOf(bytes, CH_NL, base)) >= 0; base = pos) {
-            emitter.emit('line', bytes.slice(base, pos += 1));
+        if (chunks) bound += bytes.length - chunks[chunks.length - 1].length;
+        chunk1 = chunks = undefined;
+        for (var base = 0; bound >= 0; (base = bound, bound = findChunkEnd(bytes, undefined, base))) {
+            emitter.emit(chunkEventName, bytes.slice(base, bound));
         }
-        // only emit completed lines, behave as if partials had not arrived yet
-        chunk1 = (base < bytes.length) ? bytes.slice(base) : undefined;
-        chunks = undefined;
+        // only emit completed chunks, behave as if partials had not arrived yet
+        if (base < bytes.length) chunk1 = bytes.slice(base);
     }
-}
-function offsetOf( buf, ch, base ) {
-    for (var i = base || 0; i < buf.length; i++) if (buf[i] === ch) return i;
-    return -1;
 }
 
 /**
