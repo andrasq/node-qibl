@@ -861,7 +861,7 @@ function readBody( emitter, cb ) {
     emitter.on('data', function(chunk) {
         if (typeof chunk === 'string') data ? data += chunk : data = chunk;
         else if (!chunk1) chunk1 = chunk;
-        else if (!chunks) chunks = new Array(chunk1, chunk);
+        else if (!chunks) chunks = [chunk1, chunk];
         else chunks.push(chunk);
     })
     emitter.on('end', function() {
@@ -887,7 +887,7 @@ function emitlines( emitter ) {
 
     emitter.on('data', onData);
     function onData(chunk) {
-        !chunk1 ? (chunk1 = chunk) : !chunks ? (chunks = new Array(chunk1, chunk)) : chunks.push(chunk);
+        !chunk1 ? (chunk1 = chunk) : !chunks ? (chunks = [chunk1, chunk]) : chunks.push(chunk);
         var pos = offsetOf(chunk, CH_NL, 0);
         if (pos >= 0) emitLines(pos);
     }
