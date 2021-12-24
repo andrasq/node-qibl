@@ -609,7 +609,7 @@ expected in Buffers and lines are emitted as Buffers, the caller must convert to
         // => Buffer('line 2\n')
     })
     emitter.emit('data', Buffer.from('line 1\nline'));
-    emitter.emit('data', Buffer.from('2\nline'));
+    emitter.emit('data', Buffer.from('2\npartial li'));
 
 ### qibl.emitchunks( emitter, eventName, findChunkEnd(newChunk, chunks, base) )
 
@@ -645,10 +645,12 @@ The message arguments are interpolated into the message with `util.format(messag
 
 ### microtime( )
 
-Return a high precision real-time timestamp with the seconds elapsed since the epoch, similar to
-PHP's `microtime(true)`.  It returns nanosecond precise elapsed times and tracks the system
-clock accurately to within .001 milliseconds.  Note that the system clock itself is usually only
-accurate to 1-10 ms because it is synced to a remote time service over a bursty network.
+Return a high precision real-time timestamp with the seconds elapsed since the epoch,
+similar to PHP's `microtime(true)`.  Returns nanosecond precise elapsed times and tracks the
+system clock accurately to within .001 milliseconds.  This is an efficient call, it is just
+`hrtime` added to a carefully calibrated time offset.  Note that the system clock itself is
+usually only accurate to 1-10 ms because it is synced to a remote time service over a bursty
+network.
 
     sec = qibl.microtime();
     // => 1608407555.834298
@@ -666,7 +668,7 @@ Returns `NaN` if unable to parse the value or the format.
     qibl.parseMs('2m');
     // => 120000
 
-### qids = QuickId( uniqueSystemId )
+### qids = new QuickId( uniqueSystemId )
 
 Very very fast globally unique id generator, similar in structure to MongoDB ids, composed of
 a time, a system identifier that uniquely distinguishes id sources, and a sequence number.
