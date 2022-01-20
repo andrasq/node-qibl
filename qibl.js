@@ -512,6 +512,9 @@ function sort3i( arr, i, j, k ) {
 function swapi( a, i, j ) {
     var t = a[i]; a[i] = a[j]; a[j] = t;
 }
+function swap3i( a, i, j, k ) {
+    var t = a[i]; a[i] = a[j]; a[j] = a[k]; a[k] = t;
+}
 /**
 // swap the 3 array elements so that a[i] = a[j], a[j] = a[k], and a[k] = a[i];
 function mov3i( a, i, j, k ) { var t = a[i]; a[i] = a[j]; a[j] = a[k]; a[k] = t }
