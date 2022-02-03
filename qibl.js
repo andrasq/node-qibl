@@ -222,7 +222,8 @@ function getProperty( target, dottedName, defaultValue ) {
 }
 // compile the property getter for 10x faster property lookups.
 // Returns a dedicated function to retrieve the named property of the objects passed to it.
-function compileGetProperty(path) {
+// CAUTION: property names must be valid identifiers, else a run-time error is thrown by eval.
+function compileGetProperty( path ) {
     var pretest = '(o !== null && o !== undefined)';
     var end = -1;
     while ((end = path.indexOf('.', end + 1)) >= 0) {
@@ -900,7 +901,7 @@ function offsetOf( buf, ch, base ) {
 /*
  * Re-chunk the 'data' bytes emitted by `emitter` on a parametric chunk boundary.
  * `findChunkEnd(chunk, [chunks], base)` returns the byte offset in the latest `chunk`
- * of the ending bound of the rechunk starting at `base` in `chunks`, else -1.
+ * of the ending bound of the rechunk starting at `base` in `chunks[0]`, else -1.
  * Consumes 'data' events and emits `chunkEventName` events on the same emitter.
  * Does not handle feedback loops where the emit itself generates more chunks.
  */
