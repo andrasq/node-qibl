@@ -2,7 +2,7 @@
  * qibl -- quick itty-bitty library
  * Small functions and polyfills that I found useful.
  *
- * Copyright (C) 2019-2021 Andras Radics
+ * Copyright (C) 2019-2022 Andras Radics
  * Licensed under the Apache License, Version 2.0
  *
  * 2019-09-11 - AR.

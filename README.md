@@ -857,6 +857,8 @@ process exits (by normal exit, SIGTERM or SIGHUP).  The filename is constructed 
 concatenating the directory name, core filename, a six-character random suffix, and filename
 extension.  If the file cannot be created an error is thrown.
 
+Note that this call behaves like a cross between `tempfile(1)` and its namesake `tmpfile(3)`.
+
 Options:
 - `dir` - name of the directory to hold the file, default is `process.env.TMPDIR` else `/tmp`
 - `name` - core filename without the leading path separators, default `node-tmpfile-`
