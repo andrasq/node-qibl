@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021 Andras Radics
+ * Copyright (C) 2019-2022 Andras Radics
  * Licensed under the Apache License, Version 2.0
  */
 
@@ -936,6 +936,15 @@ module.exports = {
             qibl.sort3i(arr, 2, 1, 0);
             t.ok(arr[0] >= arr[1] && arr[1] >= arr[2], "not sorted: " + arr);
         }
+        t.done();
+    },
+
+    'swap3i': function(t) {
+        var a = [1, 2, 3, 4];
+        qibl.swap3i(a, 1, 2, 3);
+        t.deepEqual(a, [1, 3, 4, 2]);
+        qibl.swap3i(a, 0, 2, 2);
+        t.deepEqual(a, [4, 3, 1, 2]);
         t.done();
     },
 
@@ -2364,13 +2373,13 @@ module.exports = {
             })
         },
         'removes files on exit': function(t) {
+            // nyc code coverage installs listeners for fatal signals, so files are not removed until the end
+            if (process.env.NYC_COVERAGE) t.skip();
             var filename = qibl.tmpfile();
             fs.closeSync(fs.openSync(filename, 0));
             setTimeout(function() {
-                // tmpfile listens for 'exit' and 'SIGTERM' events
                 process.emit('SIGTERM');
                 t.throws(function() { fs.openSync(filename, 0) }, /ENOENT/);
-                qibl.tmpfile();
                 t.done();
                 // NOTE: node-v0.6 setTimeout never triggers without a second arg
             }, 0)

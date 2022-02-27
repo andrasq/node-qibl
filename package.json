@@ -11,7 +11,7 @@
 
   "scripts": {
     "test": "qnit test-qibl.js",
-    "coverage": "nyc -r text -r lcov npm test",
+    "coverage": "env NYC_COVERAGE=1 nyc -r text -r lcov npm test",
     "clean": "rm -rf .nyc_output coverage npm-debug.log"
   }
 }

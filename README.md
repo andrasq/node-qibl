@@ -853,9 +853,9 @@ Remove the named file or directory.  If directory, removes all its contents too.
 
 Create a new empty temporary file for exclusive use and return its filename.  The file is
 guaranteed not to have existed before the call, and will be automatically removed when the
-process exits (by normal exit, SIGTERM or SIGHUP).  The filename is constructed by
-concatenating the directory name, core filename, a six-character random suffix, and filename
-extension.  If the file cannot be created an error is thrown.
+process exits (by normal exit, or unhandled SIGTERM, SIGHUP, SIGINT or SIGQUIT).  The
+filename is constructed by concatenating the directory name, core filename, a six-character
+random suffix, and filename extension.  If the file cannot be created an error is thrown.
 
 Note that this call behaves like a cross between `tempfile(1)` and its namesake `tmpfile(3)`.
 

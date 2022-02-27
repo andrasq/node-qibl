@@ -93,6 +93,7 @@ var qibl = module.exports = {
     qsearch: qsearch,
     sort3: sort3,
     sort3i: sort3i,
+    swap3i: swap3i,
     shuffle: randomize,
     randomize: randomize,
     interleave2: interleave2,
@@ -513,6 +514,7 @@ function sort3i( arr, i, j, k ) {
 function swapi( a, i, j ) {
     var t = a[i]; a[i] = a[j]; a[j] = t;
 }
+// swap a[i] for a[j] and a[j] for a[k], leaving a[i] in a[k]
 function swap3i( a, i, j, k ) {
     var t = a[i]; a[i] = a[j]; a[j] = a[k]; a[k] = t;
 }
@@ -1089,13 +1091,18 @@ function rmdir_r( dirpath, callback ) {
  */
 var _filesToRemoveOnExit = [];
 function _unlinkFilesOnExit() {
-    var exitSignals = ['exit', 'SIGTERM', 'SIGHUP'];
+    var exitSignals = ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGTERM'];
     var onExit = function onExit() {
         _filesToRemoveOnExit.forEach(function(name) { try { fs.unlinkSync(name) } catch (err) {} });
-        exitSignals.forEach(function(sig){ process.removeListener(sig, onExit) });
-        _filesToRemoveOnExit = [];
+        // do not empty out _filesToRemove to not install new listeners
+        _filesToRemoveOnExit = [_filesToRemoveOnExit[0]];
     }
-    exitSignals.forEach(function(sig){ process.on(sig, onExit) });
+    var onSignal = function onSignal(sig) {
+        /* istanbul ignore next -- will have more than one listener under code coverage */
+        if (process.listeners(sig).length === 1) onExit();
+    }
+    process.on('exit', onExit);
+    exitSignals.forEach(function(sig) { process.on(sig, function() { onSignal(sig) }) });
 }
 function tmpfile( options ) {
     options = options || {};
