@@ -2494,6 +2494,19 @@ module.exports = {
             t.deepEqual(keys, ['a', 'b', 'c']);
             t.done();
         },
+
+        'traverses non-hash on "visit"': function(t) {
+            var keys = [];
+            var date = new Date();
+            date.x = 1;
+            var tree = { a: 1, d: date };
+            qibl.walktree(tree, function(v, k) { keys.push(k); return '' });
+            t.deepEqual(keys, ['a', 'd']);
+            keys = [];
+            qibl.walktree(tree, function(v, k) { keys.push(k); return 'visit' });
+            t.deepEqual(keys, ['a', 'd', 'x']);
+            t.done();
+        },
     },
 
     'copytreeDecycle': {

@@ -995,6 +995,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
+- 1.19.1 - support 'visit' in walktree
 - 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`, `socketpair`,
            `emitchunks`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
