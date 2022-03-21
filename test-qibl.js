@@ -2132,6 +2132,20 @@ module.exports = {
             })
         },
 
+        'emits error on unreadable dir': function(t) {
+            var called = false;
+            var errors = qibl.walkdir('/var/spool/cron/crontabs', function(){}, function(err) {
+                t.ifError(err); // does not return errors
+                t.ok(called);
+                t.done();
+            })
+            errors.on('error', function(err, path) {
+                t.equal(path, '/var/spool/cron/crontabs');
+                t.equal(err.code, 'EACCES');
+                called = true;
+            })
+        },
+
         'reports the search root first with filepath and depth': function(t) {
             var names = [];
             var depths = [];
