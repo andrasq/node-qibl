@@ -1,6 +1,6 @@
 qibl
 ====
-[![Build Status](https://app.travis-ci.com/andrasq/node-qibl.svg?branch=master)](https://app.travis-ci.com/andrasq/node-qibl)
+[![Build Status](https://app.travis-ci.com/andrasq/node-qibl.svg?branch=master)](https://app.travis-ci.com/github/andrasq/node-qibl)
 [![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qibl/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qibl?branch=master)
 
 Quick Itty-Bitty Library.
@@ -995,6 +995,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
+- 1.19.2 - faster diffarray
 - 1.19.1 - support 'visit' in walktree
 - 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`, `socketpair`,
            `emitchunks`

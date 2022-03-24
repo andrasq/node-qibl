@@ -1227,7 +1227,7 @@ function difftree( t1, t2 ) {
 function diffarray( a1, a2 ) {
     var i, differs = false, diff = [];
     for (i = 0; i < a1.length; i++) if (a1[i] !== a2[i] && _diffit2(diff, i, a1[i], a2[i])) differs = true;
-    for (     ; i < a2.length; i++) if (i in a2 && a2[i] !== undefined) { diff[i] = a2[i]; differs = true }
+    for (i = a1.length; i < a2.length; i++) if (a2[i] !== undefined) { diff[i] = a2[i]; differs = true }
     return differs ? diff : undefined;
 }
 function _diffit2( target, key, v1, v2 ) {
