@@ -922,6 +922,9 @@ matches the `undefined` value.
     qibl.diffarray([ , 2, 3], [undefined, 2, 4]);
     // => [ , , 4]
 
+    qibl.diffarray([1, { a: 1 }], [1, { a: 1, b: 2 }]);
+    // => [ , { b: 2 }]
+
 ### retry( getDelay(retryCount), timeout, func(cb), callback(err) )
 
 Try calling `func` until it succeeds or have waited `timeout` total milliseconds pausing
