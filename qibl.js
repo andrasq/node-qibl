@@ -1155,11 +1155,12 @@ function walktree( tree, visitor ) {
 function _visitnodes( node, visitor, state ) {
     // TODO: maybe only visit enumerable nodes, ie qibl.keys
     for (var k in node) {
+        if (state.stop) break;
         var next = visitor(node[k], k, node, state.depth);
         if (next === 'stop') state.stop = true;
-        else if (next !== 'skip' && (qibl.isHash(node[k]) || next === 'visit')) {
+        else if (next === 'skip') continue;
+        else if (qibl.isHash(node[k]) || next === 'visit' && typeof node[k] === 'object') {
             state.depth += 1; _visitnodes(node[k], visitor, state); state.depth -= 1; }
-        if (state.stop) break;
     }
 }
 

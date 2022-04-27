@@ -2507,6 +2507,15 @@ module.exports = {
             t.deepEqual(keys, ['a', 'd', 'x']);
             t.done();
         },
+
+        'traverses all objects on "visit"': function(t) {
+            var keys = [];
+            var tree = [1, 2, "str", {a: 1}];
+            tree.x = 2;
+            qibl.walktree(tree, function(v, k) { keys.push(k); return 'visit' });
+            t.deepEqual(keys, [0, 1, 2, 3, 'a', 'x']);
+            t.done();
+        },
     },
 
     'copytreeDecycle': {

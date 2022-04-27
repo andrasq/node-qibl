@@ -889,7 +889,8 @@ Recursively examine the properties of tree and call `visitor()` on each.  `tree`
 value, but only `isHash` hashes are traversed.  Like Array.forEach, the visitor is called with
 the property value, the property name (index), the object whose property it is, plus `depth`,
 the current level of property traversal, 1 for the direct properties of `tree`.  If the visitor
-returns `'skip'` the property is not recursed into, and if `'stop'` the traversal is halted.
+returns `'skip'` the property is not recursed into, if `'stop'` the traversal is halted, and
+if `'visit'` then the object will be recursed into even if not a hash.
 
 ### copytreeDecycle( tree [, replacement] )
 
@@ -999,6 +1000,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
+- 1.19.3 - fix walktree 'visit' to not iterate strings
 - 1.19.2 - faster diffarray
 - 1.19.1 - support 'visit' in walktree
 - 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`, `socketpair`,
