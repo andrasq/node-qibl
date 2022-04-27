@@ -7,8 +7,8 @@ before_install:
   - mkdir -p $HOME/bin $HOME/lib
   - npm install -g qnit npm@2.15.0
   - cp -rp node_modules $HOME/lib/
-  - ln -sf ../lib/node_modules/.bin/qnit $HOME/bin/qnit
-  - ln -sf ../lib/node_modules/.bin/npm $HOME/bin/npm2
+  - ln -sf ../lib/node_modules/qnit/bin/qnit $HOME/bin/qnit
+  - ln -sf ../lib/node_modules/npm/bin/npm-cli.js $HOME/bin/npm2
   # test other node versions of interest too
   # travis uses nvm to install npm-v1 for node-v0.8, which can no longer download from registry.npmjs.org:
   # npm ERR! Error: 139905814947648:error:1407742E:SSL routines:SSL23_GET_SERVER_HELLO:tlsv1 alert protocol ... s23_clnt.c:658
@@ -24,6 +24,6 @@ before_install:
 
 after_success:
   - if [ `node -v` != "v5.8.0" ]; then exit; fi
-  - npm install -g nyc@8.4.0 coveralls@3.0.2
-  - npm run coverage
+  - npm install -g nyc@8.4.0 coveralls@3.0.2 codecov
+  - npm run coverage && codecov
   - nyc report -r text-lcov | coveralls
