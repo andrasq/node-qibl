@@ -792,7 +792,7 @@ This function currently does not break up the call stack and does not yield the 
         // err == null, a == 1, b == 2
     })
 
-### processItem = batchCalls( [options,] processBatch(items, cb) )
+### processItem = batchCalls( [options,] processBatch(items [,cb]) )
 
 Return a function that will accept a single argument and an optional callback, and will
 periodically call `processBatch` with batches of the arguments the returned function is
@@ -810,6 +810,7 @@ Options:
   returned by `growBatch`.  The default is a function to `batch.push(item)`.
 
 E.g.,
+
     const processItem = qibl.batchCalls({maxBatchSize: 2}, processBatch);
     processItem(1);
     processItem(2);
