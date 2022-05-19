@@ -752,6 +752,87 @@ module.exports = {
         },
     },
 
+    'forEachProperty': {
+        'visits each enumerable property': function(t) {
+            var keys = [], values = [];
+            qibl.forEachProperty({ a: 1, b: 2}, function(v, k) { keys.push(k); values.push(v) });
+            t.deepEqual(keys, ['a', 'b']);
+            t.deepEqual(values, [1, 2]);
+            t.done();
+        },
+        'skips non-enumerable properties': function(t) {
+            var keys = [], values = [];
+            qibl.forEachProperty(new Error('test'), function(v, k) { keys.push(k); values.push(v) });
+            t.deepEqual(keys, []);
+            t.deepEqual(values, []);
+            t.done();
+        },
+    },
+
+    'hashToMap': {
+        'converts hash to Hashmap': function(t) {
+            t.deepEqual(qibl.hashToMap({}), new qibl.Hashmap());
+            t.deepEqual(qibl.hashToMap({ a: 1, b: {} }), new qibl.Hashmap([['a', 1], ['b', {}]]));
+            t.done();
+        },
+        'converts array to Hashmap': function(t) {
+            t.deepEqual(qibl.hashToMap([123, {b: 2}]), new qibl.Hashmap([[0, 123], [1, {b: 2}]]));
+            t.done();
+        },
+        'ignores non-iterable input': function(t) {
+            t.deepEqual(qibl.hashToMap(null), new qibl.Hashmap());
+            t.deepEqual(qibl.hashToMap(123), new qibl.Hashmap());
+            t.done();
+        },
+        'adds to existing map': function(t) {
+            var map = new qibl.Hashmap([['x', 123]]);
+            qibl.hashToMap({a: 1}, map);
+            t.deepEqual(map, new qibl.Hashmap([['x', 123], ['a', 1]]));
+            t.done();
+        },
+    },
+
+    'mapToHash': {
+        'converts map to hash': function(t) {
+            t.deepEqual(qibl.mapToHash(new qibl.Hashmap([['a', 1], ['b', {}]])), {a: 1, b: {}});
+            t.done();
+        },
+        'adds to existing hash': function(t) {
+            t.deepEqual(qibl.mapToHash(new qibl.Hashmap([['a', 1]]), {x: 123}), {x: 123, a: 1});
+            t.done();
+        },
+    },
+
+    '_Hashmap': {
+        'constructs a map': function(t) {
+            t.deepEqual(new qibl._Hashmap(), new qibl._Hashmap());
+            t.notEqual(new qibl._Hashmap(), new qibl._Hashmap());
+            t.done();
+        },
+        'can set and get elements': function(t) {
+            var map = new qibl._Hashmap();
+            map.set('a', 1);
+            map.set('b', 'two');
+            t.strictEqual(map.get('a'), 1);
+            t.strictEqual(map.get('b'), 'two');
+            t.strictEqual(map.get('c'), undefined);
+            t.done();
+        },
+        'can get keys and values arrays': function(t) {
+            var map = new qibl._Hashmap([['a', 1], ['b', 2]]);
+            t.deepEqual(map.keys(), ['a', 'b']);
+            t.deepEqual(map.values(), [1, 2]);
+            t.done();
+        },
+        'can iterate contents': function(t) {
+            var contents = [];
+            var map = new qibl._Hashmap([['a', 1], ['b', 2]]);
+            map.forEach(function(value, key) { contents.push([key, value]) });
+            t.deepEqual(contents, [['a', 1], ['b', 2]]);
+            t.done();
+        },
+    },
+
     'concat2 should concatenate arrays': function(t) {
         t.deepEqual(qibl.concat2([], []), []);
         t.deepEqual(qibl.concat2([1], []), [1]);

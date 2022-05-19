@@ -298,6 +298,27 @@ This can be a handy way of garbage collecting objects `{}` that are used to cach
 that on expiration are set to `undefined` instead of being deleted.  (It can be much faster
 to set to undefined than to delete.)
 
+### forEachProperty( hash, visitor(value, key, hash) )
+
+Visit all enumerable properties of the hash, passing the property value, property name and
+the hash itself to the visitor function.
+
+### hashToMap( hash [,map] )
+
+Convert the iterable `hash` into a `qibl.Hashmap` (which is a Map if supported, else a minimal polyfill).
+If `map` is provided the converted properties are set on the existing `map`.  Returns the updated `map`.
+All iterables are converted, including strings, arrays and Buffers; caller beware.
+
+    qibl.hashToMap({ a: 1, b: 2 });
+    // => Map(2) { 'a' => 1, 'b' => 2 }
+
+### mapToHash( map [,hash] )
+
+Convert the Map or qibl.Hashmap `map` to a `hash`.  All keys should be strings.  If `hash` is provided
+the converted properties are added to the existing `hash`.  Returns the updated `hash`.
+
+    qibl.mapToHash(new Map([['a', 1], ['b', 2]]);
+    // => { a: 1, b: 2 }
 
 Strings
 -------
@@ -1006,6 +1027,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
+- 1.20.0 - new forEachProperty, hashToMap, mapToHash
 - 1.19.4 - fix walktree 'visit' to not iterate strings, fix retry timeout and timeout error return
 - 1.19.2 - faster diffarray
 - 1.19.1 - support 'visit' in walktree

@@ -56,6 +56,11 @@ var qibl = module.exports = {
     fill: fill,
     populate: populate,
     omitUndefined: omitUndefined,
+    Hashmap: Hashmap,
+    _Hashmap: _Hashmap,
+    forEachProperty: forEachProperty,
+    hashToMap: hashToMap,
+    mapToHash: mapToHash,
     str_repeat: str_repeat,
     str_truncate: str_truncate,
     strtok: strtok,
@@ -418,6 +423,30 @@ function omitUndefined( item ) {
         for (var k in item) if ((val = item[k]) !== undefined) ret[k] = val;
     }
     return ret;
+}
+
+function forEachProperty( hash, visitor ) {
+    var keys = hash && (nodeMajor >= 4 || typeof hash === 'object') ? qibl.keys(hash) : [];
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        visitor(hash[key], key, hash);
+    }
+}
+
+var _setMap = {};
+var _setMapProperty = function(value, key) { _setMap.set(key, value) };
+function hashToMap( hash, map ) {
+    _setMap = map || new Hashmap();
+    if (hash) forEachProperty(hash, _setMapProperty);
+    return _setMap;
+}
+
+var _setHash = {};
+var _setHashProperty = function(value, key) { _setHash[key] = value };
+function mapToHash( map, hash ) {
+    _setHash = hash || {};
+    map.forEach(_setHashProperty);
+    return _setHash;
 }
 
 
@@ -1463,11 +1492,13 @@ function distinct( items, getKey ) {
     return Array.isArray(vals) ? vals : qibl.toArray(vals);
 }
 function _toString(x) { return typeof x === 'string' ? x : '' + x }
-// quick-and-dirty Map polyfill to use where needed, works for strings and numbers
-function _Hashmap() {};
+// quick-and-dirty Map polyfill to use in a pinch, works for string keys (and numbers, sort of)
+function _Hashmap(keyvals) { for (var ix in keyvals) { var kv = keyvals[ix]; this[kv[0]] = kv[1] } }
 _Hashmap.prototype.set = function(k, v) { this[k] = v; return this }
 _Hashmap.prototype.get = function(k) { return this[k] }
+_Hashmap.prototype.keys = function() { return qibl.keys(this) }
 _Hashmap.prototype.values = function() { return qibl.values(this) }     // Map returns an iterator, we return array
+_Hashmap.prototype.forEach = function(visitor) { forEachProperty(this, visitor) }
 
 function groupBy( items, getKey, target ) {
     target = target || {};
