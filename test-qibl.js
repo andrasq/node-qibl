@@ -2701,11 +2701,41 @@ module.exports = {
             })
         },
 
-        'returns the function return value': function(t) {
-            qibl.retry(function() { return 1 }, 10, function(cb) { cb(null, 1234) }, function(err, ret) {
+        'returns the function return values': function(t) {
+            qibl.retry(function() { return 1 }, 10, function(cb) { cb(null, 1234, 56) }, function(err, ret, ret2) {
                 t.equal(ret, 1234);
+                t.equal(ret2, 56);
                 t.done();
             });
+        },
+
+        'returns error on initial-call timeout': function(t) {
+            var ncalls = 0;
+            qibl.retry(function() { return 10 }, 4, function(cb) { ncalls += 1 }, function(err, ret) {
+                t.ok(err);
+                t.equal(err.message, 'timeout');
+                t.equal(ncalls, 1);
+                t.done();
+            })
+        },
+
+        'returns error on second-call timeout': function(t) {
+            var ncalls = 0;
+            var err = new Error('fail on first call');
+            qibl.retry(function() { return 10 }, 4, function(cb) { ncalls += 1; if (ncalls < 2) cb(err) }, function(err, ret) {
+                t.ok(err);
+                t.equal(err.message, 'timeout');
+                t.equal(ncalls, 2);
+                t.done();
+            })
+        },
+
+        'suppresses second return': function(t) {
+            qibl.retry(function() { return 1 }, 4, function(cb) { setTimeout(cb, 10) }, function(err) {
+                t.ok(err);
+                t.equal(err.message, 'timeout');
+                t.done();
+            })
         },
     },
 

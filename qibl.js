@@ -1242,15 +1242,26 @@ function _diffit2( target, key, v1, v2 ) {
 /*
  * Repeat func() until it succeeeds over at most timeout ms.
  * The delays between attempts are computed by getDelay(attemptCount).
- * At least two attempts are made, one at the beginning and one at timeout.
- * Note: the timeout limit applies to the sum of the delays, not elapsed wallclock time.
+ * At least two attempts are made, one at the beginning and one at timeout,
+ * unless timeout comes before the first call finishes.
  */
 function retry( getDelay, timeout, func, callback ) {
-    var time = 0, retries = 0;
-    func(function _loop(err, result) {
-        if (!err || time >= timeout) return callback(err, result);
-        var delay = getDelay(++retries);
-        setTimeout(func, delay <= (timeout - time) ? delay : (timeout - time + 1), _loop);
+    var time = 0, retries = 0, timer = null, returnCount = 0;
+    var timeoutErr = {message: 'timeout', code: 'TIMEOUT'};
+    function finish(err, result, result2) {
+        clearTimeout(timer);
+        if (err === timeoutErr) {
+            err = qibl.makeError(err);
+            return timer = setTimeout(finish, 0, err);          // give func one last chance to succeed
+        }
+        if (!returnCount++) arguments.length > 2 ?  callback(err, result, result2) : callback(err, result);
+    }
+    timer = setTimeout(finish, timeout, timeoutErr);            // time out if func() hangs
+    func(function _loop(err, result, result2) {
+        if (!err || err === timeoutErr) return arguments.length > 2 ? finish(err, result, result2) : finish(err, result);
+        if (time >= timeout) return finish(err);
+        var delay = getDelay(++retries);                        // pause before the next call
+        setTimeout(func, delay <= (timeout - time) ? delay : (timeout - time - 1), _loop);
         time += delay;
     })
 }

@@ -927,12 +927,18 @@ matches the `undefined` value.
     qibl.diffarray([1, { a: 1 }], [1, { a: 1, b: 2 }]);
     // => [ , { b: 2 }]
 
-### retry( getDelay(retryCount), timeout, func(cb), callback(err) )
+### retry( getDelay(retryNum), timeoutMs, func(cb(err, res, res2)), callback(err, res, res2) )
 
-Try calling `func` until it succeeds or have waited `timeout` total milliseconds pausing
-`getDelay(retryCount)` ms between attempts.  The first `retryCount` passed to `getDelay`
-is `1` (the very first call was not a retry).  Returns the result of the last attempt.
-Makes an attempt at the very start, and a final one at the very end of the timeout period.
+Repeatedly call `func` until it succeeds or have tried for `timeoutMs` milliseconds.  Pauses
+`getDelay()` backoff ms between retry attempts.  The first `retryNum` to `getDelay` is `1`.
+Returns the result of the last call to `func`, either two result values or the failure Error.
+Makes an initial attempt to `func()` when called, then retry attempts separated by delays,
+and a final attempt at the very end of the timeout period after a possibly shortened delay.
+
+Starting with v1.19.4 the `timeoutMs` is enforced with a `setTimeout()` timer, and measures total
+elapsed time.  If `func()` returns immediately, then the sum of delays will be (close to)
+the timeoutMs, but if `func` takes a while to fail the number of attempts will be fewer.  One
+final attempt is made just before timeout unless already timed out.
 
 ### new Mutex( limit )
 
@@ -1000,11 +1006,11 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
-- 1.19.3 - fix walktree 'visit' to not iterate strings
+- 1.19.4 - fix walktree 'visit' to not iterate strings, fix retry timeout and timeout error return
 - 1.19.2 - faster diffarray
 - 1.19.1 - support 'visit' in walktree
-- 1.19.0 - new `getConfig`, new `objectToError`, new `errorToObject`, new `tmpfile`, `emitlines`, `socketpair`,
-           `emitchunks`
+- 1.19.0 - new `getConfig`, new `errorToObject` and `objectToError`, new `tmpfile`, `socketpair`,
+           `emitlines`, `emitchunks`
 - 1.18.1 - `makeGetId` id helper, document `shuffle` (aka randomize) and `interleave2`
 - 1.18.0 - new functions `batchCalls` (adapted from `qfifo`), `fromEntries`, and `QuickId` (adapted from `mongoid-js`)
 - 1.17.1 - fix `parseMs` to return NaN for an empty string "" time interval
