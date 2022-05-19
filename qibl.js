@@ -426,7 +426,7 @@ function omitUndefined( item ) {
 }
 
 function forEachProperty( hash, visitor ) {
-    var keys = hash && (nodeMajor >= 4 || typeof hash === 'object') ? qibl.keys(hash) : [];
+    var keys = hash && (nodeMajor > 5 || typeof hash === 'object') ? qibl.keys(hash) : [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
         visitor(hash[key], key, hash);
