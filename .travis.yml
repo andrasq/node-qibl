@@ -8,8 +8,9 @@ before_install:
   # nvm seems to overwrite ~/lib/node_modules, place our tools into lib2
   #
   - mkdir -p $HOME/bin $HOME/lib2
-  - npm install qnit npm@2.15.0
-  - cp -rp node_modules $HOME/lib2/
+  - npm install -g qnit npm@2.15.0
+  - which npm
+  - cp -rp $HOME/lib $HOME/lib2/
   - ln -sf ../lib2/node_modules/qnit/bin/qnit $HOME/bin/qnit
   - ln -sf ../lib2/node_modules/npm/bin/npm-cli.js $HOME/bin/npm2
   - npm2 --version
