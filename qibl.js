@@ -143,6 +143,7 @@ var qibl = module.exports = {
     setIterator: setIterator,
     getIterator: getIterator,
     IteratorProperty: IteratorProperty,
+    makeIteratorPeekable: makeIteratorPeekable,
     toArray: toArray,
     vinterpolate: vinterpolate,
     compileVinterpolate: compileVinterpolate,
@@ -426,7 +427,8 @@ function omitUndefined( item ) {
 }
 
 function forEachProperty( hash, visitor ) {
-    var keys = hash && (nodeMajor > 5 || typeof hash === 'object') ? qibl.keys(hash) : [];
+    // only iterate objects / arrays / Buffers, not strings
+    var keys = hash && typeof hash === 'object' ? Object.keys(hash) : [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
         visitor(hash[key], key, hash);
@@ -1561,6 +1563,20 @@ function getIterator( obj ) {
     return obj[IteratorProperty];
 }
 
+// annotate the iterator `iter` with peek() and unget() methods
+function makeIteratorPeekable( iter ) {
+    var res, next;
+
+    iter._origNext = iter.next;
+    iter._nextItem = null;
+    iter.next = function() { return (res = this._nextItem) ? ((this._nextItem = null), res) : this._origNext() };
+    // do not save a no-more-items result, maybe more items will appear later
+    iter.peek = function() { return this._nextItem || ((next = this._origNext()).done ? next : (this._nextItem = next)) };
+    iter.unget = function(result) { this._nextItem = { done: false, value: result } };
+
+    return iter;
+}
+
 function toArray( obj, filter ) {
     return _traverse(obj, filter, new Array());
 }
@@ -1591,6 +1607,7 @@ function _traverse( obj, transform, target ) {
 // Object.keys
 function keys( object ) {
     if (object.constructor !== Object) return Object.keys(object);
+    // Object has no inherited properties, and non-enumerable properties are not visited with 'in'
     var keys = new Array();
     for (var k in object) keys.push(k);
     return keys;

@@ -301,7 +301,9 @@ to set to undefined than to delete.)
 ### forEachProperty( hash, visitor(value, key, hash) )
 
 Visit all enumerable properties of the hash, passing the property value, property name and
-the hash itself to the visitor function.
+the hash itself to the visitor function.  Iterates arrays and Buffers, but not strings.
+For arrays and Buffers, annotated properties included in `Object.keys` are visited in
+addition to the numeric indexes.
 
 ### hashToMap( hash [,map] )
 
@@ -1027,7 +1029,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
-- 1.20.0 - new forEachProperty, hashToMap, mapToHash
+- 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable
 - 1.19.4 - fix walktree 'visit' to not iterate strings, fix retry timeout and timeout error return
 - 1.19.2 - faster diffarray
 - 1.19.1 - support 'visit' in walktree

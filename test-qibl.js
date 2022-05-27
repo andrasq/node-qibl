@@ -3391,6 +3391,51 @@ module.exports = {
         },
     },
 
+    'makeIteratorPeekable': {
+        'annotates the iterator': function(t) {
+            var arr = [1, 2, 3];
+            var it = qibl.getIterator(arr).call(arr);
+            t.equal(qibl.makeIteratorPeekable(it), it);
+            t.done();
+        },
+        'adds peek and unget methods': function(t) {
+            var arr = [1, 2, 3];
+            var it = qibl.getIterator(arr).call(arr);
+            qibl.makeIteratorPeekable(it);
+            t.equal(typeof it.peek, 'function');
+            t.equal(typeof it.unget, 'function');
+            t.equal(typeof it.next, 'function');
+            t.done();
+        },
+        'can peek': function(t) {
+            var arr = [1, 2, 3];
+            var it = qibl.getIterator(arr).call(arr);
+            qibl.makeIteratorPeekable(it);
+            t.equal(it.peek().value, 1);
+            t.contains(it.next(), { value: 1, done: false });
+            t.equal(it.peek().value, 2);
+            t.contains(it.next(), { value: 2, done: false });
+            t.contains(it.next(), { value: 3, done: false });
+            t.equal(it.peek().done, true);
+            t.equal(it.peek().done, true);
+            t.contains(it.next(), { done: true });
+            t.done();
+        },
+        'can unget': function(t) {
+            var arr = [1, 2, 3];
+            var it = qibl.getIterator(arr).call(arr);
+            qibl.makeIteratorPeekable(it);
+            it.unget(99);
+            t.equal(it.peek().value, 99);
+            t.contains(it.next(), { value: 99, done: false });
+            t.contains(it.next(), { value: 1, done: false });
+            it.unget(1);
+            t.contains(it.next(), { value: 1, done: false });
+            t.contains(it.next(), { value: 2, done: false });
+            t.done();
+        },
+    },
+
     'Object polyfills': {
         'keys returns enumerable own properties': function(t) {
             var obj= {a:1, c:3};
