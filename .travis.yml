@@ -7,23 +7,25 @@ before_install:
   # use npm2, npm@1.2.30 that travis uses for node-v0.8 breaks downloading from registry.npmjs.org: tlsv1 s23_clnt.c:658
   # nvm seems to overwrite ~/lib/node_modules, place our tools into lib2
   #
+  - npm install qnit
+  # node-v5.8.0 gets npm-v2.15.0 pre-installed into ./node_modules
+  # other node versions overwerite it, so save this copy
+  # Do not reinstall, it can break (module not found) when overwriting itself
   - mkdir -p $HOME/bin $HOME/lib2
-  - npm install -g qnit npm@2.15.0
-  - which npm
-  - cp -rp $HOME/lib $HOME/lib2/
+  - cp -rp node_modules $HOME/lib2/
   - ln -sf ../lib2/node_modules/qnit/bin/qnit $HOME/bin/qnit
   - ln -sf ../lib2/node_modules/npm/bin/npm-cli.js $HOME/bin/npm2
-  - npm2 --version
   #
   # test other node versions of interest too
   #
-  # nvm install 0.6 && npm2 -v && node -v && npm2 test -- travis.ci breaks on node-v0.6, skip for now
+  # nvm install 0.6 && npm2 -v && node -v && npm2 test -- travis-ci.com breaks on node-v0.6
   - nvm install 0.8.28 && npm2 -v && node -v && npm2 test
   - nvm install 0.10 && npm2 -v && node -v && npm2 test
   - nvm install 4 && npm2 -v && node -v && npm2 test
-  #- nvm install 5.12 && npm2 -v && node -v && npm2 test
+  #- nvm install 5.12 && npm2 -v && node -v && npm2 test -- race condition?
   - nvm install 12 && npm2 -v && node -v && npm2 test
   - nvm install 16 && npm2 -v && node -v && npm2 test
+  - nvm install 18 && npm2 -v && node -v && npm2 test
   - nvm install 5.8.0
 
 after_success:
