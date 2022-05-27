@@ -2769,6 +2769,15 @@ module.exports = {
             })
         },
 
+        'warm up timeouts': function(t) {
+            // try and head off a race condition on travis-ci.com
+            qibl.retry(function() { return 1 }, 5, function(cb) {}, function(err) {
+                t.equal(err && err.code, 'TIMEOUT');
+                t.equal(err && err.message, 'timeout');
+                t.done();
+            });
+        },
+
         'makes multiple attemps then times out': function(t) {
             function uniformDelay(n) { return 4 };
             var times = [];
