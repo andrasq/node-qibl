@@ -3394,12 +3394,14 @@ module.exports = {
     'makeIteratorPeekable': {
         'annotates the iterator': function(t) {
             var arr = [1, 2, 3];
+            if (!qibl.getIterator(arr)) t.skip();
             var it = qibl.getIterator(arr).call(arr);
             t.equal(qibl.makeIteratorPeekable(it), it);
             t.done();
         },
         'adds peek and unget methods': function(t) {
             var arr = [1, 2, 3];
+            if (!qibl.getIterator(arr)) t.skip();
             var it = qibl.getIterator(arr).call(arr);
             qibl.makeIteratorPeekable(it);
             t.equal(typeof it.peek, 'function');
@@ -3409,6 +3411,7 @@ module.exports = {
         },
         'can peek': function(t) {
             var arr = [1, 2, 3];
+            if (!qibl.getIterator(arr)) t.skip();
             var it = qibl.getIterator(arr).call(arr);
             qibl.makeIteratorPeekable(it);
             t.equal(it.peek().value, 1);
@@ -3423,6 +3426,7 @@ module.exports = {
         },
         'can unget': function(t) {
             var arr = [1, 2, 3];
+            if (!qibl.getIterator(arr)) t.skip();
             var it = qibl.getIterator(arr).call(arr);
             qibl.makeIteratorPeekable(it);
             it.unget(99);
