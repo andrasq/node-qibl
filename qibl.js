@@ -1283,7 +1283,7 @@ function retry( getDelay, timeout, func, callback ) {
         clearTimeout(timer);
         if (err === timeoutErr) {
             err = qibl.makeError(err);
-            return timer = setTimeout(finish, 0, err);          // give func one last chance to succeed
+            return timer = setTimeout(finish, returnCount, err);        // give func one last chance to succeed
         }
         if (!returnCount++) arguments.length > 2 ?  callback(err, result, result2) : callback(err, result);
     }
