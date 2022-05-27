@@ -22,7 +22,7 @@ before_install:
   #- nvm install 5.12 && npm2 -v && node -v && npm2 test -- race condition?
   - nvm install 12 && npm2 -v && node -v && npm2 test
   - nvm install 16 && npm2 -v && node -v && npm2 test
-  - nvm install 18 && npm2 -v && node -v && npm2 test
+  #- nvm install 18 && npm2 -v && node -v && npm2 test -- travis-ci.com has wrong version of glibc
   - nvm install 5.8.0
 
 after_success:
