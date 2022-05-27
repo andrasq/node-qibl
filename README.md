@@ -829,8 +829,8 @@ Options:
   the default.
 - `startBatch()` - function that returns a new empty batch.  The default is to use an empty
   array `[]`.
-- `growBatch(batch, item)` - function to add the item to the batch.  The batch is the last batch
-  returned by `growBatch`.  The default is a function to `batch.push(item)`.
+- `growBatch(batch, item)` - function to add the item to the batch.  The batch is the most
+  recent one obtained with `startBatch`.  The default is a function to `batch.push(item)`.
 
 E.g.,
 
