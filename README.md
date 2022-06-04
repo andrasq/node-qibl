@@ -1029,6 +1029,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
+- 1.20.1 - fix getConfig to not expose the _merge method
 - 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable
 - 1.19.4 - fix walktree 'visit' to not iterate strings, fix retry timeout and timeout error return
 - 1.19.2 - faster diffarray

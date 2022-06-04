@@ -188,6 +188,7 @@ function assignTo( target /* ,VARARGS */ ) {
 
 // recursively transfer all enumeriable properties of src(es) onto target
 // See also `qhash`.
+// TODO: should only merge own properties, for consistency with the Object.* functions
 function merge( target /* ,VARARGS */ ) {
     for (var src, i = 1; i < arguments.length; i++) {
         for (var key in (src = arguments[i])) {
@@ -1821,7 +1822,9 @@ function makeGetId( sysId ) {
 
 // object to hold the config
 function Config(obj) { qibl.merge(this, obj) }
-Config.prototype._merge = function(obj) { return qibl.merge(new Config(this), obj) };
+// Config.prototype._merge = function(obj) { return qibl.merge(new Config(this), obj) };
+Object.defineProperty(Config.prototype, '_merge',
+    {enumerable: false, value: function(obj) { return qibl.merge(new Config(this), obj) }});
 Config.tryLoad = function(loader, file) { try { return loader(file) } catch (err) {} };
 Config.fetchConfig = function(dirname, filename, loaders) {
     var filepath = dirname + '/' + filename;
