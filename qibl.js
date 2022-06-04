@@ -1119,19 +1119,18 @@ function rmdir_r( dirpath, callback ) {
  * Create a new file that will be automatically removed when the process exits.
  * Similar to tmpfile(3), but returns the name of the created file.
  * This function installs a process.on('exit') hook.
- * FIXME: does not remove the tmpfiles if the process is killed with ^C or HUP etc
  */
 var _filesToRemoveOnExit = [];
 function _unlinkFilesOnExit() {
-    var exitSignals = ['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGTERM'];
-    var onExit = function onExit() {
+    var exitSignals = ['SIGHUP', 'SIGINT', 'SIGTERM'];
+    var onExit = qibl.once(function onExit() {
         _filesToRemoveOnExit.forEach(function(name) { try { fs.unlinkSync(name) } catch (err) {} });
         // do not empty out _filesToRemove to not install new listeners
         _filesToRemoveOnExit = [_filesToRemoveOnExit[0]];
-    }
+    })
     var onSignal = function onSignal(sig) {
         /* istanbul ignore next -- will have more than one listener under code coverage */
-        if (process.listeners(sig).length === 1) onExit();
+        if (process.listeners(sig).length === 1) { onExit(); throw new Error('terminated') }
     }
     process.on('exit', onExit);
     exitSignals.forEach(function(sig) { process.on(sig, function() { onSignal(sig) }) });

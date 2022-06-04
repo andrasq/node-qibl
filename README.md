@@ -877,11 +877,17 @@ Remove the named file or directory.  If directory, removes all its contents too.
 
 Create a new empty temporary file for exclusive use and return its filename.  The file is
 guaranteed not to have existed before the call, and will be automatically removed when the
-process exits (by normal exit, or unhandled SIGTERM, SIGHUP, SIGINT or SIGQUIT).  The
+process exits (by normal exit, or unhandled SIGTERM, SIGHUP, or SIGINT).  The
 filename is constructed by concatenating the directory name, core filename, a six-character
 random suffix, and filename extension.  If the file cannot be created an error is thrown.
 
 Note that this call behaves like a cross between `tempfile(1)` and its namesake `tmpfile(3)`.
+
+Note that the installed signal handlers try to keep to the default behavior of exiting by
+throwing a `"terminated"` exception.  They throw only if no other handlers are listening for
+the signal, else the other handlers will presumably decide whether to exit or not.  Emitting
+signal names is thus no longer harmless, because it can throw.  Also, if the other handlers
+also only exit only if they are the sole listener, then the process may not exit after all.
 
 Options:
 - `dir` - name of the directory to hold the file, default is `process.env.TMPDIR` else `/tmp`
@@ -1029,7 +1035,8 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
-- 1.20.1 - fix getConfig to not expose the _merge method
+- 1.20.1 - fix getConfig to not expose the _merge method,
+           fix tmpfile to exit on sighup/int/term, and do nothing on sigquit
 - 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable
 - 1.19.4 - fix walktree 'visit' to not iterate strings, fix retry timeout and timeout error return
 - 1.19.2 - faster diffarray

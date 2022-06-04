@@ -2436,7 +2436,8 @@ module.exports = {
         },
         after: function(done) {
             if (savedTmpdir !== undefined) process.env.TMPDIR = savedTmpdir;
-            process.emit('SIGTERM');
+            // emit a 'SIGTERM' to clean up the files, but catch to not exit the program
+            try { process.emit('SIGTERM') } catch (err) {}
             done();
         },
 
@@ -2473,10 +2474,15 @@ module.exports = {
             var filename = qibl.tmpfile();
             fs.closeSync(fs.openSync(filename, 0));
             setTimeout(function() {
-                process.emit('SIGTERM');
-                t.throws(function() { fs.openSync(filename, 0) }, /ENOENT/);
-                t.done();
-                // NOTE: node-v0.6 setTimeout never triggers without a second arg
+                try {
+                    process.emit('SIGTERM');
+                } catch (err) {
+                    t.ok(err);
+                    t.ok(/terminated/.test(err.message));
+                    t.throws(function() { fs.openSync(filename, 0) }, /ENOENT/);
+                    t.done();
+                    // NOTE: node-v0.6 setTimeout never triggers without a second arg
+                }
             }, 0)
         },
         'errors': {
