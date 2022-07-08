@@ -12,10 +12,11 @@ than the equivalent built-in.
 Use either directly as a dependency, or as a library of cut-and-paste functions.  If using cut-and-paste,
 add an attribution comment line identifying the qibl source version that it came from, e.g.
 
-    qibl = require('qibl');
-
+    var qibl = require('qibl');
+    qibl.subsample(...);
+    -------
     // adapted from qibl@1.4.0
-    function subsample() { ... }
+    function subsample(items, count) { ... }
 
 To run the tests, check out the repo.
 
@@ -471,17 +472,18 @@ array.  Equivalent to `arr.flatMap()`, which is just `target.concat(...arr.map(t
     arr = qibl.flatMap2([0], [{v: 1}, {v: [2, 3]}], (x) => x.v);
     // => [0, 1, 2, 3]
 
-### qibl.subsample( items, k [,base, bound] )
+### qibl.subsample( items, k [,base [,bound]] )
 
-Return a uniformly distributed subsample of k items selected from the items array between
-the specified base and bound.  Base and bound default to 0 and items.length, respectively.
+Return a uniformly distributed subsample of `k` items selected from the `items` array from between
+the specified `base` and `bound`.  Base and bound default to `0` and `items.length`, respectively.
 Returns at most as many items as there are in the array (or in the bounded range).
 
 ### qibl.qsearch( min, max, probe(n) )
 
-Find the largest value n in the range [min..max] that still has the tested property,
-i.e. `probe(n)` returns truthy.  Returns the index `n` if found, or `min - 1` if not
-in the range.
+Find the largest value `n` in the range [`min`..`max`] that still has the tested property,
+i.e. where `probe(n)` returns truthy.  The function first uses binary search to call
+`probe()` with various `n` to narrow down where the probe starts failing, then switches to a
+fast linear search.  Returns the last truthy index `n` if found, or `min - 1` if not in the range.
 
 ### qibl.sort3( a, b, c )
 

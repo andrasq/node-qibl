@@ -517,7 +517,7 @@ function subsample( items, k, base, bound ) {
 }
 
 // find the last location in the range [min..max] that still has the property.
-// Returs the largest index n >= min, n <= max where it holds, or (min - 1) if none do.
+// Returs the largest index n >= min, n <= max where probe(n) holds, or (min - 1) if none do.
 // aka see absearch(), binsearch()
 function qsearch( min, max, probeProperty ) {
     // bisection search while have a lot to examine
