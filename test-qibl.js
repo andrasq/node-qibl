@@ -3999,4 +3999,39 @@ module.exports = {
             t.done();
         },
     },
+
+    'Stopwatch': {
+        'creates a running stopwatch': function(t) {
+            var w = new qibl.Stopwatch();
+            t.ok(w.started > 0);
+            t.done();
+        },
+
+        'can start, stop and read': function(t) {
+            var w = new qibl.Stopwatch();
+            w.stop();
+            var t1 = w.read();
+            for (var i=0; i<10; i++) var t2 = w.read();
+            t.equal(t2, t1);
+            w.start();
+            for (var i=0; i<20000; i++) var t3 = w.read();
+            t.ok(t3 > t2);
+            t.done();
+        },
+
+        'can tag timepoints and report them': function(t) {
+            var w = new qibl.Stopwatch();
+            w.mark('a');
+            w.mark('b');
+            t.deepEqual(qibl.keys(w.report()), ['a', 'b']);
+            w.mark('c');
+            t.deepEqual(qibl.keys(w.report()), ['a', 'b', 'c']);
+
+            w.reset();
+            var t1 = w.read();
+            t.ok(t1 < .01);
+            t.deepEqual(qibl.keys(w.report()), []);
+            t.done();
+        },
+    },
 }

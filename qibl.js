@@ -157,6 +157,7 @@ var qibl = module.exports = {
     getConfig: getConfig,
     errorToObject: errorToObject,
     objectToError: objectToError,
+    Stopwatch: Stopwatch,
     // _configure: _configure,
 };
 
@@ -1857,6 +1858,28 @@ function objectToError( obj ) {
     delete err.__ctor;
     return err;
 }
+
+/*
+ * Millisecond stopwatch timer.
+ * NOTE: node before v0.7 has only millisecond resolution, newer node nanosecond.
+ */
+function Stopwatch() {
+    this.started = qibl.microtime();    // stopwatch start time sec
+    this.elapsed = 0;                   // total elapsed time sec
+    this.marks = {};                    // tagged timestamps
+}
+Stopwatch.prototype.start = function start() { this.started = this.started || qibl.microtime() }
+Stopwatch.prototype.stop = function stop() { this.read(), this.started = 0 }
+Stopwatch.prototype.read = function read( ) {
+    var now, started = this.started;
+    if (started) { this.started = (now = qibl.microtime()), this.elapsed += now - started }
+    return this.elapsed;
+}
+Stopwatch.prototype.mark = function mark(name) { this.marks[name] = this.read() }
+Stopwatch.prototype.report = function report() { return this.marks }
+// TODO: find out why qibl.assignTo is .02 ms vs Object.assign .002 ms
+// Stopwatch.prototype.reset = function reset() { (Object.assign || qibl.assignTo)(this, new Stopwatch()) }
+Stopwatch.prototype.reset = function reset() { this.started = qibl.microtime(), this.elapsed = 0, this.marks = {} }
 
 
 /*

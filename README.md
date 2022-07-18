@@ -779,6 +779,44 @@ object.  All own properties of `err` are retained.
 Create an error having all the same properties as `obj`.  If `obj` was created with
 `errorToObject`, will also try to restore an instance of the original error type.
 
+### Stopwatch
+
+Restartable nanosecond resolution stopwatch timer.
+
+    var stopw = new qibl.Stopwatch();
+    // ...
+    var elapsed = sw.read();
+    // => elapsed time in seconds, with ns precision
+
+#### stopw = new qibl.Stopwatch( )
+
+Create a new stopwatch.  The stopwatch is running, measuring elapsed time.
+
+#### stopw.read()
+
+Return the total time accumulated on this stopwatch, in seconds with nanosecond resolution.
+A newly created stopwatch is running, but can be stopped and restarted.
+
+#### stopw.stop()
+
+Pause the stopwatch.  The time elapsed so far is preserved, but does not increase while
+stopped.  Stopping an already stopped stopwatch has no effect.
+
+#### stopw.start()
+
+Restart the stopwatch.  When restarted, the elapsed time will start growing again.
+Restarting a running stopwatch has no effect.
+
+#### stopw.mark( label )
+
+Tag the current elapsed time with the provided label, and save it.  Reusing a label
+overwrites the associated timestamp.
+
+#### stopw.report( )
+
+Return all tagged timestamps as an object with the labels as the keys and the associated
+elapsed times as the values.
+
 ### repeatFor( count, loopedFunction(done(err), ix), callback )
 
 Call `loopedFunction()` exactly `count` times.  Each call is passed a callback followed by the
@@ -1037,6 +1075,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
+- 1.21.0 - new `Stopwatch`
 - 1.20.1 - fix getConfig to not expose the _merge method,
            fix tmpfile to exit on sighup/int/term, and do nothing on sigquit
 - 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable
