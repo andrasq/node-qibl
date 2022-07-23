@@ -420,12 +420,9 @@ argv.  Substrings without a corresponding argument are not replaced.
 ### qibl.addslashes( str [,regex] )
 
 Backslash-escape characters in the string.  Without a regex, the characters escaped by
-default are ', ", \ and \0 (single-quote, double-quote, backslash and NUL).
-
-If a regex is passed in, the patterns matched by its first capturing group will be the ones
+default are `'`, `"`, `\` and `\0` (single-quote, double-quote, backslash and NUL).
+If a regex is provided, the patterns matched by its first capturing group will be the ones
 escaped instead.
-
-The default characters escaped are quotes `'` and `"`, backslash `\`, and NUL `\x00`.
 
     addslashes("curl test.com/;cat /etc/passwd", /([;|&$])/g);
     // => "curl test.com/\;cat /etc/passwd"
@@ -1079,7 +1076,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
-- 1.21.0 - new `Stopwatch`, fix `addslashes` for string patterns
+- 1.21.0 - new `Stopwatch`, add string support to `addslashes`
 - 1.20.1 - fix getConfig to not expose the _merge method,
            fix tmpfile to exit on sighup/int/term, and do nothing on sigquit
 - 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable

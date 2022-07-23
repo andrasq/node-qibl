@@ -1713,6 +1713,7 @@ function offsetsOf( str, patt ) {
 **/
 
 // sql escape()
+// TODO: cache the regexes built from strings
 function addslashes( str, patt ) {
     if (typeof patt === 'string') patt = new RegExp('([' + qibl.escapeRegex(patt) + '])', 'g');
     else patt = patt || /([\'\"\\\x00])/g;
