@@ -1713,12 +1713,13 @@ function offsetsOf( str, patt ) {
 
 // sql escape()
 function addslashes( str, patt ) {
-    // TODO: default to escaping only \' \" \\ \0, pass them in for escapeshellcmd()
-    patt = patt || /([\'\"\\\x00])/g;
+    if (typeof patt === 'string') patt = new RegExp('([' + qibl.escapeRegex(patt) + '])', 'g');
+    else patt = patt || /([\'\"\\\x00])/g;
     return str.replace(patt, '\\$1');
 }
 
 // from mysqule (aka node-minisql):
+// Equivalent to Object.assign(new Error(util.format(fmt, ...args)), props).
 function makeError( props, fmt /* ,VARARGS */ ) {
     var args = [].slice.call(arguments);
     var props = typeof args[0] === 'object' ? args.shift() : {};

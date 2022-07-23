@@ -3616,8 +3616,15 @@ module.exports = {
     },
 
     'addslashes': {
-        'should escape dangerous metacharacters': function(t) {
-            var patt = /([\\"';|&$])/g;
+        'should escape chars': function(t) {
+            t.equal(qibl.addslashes('foobar', 'oa'), 'f\\o\\ob\\ar');
+            t.done();
+        },
+        'should escape dangerous metacharacters by string and by regex': function(t) {
+            var patt = '\\\"\'\;\|\&\$';
+            t.equal(qibl.addslashes(';|$"', patt), '\\;\\|\\$\\"');
+            t.equal(qibl.addslashes("'", patt), "\\'");
+            patt = new RegExp('([' + patt + '])', 'g');
             t.equal(qibl.addslashes(';|$"', patt), '\\;\\|\\$\\"');
             t.equal(qibl.addslashes("'", patt), "\\'");
             t.done();
