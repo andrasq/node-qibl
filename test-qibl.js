@@ -317,8 +317,9 @@ module.exports = {
             var t1 = qibl.microtime();
             for (var i=0; i<nloops; i++) x = qibl.getProp(data[i & 1], 'a.b.c');
             var t2 = qibl.microtime();
-            t.printf("AR: %dk lookups in %0.3f ms, %dk/sec", nloops/1000, (t2 - t1) * 1000, nloops / 1000 / (t2 - t1));
+            t.printf("AR: %dk getProperty in %0.3f ms, %dk/sec\n", nloops/1000, (t2 - t1) * 1000, nloops / 1000 / (t2 - t1));
             // 58m/s for 1m, 22m/s for 100k (R5 4.8g 5600X)
+            // 200m/s for 1m, 45m/s for 100k (R5 4.9g 5600X)
             t.done();
         },
     },
@@ -408,6 +409,17 @@ module.exports = {
 
             qibl.setProperty(2, 'a', 1, 'x');
 
+            t.done();
+        },
+
+        'is fast': function(t) {
+            var target = {};
+            var nloops = 1e5;
+            var t1 = qibl.microtime();
+            for (var i=0; i<nloops; i++) qibl.setProperty(target, 'a.b.c', i);
+            var t2 = qibl.microtime();
+            t.printf("AR: %dk setProperty in %0.3f ms, %dk/sec\n", nloops/1000, (t2 - t1) * 1000, nloops / 1000 / (t2 - t1), target);
+            // 7.8m/s for 1m, 6.6m/s for 100k (R5 4.9g 5600X)
             t.done();
         },
     },
