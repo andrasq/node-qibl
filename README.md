@@ -425,6 +425,8 @@ default are ', ", \ and \0 (single-quote, double-quote, backslash and NUL).
 If a regex is passed in, the patterns matched by its first capturing group will be the ones
 escaped instead.
 
+The default characters escaped are quotes `'` and `"`, backslash `\`, and NUL `\x00`.
+
     addslashes("curl test.com/;cat /etc/passwd", /([;|&$])/g);
     // => "curl test.com/\;cat /etc/passwd"
 
@@ -788,9 +790,11 @@ Restartable nanosecond resolution stopwatch timer.
     var elapsed = sw.read();
     // => elapsed time in seconds, with ns precision
 
-#### stopw = new qibl.Stopwatch( )
+#### new Stopwatch( )
 
 Create a new stopwatch.  The stopwatch is running, measuring elapsed time.
+
+    stopw = new qibl.Stopwatch();
 
 #### stopw.read()
 
