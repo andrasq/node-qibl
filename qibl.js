@@ -1682,6 +1682,7 @@ function formatValue(arg) {
 // Only 6% slower than backticks `${x}` compile-time interpolation.
 // Compiling the interpolation is 3x faster (23 vs 8m/s) but adds 40 lines of code (compile + cache funcs)
 //   470k/s to compile and 23m/s to run, vs straight 8m/s: faster if more than 28 calls
+//   v13 780k/s to compile, 50m/s to run
 function compileVinterpolate( fmt, patt ) {
     var format = util.format;
     if (typeof patt !== 'string') throw new Error('pattern must be a string not ' + (typeof patt));
@@ -1694,7 +1695,7 @@ function compileVinterpolate( fmt, patt ) {
         "  if (argv.length !== %d) _rejectArgs(argv.length, %d);\n", argCount, argCount);
     var lastPart = parts.pop();
     src += "  return " +
-        parts.map(function(part, ix) {return (part !== '""' ? part + " + " : '')  + format("argv[%d]", ix) }).join(' + ') +
+        parts.map(function(part, ix) {return (part !== '""' ? part + " + " : '')  + 'argv[' + ix + ']' }).join(' + ') +
         (lastPart !== '""' ? ' + ' + lastPart : '') + ";\n";
     src += "}";
 // console.log("Ar: **** src", src);

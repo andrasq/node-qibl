@@ -3613,6 +3613,17 @@ module.exports = {
             t.contains(fn.toString(), 'argv[0] + argv[1] + " " + argv[2];');
             t.done();
         },
+        'compiled function is fast': function(t) {
+            var nloops = 1e5;
+            var interpolate = qibl.compileVinterpolate('Hi ? there ? test', '?');
+            var t1 = qibl.microtime();
+            for (var i=0; i<nloops; i++) {
+                // var interpolate = qibl.compileVinterpolate('Hi ? there ? test', '?');
+                var str = interpolate(['Marco', 'Polo']);
+            }
+            t.printf('compiled interpolate: %dk loops in %s ms', nloops/1000, (1000 * (qibl.microtime() - t1)).toFixed(3));
+            t.done();
+        },
     },
 
     'addslashes': {
