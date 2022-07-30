@@ -2467,9 +2467,11 @@ module.exports = {
             t.done();
         },
         'creates a file in TMPDIR': function(t) {
-            process.env.TMPDIR = '/var//tmp';
+            process.env.TMPDIR = '/var//tmp'; // use double-slash as our marker
             var filename = qibl.tmpfile({ name: 'FOOBAR.' });
             t.ok(qibl.startsWith(filename, '/var//tmp/FOOBAR'));
+            fs.closeSync(fs.openSync(filename, 0)); // file exists, open does not throw
+            // NOTE: node-v0.6 requires the second argument to openSync
             t.done();
         },
         'creates many files': function(t) {
@@ -2488,6 +2490,7 @@ module.exports = {
             setTimeout(function() {
                 try {
                     process.emit('SIGTERM');
+                    throw new Error('missing exception');
                 } catch (err) {
                     t.ok(err);
                     t.ok(/terminated/.test(err.message));
@@ -2506,6 +2509,8 @@ module.exports = {
                     process.emit('SIGTERM');
                     throw new Error('missing exception');
                 } catch (err) {
+                    try { process.emit('SIGTERM') } catch (err) {}
+                    try { process.emit('SIGTERM') } catch (err) {}
                     t.ok(err.message.indexOf('terminated') >= 0);
                     fs.closeSync(fs.openSync(filename, 0)); // file exists, open does not throw
                     fs.unlinkSync(filename); // file exists, remove does not throw
@@ -2516,6 +2521,7 @@ module.exports = {
         'errors': {
             'throws if unable to create file': function(t) {
                 t.throws(function(){ qibl.tmpfile({ dir: '/nonesuch' }) }, /ENOENT/);
+                t.throws(function(){ qibl.tmpfile({ dir: '/', name: 'nonesuch-' }) }, /EACCES/);
                 t.done();
             },
         },

@@ -1125,9 +1125,9 @@ var _filesToRemoveOnExit = [];
 function _unlinkFilesOnExit() {
     var exitSignals = ['SIGHUP', 'SIGINT', 'SIGTERM'];
     var onExit = qibl.once(function onExit() {
-        _filesToRemoveOnExit.forEach(function(name) { try { fs.unlinkSync(name) } catch (err) {} });
+        _filesToRemoveOnExit.forEach(function(name) { try { name && fs.unlinkSync(name) } catch (err) {} });
         // do not empty out _filesToRemove to not install new listeners
-        _filesToRemoveOnExit = [_filesToRemoveOnExit[0]];
+        _filesToRemoveOnExit = [undefined];
     })
     var onSignal = function onSignal(sig) {
         /* istanbul ignore next -- will have more than one listener under code coverage */
@@ -1140,8 +1140,9 @@ function tmpfile( options ) {
     options = options || {};
     var prefix = (options.dir || process.env.TMPDIR || '/tmp') + '/' + (options.name || '/node-tmpfile-');
 
-    // if tmpfile namespace is 99% full, 460 attempts will find an open slot 99% of the time
-    for (var i = 0; i <= 460; i++) {
+    // if tmpfile namespace is 99% full, 460 attempts will find a name 99% of the time, 100 attempts 63%, 50 40%
+    // if tmpfile namespace is 95% full, 90 attempts will find a name 99% of the time, 59 attemps 95%, 50 92%
+    for (var maxAttempts = 100, i = 1; i <= maxAttempts; i++) {
         var suffix = Math.random().toString(36).slice(2, 8);
         var filename = prefix + suffix + (options.ext || '');
         try {
@@ -1152,7 +1153,7 @@ function tmpfile( options ) {
             autoRemove && _filesToRemoveOnExit.length === 1 && _unlinkFilesOnExit();
             return filename;
         } catch (err) {
-            if (i === 460) throw qibl.assignTo(err, { message: 'tmpfile: too many attempts: ' + err.message });
+            if (i >= maxAttempts) throw qibl.assignTo(err, { message: 'tmpfile: too many attempts: ' + err.message });
         }
     }
 }

@@ -1082,7 +1082,8 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
-- 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option
+- 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
+           tmpfile fail faster
 - 1.20.1 - fix getConfig to not expose the _merge method,
            fix tmpfile to exit on sighup/int/term, and do nothing on sigquit
 - 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable
