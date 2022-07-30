@@ -2497,6 +2497,22 @@ module.exports = {
                 }
             }, 0)
         },
+        'does not remove permanent files': function(t) {
+            if (process.env.NYC_COVERAGE) t.skip();
+            var filename = qibl.tmpfile({ remove: false });
+            setTimeout(function() {
+                try {
+                    // signal handler has been installed by above tests and will re-throw the signal
+                    process.emit('SIGTERM');
+                    throw new Error('missing exception');
+                } catch (err) {
+                    t.ok(err.message.indexOf('terminated') >= 0);
+                    fs.closeSync(fs.openSync(filename, 0)); // file exists, open does not throw
+                    fs.unlinkSync(filename); // file exists, remove does not throw
+                    t.done();
+                }
+            }, 0)
+        },
         'errors': {
             'throws if unable to create file': function(t) {
                 t.throws(function(){ qibl.tmpfile({ dir: '/nonesuch' }) }, /ENOENT/);

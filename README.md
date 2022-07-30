@@ -939,7 +939,8 @@ Options:
 - `dir` - name of the directory to hold the file, default is `process.env.TMPDIR` else `/tmp`
 - `name` - core filename without the leading path separators, default `node-tmpfile-`
 - `ext` - filename extension to append, default `''` empty string
-
+- `remove` - whether to auto-remove the file on exit, default enabled, set to `false` to create
+    a permanent file that will not be removed on fatal signal or process exit
 
     const filename = qibl.tmpfile();
     // => "/tmp/node-tmpfile-wp3tio"
@@ -1081,7 +1082,7 @@ An open socket can be passed to a `child_process` as the second argument to `chi
 Changelog
 ---------
 
-- 1.21.0 - new `Stopwatch`, add string support to `addslashes`
+- 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option
 - 1.20.1 - fix getConfig to not expose the _merge method,
            fix tmpfile to exit on sighup/int/term, and do nothing on sigquit
 - 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable

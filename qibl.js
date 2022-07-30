@@ -1147,8 +1147,9 @@ function tmpfile( options ) {
         try {
             var fd = fs.openSync(filename, (0x80 + 0x40 + 0x01) >>> 0); // O_EXCL + O_CREAT + O_WRONLY
             fs.closeSync(fd);
-            _filesToRemoveOnExit.push(filename);
-            if (_filesToRemoveOnExit.length === 1) _unlinkFilesOnExit();
+            var autoRemove = !!(options.remove || options.remove === undefined);
+            autoRemove && _filesToRemoveOnExit.push(filename);
+            autoRemove && _filesToRemoveOnExit.length === 1 && _unlinkFilesOnExit();
             return filename;
         } catch (err) {
             if (i === 460) throw qibl.assignTo(err, { message: 'tmpfile: too many attempts: ' + err.message });
