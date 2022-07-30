@@ -1122,19 +1122,23 @@ function rmdir_r( dirpath, callback ) {
  * This function installs a process.on('exit') hook.
  */
 var _filesToRemoveOnExit = [];
-function _unlinkFilesOnExit() {
-    var exitSignals = ['SIGHUP', 'SIGINT', 'SIGTERM'];
-    var onExit = qibl.once(function onExit() {
-        _filesToRemoveOnExit.forEach(function(name) { try { name && fs.unlinkSync(name) } catch (err) {} });
-        // do not empty out _filesToRemove to not install new listeners
-        _filesToRemoveOnExit = [undefined];
-    })
-    var onSignal = function onSignal(sig) {
-        /* istanbul ignore next -- will have more than one listener under code coverage */
-        if (process.listeners(sig).length === 1) { onExit(); throw new Error('terminated') }
+function _unlinkFileOnExit( filename ) {
+    _filesToRemoveOnExit.push(filename);
+    // on first call install the signal handler(s) to remove files on exit
+    if (_filesToRemoveOnExit.length === 1) {
+        var exitSignals = ['SIGHUP', 'SIGINT', 'SIGTERM'];
+        var onExit = qibl.once(function onExit() {
+            _filesToRemoveOnExit.forEach(function(name) { try { name && fs.unlinkSync(name) } catch (err) {} });
+            // do not empty out _filesToRemove to not install new listeners
+            _filesToRemoveOnExit = [undefined];
+        })
+        var onSignal = function onSignal(sig) {
+            /* istanbul ignore next -- will have more than one listener under code coverage */
+            if (process.listeners(sig).length === 1) { onExit(); throw new Error('terminated') }
+        }
+        process.on('exit', onExit);
+        exitSignals.forEach(function(sig) { process.on(sig, function() { onSignal(sig) }) });
     }
-    process.on('exit', onExit);
-    exitSignals.forEach(function(sig) { process.on(sig, function() { onSignal(sig) }) });
 }
 function tmpfile( options ) {
     options = options || {};
@@ -1148,9 +1152,7 @@ function tmpfile( options ) {
         try {
             var fd = fs.openSync(filename, (0x80 + 0x40 + 0x01) >>> 0); // O_EXCL + O_CREAT + O_WRONLY
             fs.closeSync(fd);
-            var autoRemove = !!(options.remove || options.remove === undefined);
-            autoRemove && _filesToRemoveOnExit.push(filename);
-            autoRemove && _filesToRemoveOnExit.length === 1 && _unlinkFilesOnExit();
+            if (options.remove || options.remove === undefined) _unlinkFileOnExit(filename);
             return filename;
         } catch (err) {
             if (i >= maxAttempts) throw qibl.assignTo(err, { message: 'tmpfile: too many attempts: ' + err.message });

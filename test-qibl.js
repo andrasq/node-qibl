@@ -2502,10 +2502,10 @@ module.exports = {
         },
         'does not remove permanent files': function(t) {
             if (process.env.NYC_COVERAGE) t.skip();
+            qibl.tmpfile(); // install sig handlers
             var filename = qibl.tmpfile({ remove: false });
             setTimeout(function() {
                 try {
-                    // signal handler has been installed by above tests and will re-throw the signal
                     process.emit('SIGTERM');
                     throw new Error('missing exception');
                 } catch (err) {
