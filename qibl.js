@@ -1127,11 +1127,11 @@ function _unlinkFileOnExit( filename ) {
     // on first call install the signal handler(s) to remove files on exit
     if (_filesToRemoveOnExit.length === 1) {
         var exitSignals = ['SIGHUP', 'SIGINT', 'SIGTERM'];
-        var onExit = qibl.once(function onExit() {
+        var onExit = function onExit() {
             _filesToRemoveOnExit.forEach(function(name) { try { name && fs.unlinkSync(name) } catch (err) {} });
             // do not empty out _filesToRemove to not install new listeners
             _filesToRemoveOnExit = [undefined];
-        })
+        }
         var onSignal = function onSignal(sig) {
             /* istanbul ignore next -- will have more than one listener under code coverage */
             if (process.listeners(sig).length === 1) { onExit(); throw new Error('terminated') }
