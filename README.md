@@ -780,7 +780,8 @@ Create an error having all the same properties as `obj`.  If `obj` was created w
 
 ### Stopwatch
 
-Restartable nanosecond resolution stopwatch timer.
+Restartable nanosecond resolution stopwatch timer.  Stopwatch timers check the time-of-day clock
+when started and read, but consume no other resources and can be safely abandoned or left "running".
 
     var stopw = new qibl.Stopwatch();
     // ...
@@ -797,6 +798,10 @@ Create a new stopwatch.  The stopwatch is running, measuring elapsed time.
 
 Return the total time accumulated on this stopwatch, in seconds with nanosecond resolution.
 A newly created stopwatch is running, but can be stopped and restarted.
+
+#### stopw.readMs()
+
+Return the total time accumulated on the stopwatch, in millisconds.  Same as `read() * 1000`.
 
 #### stopw.stop()
 

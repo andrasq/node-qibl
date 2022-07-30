@@ -1878,6 +1878,7 @@ Stopwatch.prototype.read = function read( ) {
     if (started) { this.started = (now = qibl.microtime()), this.elapsed += now - started }
     return this.elapsed;
 }
+Stopwatch.prototype.readMs = function readMs() { return 1000 * this.read() }
 Stopwatch.prototype.mark = function mark(name) { this.marks[name] = this.read() }
 Stopwatch.prototype.report = function report() { return this.marks }
 // TODO: find out why qibl.assignTo is .02 ms vs Object.assign .002 ms

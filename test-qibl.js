@@ -4037,7 +4037,7 @@ module.exports = {
             t.done();
         },
 
-        'can start, stop and read': function(t) {
+        'can start, stop, read and readMs': function(t) {
             var w = new qibl.Stopwatch();
             w.stop();
             var t1 = w.read();
@@ -4046,6 +4046,8 @@ module.exports = {
             w.start();
             for (var i=0; i<20000; i++) var t3 = w.read();
             t.ok(t3 > t2);
+            var t4 = w.readMs();
+            t.ok(t4 >= t3 * 1000);
             t.done();
         },
 
