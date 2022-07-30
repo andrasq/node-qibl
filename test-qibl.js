@@ -999,12 +999,13 @@ module.exports = {
     },
 
     'qsearch': {
-        '': function(t) {
+        'finds last index having the probed property': function(t) {
             var arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
             t.equal(qibl.qsearch(0, 7, function(i) { return arr[i] <= 5 }), 5);
             t.equal(qibl.qsearch(0, 5, function(i) { return arr[i] <= 5 }), 5);
             t.equal(qibl.qsearch(0, 4, function(i) { return arr[i] <= 5 }), 4);
             t.equal(qibl.qsearch(0, 9, function(i) { return arr[i] <= 2 }), 2);
+            t.equal(qibl.qsearch(8, 9, function(i) { return arr[i] <= 2 }), 7);
             t.equal(qibl.qsearch(0, 9, function(i) { return arr[i] <= 99 }), 9);
             t.equal(qibl.qsearch(0, 9, function(i) { return arr[i] == 99 }), -1);
             t.equal(qibl.qsearch(5, 9, function(i) { return arr[i] == 99 }), 4);

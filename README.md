@@ -484,6 +484,16 @@ i.e. where `probe(n)` returns truthy.  The function first uses binary search to 
 `probe()` with various `n` to narrow down where the probe starts failing, then switches to a
 fast linear search.  Returns the last truthy index `n` if found, or `min - 1` if not in the range.
 
+    items = [1, 2, 3, 4, 5];
+    qibl.qsearch(0, items.length - 1, (index) => items[index] <= 3);
+    // => 2
+
+    // binary search the sorted array for the value
+    function binarySearch( array, value ) {
+        var offset = qibl.qsearch(0, array.length - 1, (ix) => array[ix] <= value);
+        return offset >= 0 && array[offset] === value ? offset : -1;
+    }
+
 ### qibl.sort3( a, b, c )
 
 Return an array containing the 3 items in ascending order.  Much faster than `[a, b, c].sort()`.

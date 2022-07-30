@@ -397,8 +397,8 @@ function _fillit(target, val, options) {
     if (typeof val === 'function') for (var i = base; i < bound; i++) target[i] = val(i);
     else for (var i = base; i < bound; i++) target[i] = val;
 }
-var _fillit_a = eval('true && ' + _fillit);
-var _fillit_b = eval('true && ' + _fillit);
+var _fillit_a = eval('true && ' + _fillit); // _fillit optimized for arrays
+var _fillit_b = eval('true && ' + _fillit); // _fillit optimized for buffers
 function populate( target, val, options ) {
     if (Array.isArray(target)) _fillit_a(target, val, options);
     else if (Buffer.isBuffer(target)) _fillit_b(target, val, options);
