@@ -705,38 +705,6 @@ Returns `NaN` if unable to parse the value or the format.
     qibl.parseMs('2m');
     // => 120000
 
-### qids = new QuickId( uniqueSystemId )
-
-Very very fast globally unique id generator, similar in structure to MongoDB ids, composed of
-a time, a system identifier that uniquely distinguishes id sources, and a sequence number.
-Uniqueness is ensured by the system id, which must be unique for each id source.  The default
-system id is the empty string `''`.
-
-#### qids.getId( )
-
-Return a globally unique id composed of a 9-char monotonic time value, the system-wide
-unique origin identifier provided to `QuickId`, and a 4-char sequence number.  The time and
-sequence are base-32 encoded.  The time values are not realtime accurate, but are usually
-close.  The ids are in ascending sort order and are guaranteed to be unique for each
-system id.  `getId` is very very fast, it can generate tens of millions of unique ids per
-second.
-
-    new QuickId('-sys2-').getId();
-    // => "1fkbndu7p-sys2-0000"
-
-#### qids.parseId( id )
-
-Decompose an id returned by `getId` into its component timestamp, system id and sequence number.
-Only handles the standard 9-char timestamp / 4-char sequence id formats.
-
-    new QuickId().parseId('1fkbndu7p-sys2-0008');
-    // => { time: 1636776212729, sys: '-sys2-', seq: 8 }
-
-### makeGetId( uniqueSystemId )
-
-Return a function that will generate unique ids for the given system.  This is a convenience
-wrapper around `QuickId`.
-
 ### config = getConfig( [options] )
 
 Read the environment-specific configs from the configs directory.  Similar to `config` or `qconfig`,
@@ -773,51 +741,6 @@ object.  All own properties of `err` are retained.
 
 Create an error having all the same properties as `obj`.  If `obj` was created with
 `errorToObject`, will also try to restore an instance of the original error type.
-
-### Stopwatch
-
-Restartable nanosecond resolution stopwatch timer.  Stopwatch timers check the time-of-day clock
-when started and read, but consume no other resources and can be safely abandoned or left "running".
-
-    var stopw = new qibl.Stopwatch();
-    // ...
-    var elapsed = sw.read();
-    // => elapsed time in seconds, with ns precision
-
-#### new Stopwatch( )
-
-Create a new stopwatch.  The stopwatch is running, measuring elapsed time.
-
-    stopw = new qibl.Stopwatch();
-
-#### stopw.read()
-
-Return the total time accumulated on this stopwatch, in seconds with nanosecond resolution.
-A newly created stopwatch is running, but can be stopped and restarted.
-
-#### stopw.readMs()
-
-Return the total time accumulated on the stopwatch, in millisconds.  Same as `read() * 1000`.
-
-#### stopw.stop()
-
-Pause the stopwatch.  The time elapsed so far is preserved, but does not increase while
-stopped.  Stopping an already stopped stopwatch has no effect.
-
-#### stopw.start()
-
-Restart the stopwatch.  When restarted, the elapsed time will start growing again.
-Restarting a running stopwatch has no effect.
-
-#### stopw.mark( label )
-
-Tag the current elapsed time with the provided label, and save it.  Reusing a label
-overwrites the associated timestamp.
-
-#### stopw.report( )
-
-Return all tagged timestamps as an object with the labels as the keys and the associated
-elapsed times as the values.
 
 ### repeatUntil( loopedFunction(done(err, done)), callback )
 
@@ -876,7 +799,7 @@ This function currently does not break up the call stack and does not yield the 
 
 ### processItem = batchCalls( [options,] processBatch(items [,cb]) )
 
-Return a function that will accept a single argument and an optional callback, and will
+Return a function `processItem` that will accept a single argument and an optional callback, and will
 periodically call `processBatch` with batches of the arguments the returned function is
 invoked with.  The function callback, if given, will be invoked with the error returned
 by the callback from `processBatch`.
@@ -972,6 +895,16 @@ If the filename template is not already a regular expression it will be converte
         // ...
     })
 
+### socketpair( callback(err, sockets) )
+
+Return via the callback a pair of connected unix domain sockets.  Returns two open instances of
+`net.Socket` where the data written to `sockets[0]` will be readable from `sockets[1]`, and vice
+versa.  The socket filename is e.g. `/var/tmp/node-socketpair.XXXXXX` where `/var/tmp` is the value
+of the `TMPDIR` environment variable (default `/tmp`) and `XXXXXX` is a random suffix.  The file is
+created with `qibl.tmpfile` and is automatically removed when the current process exits.
+
+An open socket can be passed to a `child_process` as the second argument to `child.send()`.
+
 ### walktree( tree, visitor(node[key], key, node, depth) )
 
 Recursively examine the properties of tree and call `visitor()` on each.  `tree` may be any
@@ -1029,6 +962,15 @@ elapsed time.  If `func()` returns immediately, then the sum of delays will be (
 the timeoutMs, but if `func` takes a while to fail the number of attempts will be fewer.  One
 final attempt is made just before timeout unless already timed out.
 
+### makeGetId( uniqueSystemId )
+
+Return a function that will generate unique ids for the given system.  This is a convenience
+wrapper around `qibl.QuickId`.
+
+
+Classes
+-------
+
 ### new Mutex( limit )
 
 Create a mutual exclusion semaphore that allows `limit` concurrent users to a limited-use
@@ -1082,15 +1024,73 @@ This call never returns errors, error reporting is done per job via their schedu
     cron.run(Date.now() + 60000);
     // => "1 minute elapsed"
 
-### socketpair( callback(err, sockets) )
+### qids = new QuickId( uniqueSystemId )
 
-Return via the callback a pair of connected unix domain sockets.  Returns two open instances of
-`net.Socket` where the data written to `sockets[0]` will be readable from `sockets[1]`, and vice
-versa.  The socket filename is e.g. `/var/tmp/node-socketpair.XXXXXX` where `/var/tmp` is the value
-of the `TMPDIR` environment variable (default `/tmp`) and `XXXXXX` is a random suffix.  The file is
-created with `qibl.tmpfile` and is automatically removed when the current process exits.
+Very very fast globally unique id generator, similar in structure to MongoDB ids, composed of
+a time, a system identifier that uniquely distinguishes id sources, and a sequence number.
+Uniqueness is ensured by the system id, which must be unique for each id source.  The default
+system id is the empty string `''`.
 
-An open socket can be passed to a `child_process` as the second argument to `child.send()`.
+#### qids.getId( )
+
+Return a globally unique id composed of a 9-char monotonic time value, the system-wide
+unique origin identifier provided to `QuickId`, and a 4-char sequence number.  The time and
+sequence are base-32 encoded.  The time values are not realtime accurate, but are usually
+close.  The ids are in ascending sort order and are guaranteed to be unique for each
+system id.  `getId` is very very fast, it can generate tens of millions of unique ids per
+second.
+
+    new QuickId('-sys2-').getId();
+    // => "1fkbndu7p-sys2-0000"
+
+#### qids.parseId( id )
+
+Decompose an id returned by `getId` into its component timestamp, system id and sequence number.
+Only handles the standard 9-char timestamp / 4-char sequence id formats.
+
+    new QuickId().parseId('1fkbndu7p-sys2-0008');
+    // => { time: 1636776212729, sys: '-sys2-', seq: 8 }
+
+### new Stopwatch( )
+
+Restartable nanosecond resolution stopwatch timer.  Stopwatch timers check the time-of-day clock
+when started and read, but consume no other resources and can be safely abandoned or left "running".
+A newly created stopwatch is running, measuring elapsed time.
+
+    var stopw = new qibl.Stopwatch();
+    var elapsed = sw.read();
+    // => elapsed time in seconds, with ns precision
+
+#### stopw.read()
+
+Return the total time accumulated on this stopwatch, in seconds with nanosecond resolution.
+The current time is obtained with `qibl.microtime()`.
+A newly created stopwatch is running, but can be stopped and restarted.
+
+#### stopw.readMs()
+
+Return the total time accumulated on the stopwatch, in millisconds.  Same as `read() * 1000`.
+
+#### stopw.stop()
+
+Pause the stopwatch.  The time elapsed so far is preserved, but does not increase while
+stopped.  Stopping an already stopped stopwatch has no effect.
+
+#### stopw.start()
+
+Restart the stopwatch.  When restarted, the elapsed time will start growing again.
+Restarting a running stopwatch has no effect.
+
+#### stopw.mark( label )
+
+Tag the current elapsed time with the provided label, and save it.  Reusing a label
+overwrites the associated timestamp.
+
+#### stopw.report( )
+
+Return all tagged timestamps as an object with the labels as the keys and the associated
+elapsed times as the values.
+
 
 Changelog
 ---------
