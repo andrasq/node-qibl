@@ -264,6 +264,9 @@ returns `target`.
 Assign to `target` properties of `source` that occur in `mask`.  Assigns `undefined` if the
 property is not set on `source`.
 
+    qibl.extractTo({ a: 1 }, { a: 11, b: 22, c: 33 }, { b: undefined, d: 4 });
+    // => { a: 1, b: 22, d: undefined }
+
 ### qibl.populate( target, val [,options ] )
 
 Similar to `fill()`, but can can fill with computed values and can also populate objects.

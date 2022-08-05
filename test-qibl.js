@@ -3836,11 +3836,24 @@ module.exports = {
                 ['', NaN],
                 ['one', NaN],
                 ['7x', NaN],
+
+                ['  .5  h  1 m  1  s  ', (1800 + 60 + 1) * 1000],
+                [' .5h 1m 1s ', (1800 + 60 + 1) * 1000],
+                ['.5h1m1s', (1800 + 60 + 1) * 1000],
+                ['.5h30', (1800) * 1000 + 30],
+                ['.5 30', 30.5],
             ];
             for (var i = 0; i < tests.length; i++) {
                 if (isNaN(tests[i][1])) t.ok(isNaN(qibl.parseMs(tests[i][0])));
                 else t.strictEqual(qibl.parseMs(tests[i][0]), tests[i][1], tests[i][0] + ' <> ' + tests[i][1]);
             }
+            t.done();
+        },
+
+        'is fast': function(t) {
+            t.skip();
+            var x, times = ['1h', '30s'];
+            for (var i=0; i<1e7; i++) x = qibl.parseMs(times[i % times.length]);
             t.done();
         },
     },

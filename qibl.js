@@ -1765,12 +1765,15 @@ do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTick() / 1000 - microtime(
  * Parse time notation like '2h' into 7200000 milliseconds.
  * Supported units are hms and d -- hours, minutes, seconds, and days.
  */
-var msUnits = { w: 7*24*3600*1000, d: 24*3600*1000, h: 3600*1000, m: 60*1000, s: 1000 };
+var _msUnits = { w: 7*24*3600*1000, d: 24*3600*1000, h: 3600*1000, m: 60*1000, s: 1000, '1': 1 };
+var _msTerm = /^(\s*([\d\.]+|Infinity|-Infinity)\s*([a-z])?\s*)/;
 function parseMs( interval ) {
-    var value = parseFloat(interval);
-    if (value === +interval) return value; // number or numeric value
-    var units = String(interval).trim().slice(-1);
-    return value * msUnits[units];
+    var input = String(interval), ms = 0, value = undefined;
+    for (var term; term = input.match(_msTerm); input = input.slice(term[1].length)) {
+        value = parseFloat(term[2]) * _msUnits[term[3] || '1'];
+        ms += value;
+    }
+    return value !== undefined ? ms : NaN; // NaN if incorrect format, else a number
 }
 
 // source of very fast monotonically increasing not-quite-realtime timestamps, vaguely like qtimebase
