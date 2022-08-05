@@ -697,13 +697,13 @@ network.
 
 ### parseMs( interval )
 
-Convert a simple time duration like `'2h'` (no whitespace) into milliseconds, `7200000`.
+Convert a simple time spec like `'2h'` into milliseconds, `7200000`.
 Recognizes the modifiers `s`, `m`, `h`, `d` and `w` meaning seconds, minutes, hours, days
 and weeks.  Numeric input is assume to represent milliseconds and is returned as is.
-Returns `NaN` if unable to parse the value or the format.
+Multiple time specs are summed.  Returns `NaN` if unable to parse the value or the format.
 
-    qibl.parseMs('2m');
-    // => 120000
+    qibl.parseMs('2m .5s');
+    // => 120500
 
 ### config = getConfig( [options] )
 

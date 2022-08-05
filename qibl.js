@@ -1364,6 +1364,7 @@ function Cron( ) {
  * see https://stackoverflow.com/questions/45624671/communication-between-child-processes-in-node-js
  */
 function socketpair( callback ) {
+    // TODO: accept socketPath argument
     if (typeof callback !== 'function') throw new Error('callback not a function');
 
     var socket1, socket2;
