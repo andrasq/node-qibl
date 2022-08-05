@@ -737,23 +737,6 @@ Only handles the standard 9-char timestamp / 4-char sequence id formats.
 Return a function that will generate unique ids for the given system.  This is a convenience
 wrapper around `QuickId`.
 
-### repeatUntil( loopedFunction(done(err, done)), callback )
-
-Keep calling `loopedFunction()` until it calls its callback with an error or a truthy `done`
-value.  Errors returned from or thrown by the looped function stop the looping, are caught, and
-are returned to the callback.  Due to the way repeatUntil recurses, errors thrown from the
-callback are also caught and fed back into the callback.  This function does not yield the cpu
-unless the looped function does.
-
-    var count = 0;
-    qibl.repeatUntil(function(done) {
-        count += 1;
-        done(null, count >= 3);
-    }, function(err) {
-        callback(err, count);
-        // => count === 3
-    })
-
 ### config = getConfig( [options] )
 
 Read the environment-specific configs from the configs directory.  Similar to `config` or `qconfig`,
@@ -835,6 +818,23 @@ overwrites the associated timestamp.
 
 Return all tagged timestamps as an object with the labels as the keys and the associated
 elapsed times as the values.
+
+### repeatUntil( loopedFunction(done(err, done)), callback )
+
+Keep calling `loopedFunction()` until it calls its callback with an error or a truthy `done`
+value.  Errors returned from or thrown by the looped function stop the looping, are caught, and
+are returned to the callback.  Due to the way repeatUntil recurses, errors thrown from the
+callback are also caught and fed back into the callback.  This function does not yield the cpu
+unless the looped function does.
+
+    var count = 0;
+    qibl.repeatUntil(function(done) {
+        count += 1;
+        done(null, count >= 3);
+    }, function(err) {
+        callback(err, count);
+        // => count === 3
+    })
 
 ### repeatFor( count, loopedFunction(done(err), ix), callback )
 
@@ -1096,7 +1096,7 @@ Changelog
 ---------
 
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
-           tmpfile fail faster
+           tmpfile fail faster, support multi-term times in `parseMs`
 - 1.20.1 - fix getConfig to not expose the _merge method,
            fix tmpfile to exit on sighup/int/term, and do nothing on sigquit
 - 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable
