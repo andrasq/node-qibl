@@ -257,7 +257,7 @@ and numbers, not for objects or arrays.  Merges the flipped value-key pairs onto
 returns `target`.
 
     var flipped = qibl.flipTo({ a: 1 }, { b: 2, c: 'three' });
-    // => { 1: 'a', 2: 'b', three: 'c' }
+    // => { a: 1, '2': 'b', three: 'c' }
 
 ### qibl.extractTo( target, source, mask )
 
