@@ -7,7 +7,7 @@ Quick Itty-Bitty Library.
 
 A miscellaneous collection of small functions and polyfills I wrote that that I found myself
 reusing, gathered into a single place.  Most are pretty efficient, at times faster even
-than the equivalent built-in.
+than the equivalent built-in.  Tested to work with node v0.6 through v16.
 
 Use either directly as a dependency, or as a library of cut-and-paste functions.  If using cut-and-paste,
 add an attribution comment line identifying the qibl source version that it came from, e.g.
