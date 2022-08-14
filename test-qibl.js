@@ -3834,8 +3834,13 @@ module.exports = {
                 ['-Infinityh', -Infinity],
 
                 ['', NaN],
+                ['x', NaN],
+                ['xx x', NaN],
+                ['xx xx x', NaN],
                 ['one', NaN],
                 ['7x', NaN],
+                ['1h 7x 2m', NaN],
+                ['1h 2m 7x', NaN],
 
                 ['  .5  h  1 m  1  s  ', (1800 + 60 + 1) * 1000],
                 [' .5h 1m 1s ', (1800 + 60 + 1) * 1000],

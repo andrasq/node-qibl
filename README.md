@@ -699,7 +699,7 @@ network.
 
 Convert a simple time spec like `'2h'` into milliseconds, `7200000`.
 Recognizes the modifiers `s`, `m`, `h`, `d` and `w` meaning seconds, minutes, hours, days
-and weeks.  Numeric input is assume to represent milliseconds and is returned as is.
+and weeks.  Plain numbers are assumed to represent milliseconds and are returned as is.
 Multiple time specs are summed.  Returns `NaN` if unable to parse the value or the format.
 
     qibl.parseMs('2m .5s');

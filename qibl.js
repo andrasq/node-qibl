@@ -1767,14 +1767,14 @@ do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTick() / 1000 - microtime(
  * Supported units are hms and d -- hours, minutes, seconds, and days.
  */
 var _msUnits = { w: 7*24*3600*1000, d: 24*3600*1000, h: 3600*1000, m: 60*1000, s: 1000, '1': 1 };
-var _msTerm = /^(\s*([\d\.]+|Infinity|-Infinity)\s*([a-z])?\s*)/;
+var _msTerm = /^(\s*([\d\.]+|Infinity|-Infinity)\s*([a-z])?\s*)/; // supporting ([eE]\d+)? 12% slower
 function parseMs( interval ) {
-    var input = String(interval), ms = 0, value = undefined;
-    for (var term; term = input.match(_msTerm); input = input.slice(term[1].length)) {
-        value = parseFloat(term[2]) * _msUnits[term[3] || '1'];
-        ms += value;
+    var str = String(interval), term, ms = 0, lastval = undefined;
+    for (; term = str && str.match(_msTerm); str = str.length > term[1].length && str.slice(term[1].length)) {
+        lastval = parseFloat(term[2]) * _msUnits[term[3] || '1']; // multiply by undefined if bad units for NaN
+        ms += lastval;
     }
-    return value !== undefined ? ms : NaN; // NaN if incorrect format, else a number
+    return lastval !== undefined ? ms : NaN; // NaN if incorrect format, else a number
 }
 
 // source of very fast monotonically increasing not-quite-realtime timestamps, vaguely like qtimebase
