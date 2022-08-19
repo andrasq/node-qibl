@@ -705,18 +705,17 @@ function str_locate( str, patt, handler, arg ) {
 // compare semver version strings
 // scan for the first version differece by decreasing significance, and return -1, 0 or +1
 // like for a sort comparison function
+var _isolateDigits = /([^0-9]+)/;
 function semverCompar( version1, version2 ) {
-    if (typeof version1 !== 'string' || typeof version2 !== 'string') return _vcompar(version1, version2);
-    var ver1 = version1.split('.'), ver2 = version2.split('.');
-    for (var i = 0; i < ver1.length; i++) if (ver1[i] !== ver2[i]) break;
-    return (i >= ver1.length && i < ver2.length) ? -1 : _vcompar(ver1[i], ver2[i]);
-}
-function _vcompar(v1, v2) {
-//console.log("AR: _vcompar", v1, v2, v1 === v2)
-    if (v1 === v2) return 0;
-    if (v1 === undefined || v2 === undefined) return v1 === undefined ? -1 : 1; // "1.2" before "1.2.0"
-    var diff = parseInt(v1) - parseInt(v2);                                     // "9" before "10", "7-a" before "11-a"
-    return diff < 0 ? -1 : diff > 0 ? 1 : (v1 < v2) ? -1 : 1;                   // "11-a" before "11-b", "a" before "b"
+    var p1 = String(version1).split(_isolateDigits), p2 = String(version2).split(_isolateDigits);
+    for (var i = 0; i < p1.length && i < p2.length; i++) {
+        if (p1[i] === p2[i]) continue;                                          // scan until a diff
+        if (p1[i] === '.' || p2[i] === '.') return p1[i] === '.' ? 1 : -1;      // "1a" before 1.0a"
+        var n1 = parseInt(p1[i]), n2 = parseInt(p2[i]);
+        if (n1 - n2) return n1 - n2 < 0 ? -1 : 1;                               // "9b" before "10a"
+        return p1[i] < p2[i] ? -1 : 1;                                          // "a" before "aa"
+    }
+    return (i >= p1.length && i >= p2.length) ? 0 : i >= p1.length ? -1 : 1;    // no diffs, or "1" before "1.0"
 }
 
 // "string".startsWith, missing in node-v0.10
