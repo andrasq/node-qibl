@@ -1097,6 +1097,7 @@ elapsed times as the values.
 Changelog
 ---------
 
+- 1.21.1 - have `retry` return the actual error on timeout
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
            tmpfile fail faster, support multi-term times in `parseMs`
 - 1.20.1 - fix getConfig to not expose the _merge method,

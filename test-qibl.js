@@ -2840,6 +2840,14 @@ module.exports = {
             });
         },
 
+        'returns the actual error if available on timeout': function(t) {
+            qibl.retry(function() { return 1 }, 4, function(cb) { cb(new Error('actual error')) }, function(err) {
+                t.ok(err);
+                t.equal(err.message, 'actual error');
+                t.done();
+            })
+        },
+
         'returns error on initial-call timeout': function(t) {
             var ncalls = 0;
             qibl.retry(function() { return 10 }, 4, function(cb) { ncalls += 1 }, function(err, ret) {
@@ -2850,12 +2858,12 @@ module.exports = {
             })
         },
 
-        'returns error on second-call timeout': function(t) {
+        'returns actual error on second-call timeout': function(t) {
             var ncalls = 0;
             var err = new Error('fail on first call');
-            qibl.retry(function() { return 10 }, 4, function(cb) { ncalls += 1; if (ncalls < 2) cb(err) }, function(err, ret) {
+            qibl.retry(function() { return 3 }, 4, function(cb) { ncalls += 1; if (ncalls < 2) cb(err) }, function(err, ret) {
                 t.ok(err);
-                t.equal(err.message, 'timeout');
+                t.equal(err.message, 'fail on first call');
                 t.equal(ncalls, 2);
                 t.done();
             })
