@@ -404,8 +404,9 @@ match the glob template.  The glob syntax is the usual `? * ** [...] {,,,}`, wit
 - `{,,,}` matches exactly one of the comma-separated alternates.  The alternates must not contain
   commas `,` or close-brace `}` characters.
   *Note:* unlike in the command shell, the alternates must not contain nested meta-patterns.
-  Currently they are fully escaped in the regex pattern, so e.g. `{*.[ch],*.js}` matches the strings
-  `"*.[ch]"` or `"*.js"`, but in the future this restriction may be eased.
+  Currently they are fully escaped in the regex pattern, with no metacharacter expansion so e.g.
+  `{*.[ch],*.js}` matches the literal strings `"*.[ch]"` or `"*.js"`, but in the future this
+  restriction may be eased.
 
 Examples:
 
@@ -874,9 +875,10 @@ also only exit only if they are the sole listener, then the process may not exit
 Options:
 - `dir` - name of the directory to hold the file, default is `process.env.TMPDIR` else `/tmp`
 - `name` - core filename without the leading path separators, default `node-tmpfile-`
-- `ext` - filename extension to append, default `''` empty string
+- `ext` - filename extension to append including any `'.'` separator, default `''` empty string
 - `remove` - whether to auto-remove the file on exit, default enabled, set to `false` to create
     a permanent file that will not be removed on fatal signal or process exit
+
 
     const filename = qibl.tmpfile();
     // => "/tmp/node-tmpfile-wp3tio"
@@ -888,7 +890,7 @@ callback the list of matching filepaths.  The filenames will be full paths with 
 directory name prepended, similarly to how the filenames are returned by `find(1)`.
 
 If the filename template is not already a regular expression it will be converted with
-`new RegExp(qibl.globRegex(template))`
+`new RegExp(qibl.globRegex(template))`.  The template accepts `globRegex` syntax.
 
     // find all files in ./src/ whose names end in '.js'
     globdir('./src', '*.js', (err, files) => {
