@@ -1174,10 +1174,17 @@ function tmpfile( options ) {
  */
 function globdir( dirname, pattern, callback ) {
     dirname = dirname || '.';
+    /* istanbul ignore next */ // ignore the lack of coverage for the \ path.sep count
+    var first = true, maxDepth = pattern instanceof RegExp || pattern.indexOf('**') >= 0 ? Infinity
+        : 1 + str_count(pattern, '/') + (path.sep === '\\' && str_count(pattern, '\\'));
     pattern = pattern instanceof RegExp ? pattern
         : new RegExp('^' + qibl.escapeRegex(dirname + '/') + qibl.globRegex(pattern).slice(1));
     var files = [], error = null;
-    var visitor = function(path) { return error ? 'stop' : ((pattern.test(path) && files.push(path)), '') }
+    var visitor = function(path, stats, depth) {
+        if (error) return 'stop';
+        if (pattern.test(path)) files.push(path);
+        return first ? (first = false, 'visit') : depth >= maxDepth ? 'skip' : '';
+    }
     var emitter = qibl.walkdir(dirname, visitor, function(err) {
         callback(err || error, files);
     })
@@ -1431,6 +1438,8 @@ function escapeRegex( str ) {
  * TODO:
  *   support full csh-style {a,b{"c,{",d}} nested expressions => ['a', 'b"c,{"', 'bd']
  *   un-closed [ should not be special
+ * TODO:
+ *   first * in path component should not match .* (ie, leading star should not match dot-files)
  */
 function globRegex( glob, from, to ) {
     var incharlist = false;

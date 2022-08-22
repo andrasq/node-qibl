@@ -1101,7 +1101,7 @@ elapsed times as the values.
 Changelog
 ---------
 
-- 1.21.2 - new preliminary `str_count`
+- 1.21.2 - new preliminary `str_count`, prune search tree for much faster globdir
 - 1.21.1 - have `retry` return the actual error on timeout, better `semverCompar` patch level handling
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
            tmpfile fail faster, support multi-term times in `parseMs`

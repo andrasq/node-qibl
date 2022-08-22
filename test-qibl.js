@@ -1392,6 +1392,19 @@ module.exports = {
         },
     },
 
+    'str_count': {
+        'counts occurrences of the pattern': function(t) {
+            t.equal(qibl.str_count("foo", 'f'), 1);
+            t.equal(qibl.str_count("foo", 'o'), 2);
+            t.equal(qibl.str_count("foo", 'x'), 0);
+            t.equal(qibl.str_count("foofoo", 'o'), 4);
+            t.equal(qibl.str_count("foofoo", 'oo'), 2);
+            t.equal(qibl.str_count("foofoo", 'oof'), 1);
+            t.equal(qibl.str_count("foofoo", 'foo'), 2);
+            t.done();
+        },
+    },
+
     'startsWith': {
         'should check prefix': function(t) {
             t.ok(qibl.startsWith('foobar', 'foobar'));
@@ -2545,6 +2558,31 @@ module.exports = {
                 t.ifError(err);
                 t.deepEqual(files.sort(), ['./qibl.js', './test-qibl.js']);
                 t.done();
+            })
+        },
+
+        'returns filepaths from a deep directory tree': function(t) {
+            var allMatch = true;
+            var t1 = qibl.microtime();
+            qibl.globdir('/usr', '*/*', function(err, files) {
+                t.ifError(err);
+                var t2 = qibl.microtime();
+                var len1 = files.length;
+                files.forEach(function(file) {
+                    if (!/^\/usr\/[^/]+\/[^/]+$/.test(file)) {
+                        allMatch = false;
+                    }
+                })
+                t.equal(allMatch, true);
+                qibl.globdir('/usr', '*/*/*', function(err, files) {
+// FIXME: errors thrown in this (walkdir?) callback feed back to here
+                    var t3 = qibl.microtime();
+                    var len2 = files.length;
+                    // on my system I see about 3x more files taking 3x more time
+                    t.ok(len2 > 2 * len1);
+                    t.ok(t3 - t2 > 2 * (t2 - t1));
+                    t.done();
+                })
             })
         },
 
