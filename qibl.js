@@ -69,6 +69,7 @@ var qibl = module.exports = {
     str_random_word: str_random_word,
     str_random_sentence: str_random_sentence,
     str_locate: str_locate,
+    str_count: str_count,
     compareVersions: semverCompar,
     semverCompar: semverCompar,
     startsWith: startsWith,
@@ -700,6 +701,13 @@ function str_locate( str, patt, handler, arg ) {
         if ((pos = str.indexOf(patt, pos)) >= 0) handler(pos, arg);
         else break;
     }
+}
+
+// the the number of occurrences of the pattern in the string
+function str_count( str, patt ) {
+    var pos = 0, n = 0, len = patt.length;
+    while ((pos = str.indexOf(patt, pos)) >= 0) pos += len, n += 1;
+    return n;
 }
 
 // compare semver version strings

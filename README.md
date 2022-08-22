@@ -355,6 +355,10 @@ with a frequency distribution similar to that of the qibl.js source file.
 
 Locate all substrings `substr` in the string `str`, and call `handler(arg) with their offsets.
 
+### qibl.str_count( str, substr )
+
+Return the count of occurrences of the substring within the str
+
 ### qibl.startsWith( str, substr )
 
 Return true if `substr` is a prefix of the string `str`.  Equivalent to String.prototype.startsWith.
@@ -1097,6 +1101,7 @@ elapsed times as the values.
 Changelog
 ---------
 
+- 1.21.2 - new preliminary `str_count`
 - 1.21.1 - have `retry` return the actual error on timeout, better `semverCompar` patch level handling
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
            tmpfile fail faster, support multi-term times in `parseMs`
