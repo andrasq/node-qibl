@@ -355,9 +355,10 @@ with a frequency distribution similar to that of the qibl.js source file.
 
 Locate all substrings `substr` in the string `str`, and call `handler(arg) with their offsets.
 
-### qibl.str_count( str, substr )
+### qibl.str_count( str, substr [,limit] )
 
-Return the count of occurrences of the substring within the str
+Return the count of occurrences of the substring within the string `str`.  If `limit` is
+provided and greater than zero, stop counting once `limit` occurrences have been found.
 
 ### qibl.startsWith( str, substr )
 
@@ -400,6 +401,8 @@ match the glob template.  The glob syntax is the usual `? * ** [...] {,,,}`, wit
 
 - `?` matches a single character in the string
 - `*` matches zero or more characters, not including `/` pathname separators
+  *Note:* currently a `*` as the start of a pathname component also matches dot-files,
+  but in the future this may be changed.  Dot files can be explicitly matched with `.*`
 - `**` matches zero or more characters, including pathname separators
 - `[...]` matches the characters listed inside the brackets.  Character ranges `a-z` are ok.
   *Note:* character lists are passed to the regex verbatim, without any escaping.  Escaped `\]` and `\\`
@@ -1101,7 +1104,7 @@ elapsed times as the values.
 Changelog
 ---------
 
-- 1.21.2 - new preliminary `str_count`, prune search tree for much faster globdir
+- 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`
 - 1.21.1 - have `retry` return the actual error on timeout, better `semverCompar` patch level handling
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
            tmpfile fail faster, support multi-term times in `parseMs`

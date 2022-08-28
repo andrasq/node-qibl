@@ -704,9 +704,10 @@ function str_locate( str, patt, handler, arg ) {
 }
 
 // the the number of occurrences of the pattern in the string
-function str_count( str, patt ) {
+function str_count( str, patt, limit ) {
+    limit = limit || Infinity;
     var pos = 0, n = 0, len = patt.length;
-    while ((pos = str.indexOf(patt, pos)) >= 0) pos += len, n += 1;
+    while ((pos = str.indexOf(patt, pos)) >= 0 && n < limit) pos += len, n += 1;
     return n;
 }
 

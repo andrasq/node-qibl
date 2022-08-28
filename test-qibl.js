@@ -1403,6 +1403,13 @@ module.exports = {
             t.equal(qibl.str_count("foofoo", 'foo'), 2);
             t.done();
         },
+        'counts up to limit': function(t) {
+            t.equal(qibl.str_count("foofoo", 'o', 1), 1);
+            t.equal(qibl.str_count("foofoo", 'o', 3), 3);
+            t.equal(qibl.str_count("foofoo", 'o', 4), 4);
+            t.equal(qibl.str_count("foofoo", 'o', 7), 4);
+            t.done();
+        },
     },
 
     'startsWith': {
