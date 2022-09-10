@@ -3505,6 +3505,20 @@ module.exports = {
             t.equal(qibl.makeIteratorPeekable(it), it);
             t.done();
         },
+        'can annotate more than once': function(t) {
+            var arr = [1, 2, 3];
+            if (!qibl.getIterator(arr)) t.skip();
+            var it = qibl.getIterator(arr).call(arr);
+            it = qibl.makeIteratorPeekable(it);
+            t.equal(it.next().value, 1);
+            t.equal(it.peek().value, 2);
+            var it2 = qibl.makeIteratorPeekable(it);
+            t.equal(it2.peek().value, 2);
+            t.equal(it2.next().value, 2);
+            t.equal(it.next().value, 3);
+            t.equal(it2.next().done, true);
+            t.done();
+        },
         'adds peek and unget methods': function(t) {
             var arr = [1, 2, 3];
             if (!qibl.getIterator(arr)) t.skip();

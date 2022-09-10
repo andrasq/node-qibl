@@ -1592,8 +1592,8 @@ function getIterator( obj ) {
 function makeIteratorPeekable( iter ) {
     var res, next;
 
-    iter._origNext = iter.next;
-    iter._nextItem = null;
+    iter._origNext = iter._origNext || iter.next;
+    iter._nextItem = iter._nextItem !== undefined ? iter._nextItem : null;
     iter.next = function() { return (res = this._nextItem) ? ((this._nextItem = null), res) : this._origNext() };
     // do not save a no-more-items result, maybe more items will appear later
     iter.peek = function() { return this._nextItem || ((next = this._origNext()).done ? next : (this._nextItem = next)) };
