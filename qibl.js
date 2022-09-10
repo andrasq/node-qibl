@@ -707,7 +707,7 @@ function str_locate( str, patt, handler, arg ) {
 function str_count( str, patt, limit ) {
     limit = limit || Infinity;
     var pos = 0, n = 0, len = patt.length;
-    while ((pos = str.indexOf(patt, pos)) >= 0 && n < limit) pos += len, n += 1;
+    if (patt) while ((pos = str.indexOf(patt, pos)) >= 0 && n < limit) pos += len, n += 1;
     return n;
 }
 

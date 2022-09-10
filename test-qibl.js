@@ -1401,6 +1401,7 @@ module.exports = {
             t.equal(qibl.str_count("foofoo", 'oo'), 2);
             t.equal(qibl.str_count("foofoo", 'oof'), 1);
             t.equal(qibl.str_count("foofoo", 'foo'), 2);
+            t.equal(qibl.str_count("foo", ''), 0);
             t.done();
         },
         'counts up to limit': function(t) {
