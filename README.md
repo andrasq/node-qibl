@@ -1091,6 +1091,10 @@ stopped.  Stopping an already stopped stopwatch has no effect.
 Restart the stopwatch.  When restarted, the elapsed time will start growing again.
 Restarting a running stopwatch has no effect.
 
+#### stopw.reset()
+
+Reset the elapsed time back to zero.  Does not clear the marked times.
+
 #### stopw.mark( label )
 
 Tag the current elapsed time with the provided label, and save it.  Reusing a label

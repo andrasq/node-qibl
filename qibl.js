@@ -1893,7 +1893,7 @@ function objectToError( obj ) {
  * Millisecond stopwatch timer.
  * NOTE: node before v0.7 has only millisecond resolution, newer node nanosecond.
  */
-function Stopwatch() {
+function Stopwatch( ) {
     this.started = qibl.microtime();    // stopwatch start time sec
     this.elapsed = 0;                   // total elapsed time sec
     this.marks = {};                    // tagged timestamps
