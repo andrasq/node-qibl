@@ -12,9 +12,13 @@ than the equivalent built-in.  Tested to work with node v0.6 through v16.
 Use either directly as a dependency, or as a library of cut-and-paste functions.  If using cut-and-paste,
 add an attribution comment line identifying the qibl source version that it came from, e.g.
 
+Use as a dependency:
+
     var qibl = require('qibl');
     qibl.subsample(...);
-    -------
+
+Use cut-and-paste functions:
+
     // adapted from qibl@1.4.0
     function subsample(items, count) { ... }
 
@@ -51,7 +55,7 @@ Assign all enumerable own properties of the sources `src` onto `target`, and ret
     // qibl.assignTo({ a: 1 }, { b: 2 }, { c: 3 });
     // => { a: 1, b: 2, c: 3 }
 
-### qibl.merge( target, src1, ... )
+### qibl.mergeTo( target, src1, ... )
 
 Recursively copy all properties of the source objects, including inherited properties, onto
 the `target` object.  All nested hashes are copied onto a new hash `{}` so the target
@@ -1110,7 +1114,8 @@ Changelog
 ---------
 
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
-           to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns
+           to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
+           recognize `mergeTo` as meaning `merge`
 - 1.21.1 - have `retry` return the actual error on timeout, better `semverCompar` patch level handling
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
            tmpfile fail faster, support multi-term times in `parseMs`

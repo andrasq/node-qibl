@@ -42,8 +42,8 @@ function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
 var qibl = module.exports = {
     isHash: isHash,
     isMethodContext: isMethodContext,
-    copyObject: assignTo,     assign: assignTo,     assignTo: assignTo,
-    merge: merge,
+    copyObject: assignTo,       assign: assignTo,       assignTo: assignTo,
+    merge: merge,               mergeTo: merge,
     getProperty: getProperty,
     compileGetProperty: compileGetProperty,
     getProp: getProp,
