@@ -3639,6 +3639,10 @@ module.exports = {
             t.deepEqual(qibl.extractTo({x:9}, {a:1, b:2}, {b:0}), {x:9, b:2});
             t.deepEqual(qibl.extractTo({x:9}, {a:1, b:2}, {a:1, b:1, c:1}), {x:9, a:1, b:2, c:undefined});
 
+            // nested properties into existing scalar property
+            t.deepEqual(qibl.extractTo({x:{a:1, b:2}}, {x:{a:2, b:3}}, {x:1}), {x: {a: 2, b: 3}});
+            t.deepEqual(qibl.extractTo({x:{a:1, b:2}}, {x:{a:2, b:3}}, {x:{a:1}}), {x: {a: 2, b: 2}});
+
             // missing properties
             t.deepEqual(qibl.extractTo({}, {a:1, b:2}, {c:0, a:0}), {c: undefined, a: 1});
 

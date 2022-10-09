@@ -1115,7 +1115,7 @@ Changelog
 
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
-           recognize `mergeTo` as meaning `merge`
+           recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties
 - 1.21.1 - have `retry` return the actual error on timeout, better `semverCompar` patch level handling
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,
            tmpfile fail faster, support multi-term times in `parseMs`
