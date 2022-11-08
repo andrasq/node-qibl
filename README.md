@@ -559,6 +559,12 @@ which concatenate to the input `array`.
     qibl.chunk([1,2,3,4,5], 2)
     // => [[1,2], [3,4], [5]]
 
+### removeByIndex( array, index )
+
+Remove the element at offset `index` from the array and return it.  The array is updated in-place.
+Like `array.splice(index, 1)` but much faster.
+
+
 Functions
 ---------
 
@@ -1113,6 +1119,7 @@ elapsed times as the values.
 Changelog
 ---------
 
+- 1.22.0 - new `removeByIndex`
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties

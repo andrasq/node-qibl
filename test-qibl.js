@@ -901,6 +901,30 @@ module.exports = {
         },
     },
 
+    'removeByIndex': {
+        'updates the array': function(t) {
+            var arr = [1, 2, 3, 4];
+            qibl.removeByIndex(arr, 0);
+            t.deepEqual(arr, [2, 3, 4]);
+            qibl.removeByIndex(arr, -1);
+            t.deepEqual(arr, [2, 3, 4]);
+            qibl.removeByIndex(arr, 7);
+            t.deepEqual(arr, [2, 3, 4]);
+            qibl.removeByIndex(arr, 1);
+            t.deepEqual(arr, [2, 4]);
+            t.done();
+        },
+
+        'returns the item': function(t) {
+            t.equal(qibl.removeByIndex([1, 2, 3], -1), undefined);
+            t.equal(qibl.removeByIndex([1, 2, 3], 0), 1);
+            t.equal(qibl.removeByIndex([1, 2, 3], 1), 2);
+            t.equal(qibl.removeByIndex([1, 2, 3], 2), 3);
+            t.equal(qibl.removeByIndex([1, 2, 3], 4), undefined);
+            t.done();
+        },
+    },
+
     'chunk': {
         'splits array into batches': function(t) {
             var tests = [

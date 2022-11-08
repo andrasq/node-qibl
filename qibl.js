@@ -94,6 +94,7 @@ var qibl = module.exports = {
     _invoke2: _invoke2,
     concat2: concat2,
     flatMap2: flatMap2,
+    removeByIndex: removeByIndex,
     chunk: chunk,
     subsample: subsample,
     qsearch: qsearch,
@@ -495,6 +496,15 @@ function chunk( array, batchSize ) {
         chunks.push(array.slice(base, base += batchSize));
     }
     return chunks;
+}
+
+// arr.splice(ix, 1) but much faster; does not wrap the removed item in an array
+function removeByIndex( arr, ix ) {
+    if (ix < 0 || ix >= arr.length) return undefined;
+    var removed = arr[ix];
+    for (var i = ix + 1; i < arr.length; i++) arr[i - 1] = arr[i];
+    arr.pop(); // faster to pop than to adjust arr.length, and much faster than to splice
+    return removed;
 }
 
 // return up to k randomly selected items from arr between base and bound,
