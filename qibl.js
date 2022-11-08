@@ -70,6 +70,7 @@ var qibl = module.exports = {
     str_random_sentence: str_random_sentence,
     str_locate: str_locate,
     str_count: str_count,
+    str_reverse: str_reverse,
     compareVersions: semverCompar,
     semverCompar: semverCompar,
     startsWith: startsWith,
@@ -719,6 +720,13 @@ function str_count( str, patt, limit ) {
     var pos = 0, n = 0, len = patt.length;
     if (patt) while ((pos = str.indexOf(patt, pos)) >= 0 && n < limit) pos += len, n += 1;
     return n;
+}
+
+// reverse the characters in the string
+function str_reverse( str ) {
+    var chars = new Array(str.length), len = str.length;
+    for (var i = 0; i < len; i++) chars[len - 1 - i] = str.charCodeAt(i);
+    return qibl.fromCharCodes(chars);
 }
 
 // compare semver version strings

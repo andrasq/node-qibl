@@ -330,6 +330,7 @@ the converted properties are added to the existing `hash`.  Returns the updated 
     qibl.mapToHash(new Map([['a', 1], ['b', 2]]);
     // => { a: 1, b: 2 }
 
+
 Strings
 -------
 
@@ -364,6 +365,13 @@ Locate all substrings `substr` in the string `str`, and call `handler(arg) with 
 Return the count of occurrences of the substring within the string `str`.  If `limit` is
 provided and greater than zero, stop counting once `limit` occurrences have been found.
 A zero-length substring will never be found and returns `0` zero.
+
+### qibl.str_reverse( str )
+
+Construct a new string composed of the the characters of `str` in reverse order.
+
+    qibl.str_reverse("hello")
+    // => "olleh"
 
 ### qibl.startsWith( str, substr )
 
@@ -1119,7 +1127,7 @@ elapsed times as the values.
 Changelog
 ---------
 
-- 1.22.0 - new `removeByIndex`
+- 1.22.0 - new `removeByIndex`, new `str_reverse`
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties

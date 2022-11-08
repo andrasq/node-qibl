@@ -1437,6 +1437,16 @@ module.exports = {
         },
     },
 
+    'str_reverse': {
+        'reverses strings': function(t) {
+            t.equal(qibl.str_reverse(''), '');
+            t.equal(qibl.str_reverse('abc'), 'cba');
+            t.equal(qibl.str_reverse('foo bar zed'), 'dez rab oof');
+            t.equal(qibl.str_reverse('\x01\x02\x03'), '\x03\x02\x01');
+            t.done();
+        },
+    },
+
     'startsWith': {
         'should check prefix': function(t) {
             t.ok(qibl.startsWith('foobar', 'foobar'));
