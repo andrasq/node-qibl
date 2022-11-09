@@ -96,6 +96,7 @@ var qibl = module.exports = {
     concat2: concat2,
     flatMap2: flatMap2,
     removeByIndex: removeByIndex,
+    remove2: remove2,
     chunk: chunk,
     subsample: subsample,
     qsearch: qsearch,
@@ -506,6 +507,16 @@ function removeByIndex( arr, ix ) {
     for (var i = ix + 1; i < arr.length; i++) arr[i - 1] = arr[i];
     arr.pop(); // faster to pop than to adjust arr.length, and much faster than to splice
     return removed;
+}
+
+// similar to array.filter(), but update the array in-place and return the modified array
+function remove2( arr, filter, removeds ) {
+    for (var i = 0, j = 0; j < arr.length; j++) {
+        if (filter(arr[j], j, arr)) removeds && removeds.push(arr[j]);
+        else arr[i++] = arr[j];
+    }
+    if (i !== j) arr.length = i;
+    return arr;
 }
 
 // return up to k randomly selected items from arr between base and bound,

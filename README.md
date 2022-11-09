@@ -572,6 +572,18 @@ which concatenate to the input `array`.
 Remove the element at offset `index` from the array and return it.  The array is updated in-place.
 Like `array.splice(index, 1)` but much faster.
 
+### remove2( array, filter(element, ix, array) [,discards] )
+
+Remove from the `array` the elements identified by the `filter`, and repack the array in-place.
+The removed elements will be appended to the `discards` array if provided.  `filter` must be a
+function that, when called with an array element, returns truthy to remove it from the array.
+Returns the modified `array`.  Similar to `Array.filter` but modifies and returns the input array,
+and only optionally gathers the discarded items.
+
+    target = [1, 2];
+    qibl.remove2([3, 4, 5], (x) => x === 4, target);
+    // => [1, 2, 4]
+
 
 Functions
 ---------
@@ -1127,7 +1139,7 @@ elapsed times as the values.
 Changelog
 ---------
 
-- 1.22.0 - new `removeByIndex`, new `str_reverse`
+- 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties

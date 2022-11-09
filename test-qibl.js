@@ -925,6 +925,34 @@ module.exports = {
         },
     },
 
+    'remove2': {
+        'returns the input array': function(t) {
+            var arr = [1, 2, 3];
+            t.equal(qibl.remove2(arr, function() { return true }), arr);
+            t.done();
+        },
+
+        'repacks the array': function(t) {
+            function isNotEven(x) { return x % 2 !== 0 }
+            t.deepEqual(qibl.remove2([1, 2, 3], function() { return true }), []);
+            t.deepEqual(qibl.remove2([1, 2, 3], function() { return false }), [1, 2, 3]);
+            t.deepEqual(qibl.remove2([], isNotEven), []);
+            t.deepEqual(qibl.remove2([1, 1, 3], isNotEven), []);
+            t.deepEqual(qibl.remove2([2, 2, 4], isNotEven), [2, 2, 4]);
+            t.deepEqual(qibl.remove2([1, 2, 3, 4, 5], isNotEven), [2, 4]);
+            t.done();
+        },
+
+        'can return the discards': function(t) {
+            var arr = [1, 2, 3, 4, 5];
+            var discards = [];
+            qibl.remove2(arr, function() { return true }, discards);
+            t.deepEqual(discards, [1, 2, 3, 4, 5]);
+            t.deepEqual(arr, []);
+            t.done();
+        },
+    },
+
     'chunk': {
         'splits array into batches': function(t) {
             var tests = [
