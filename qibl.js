@@ -236,6 +236,7 @@ function getProperty( target, dottedName, defaultValue ) {
 // compile the property getter for 10x faster property lookups.
 // Returns a dedicated function to retrieve the named property of the objects passed to it.
 // CAUTION: property names must be valid identifiers, else a run-time error is thrown by eval.
+// TODO: compile to array notation, to allow numbers and arbitrary strings as property names
 function compileGetProperty( path ) {
     var pretest = '(o !== null && o !== undefined)';
     var end = -1;
@@ -469,7 +470,9 @@ function fill( buf, ch, base, bound ) {
 // concatenate two arrays, much faster than [].concat for short arrays
 // note that unlike [].concat, a1 and a2 must be arrays and are not flattened
 function concat2( target, a1, a2 /* VARARGS */ ) {
-    for (var len = a1.length, i = 0; i < len; i++) target.push(a1[i]);
+    if (!a1) return target;
+    var len = a1.length, to = target.length; target.length += a1.length;
+    for (var i = 0; i < len; i++) target[to++] = a1[i];
     if (a2) for (var ai=2; ai<arguments.length; ai++) {
         a2 = arguments[ai];
         for (var len = a2.length, i = 0; i < len; i++) target.push(a2[i]);
@@ -487,7 +490,6 @@ function flatMap2( dst, src, compute ) {
     }
     return dst;
 }
-
 
 // like php array_chunk(), split an array into batches
 // invalid results return an empty array like lodash.chunk, not null like php

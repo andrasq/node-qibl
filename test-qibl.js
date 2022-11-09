@@ -846,6 +846,8 @@ module.exports = {
     },
 
     'concat2 should concatenate arrays': function(t) {
+        t.deepEqual(qibl.concat2([1]), [1]);
+
         t.deepEqual(qibl.concat2([], []), []);
         t.deepEqual(qibl.concat2([1], []), [1]);
         t.deepEqual(qibl.concat2([1], [2]), [1, 2]);
