@@ -582,8 +582,9 @@ and only optionally gathers the discarded items.
 
     target = [1, 2];
     qibl.remove2([3, 4, 5], (x) => x === 4, target);
+    // => [3, 5]
+    target;
     // => [1, 2, 4]
-
 
 Functions
 ---------
