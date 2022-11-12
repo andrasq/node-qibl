@@ -1712,8 +1712,8 @@ function extractTo( dst, src, mask ) {
     return dst;
 }
 
-// counterpart to extractTo, copies onto dst all properties of src that are not present in mask
-// The mask is controlled by the contained keys, even if their value is undefined.
+// counterpart to extractTo, copies onto dst all properties of src that are not set in mask
+// a mask property of undefined is treated as unset
 // nb: defaults(dst, src) === extractNotTo(dst, src, dst)
 function extractNotTo( dst, src, mask ) {
     for (var k in src) {

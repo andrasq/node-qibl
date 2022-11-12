@@ -271,6 +271,25 @@ property is not set on `source`.
     qibl.extractTo({ a: 1 }, { a: 11, b: 22, c: 33 }, { b: undefined, d: 4 });
     // => { a: 1, b: 22, d: undefined }
 
+### qibl.extractNotTo( target, source, mask )
+
+Assign to `target` all properties of `source` except those that are set in `mask`.  A `mask`
+property of `undefined` is treated as unset, and causes the corresponding source property to
+be transferred.  Assigns properties recursively, controlled by nested properties in the `mask`.
+Returns the `target`.
+
+    qibl.extractNotTo({ a:1, b:2 }, { a:111, b:222 }, { a: true });
+    // => { a:1, b:222 }
+
+    // populate dst with defaults like lodash.defaults:
+    function defaults(dst, src, mask) {
+        return qibl.extractNotTo(dst, src, dst);
+    }
+    defaults({ a:1 }, {a:1, b:2, c:3});
+    // => { a:1, b:2, c:3 }
+    defaults({ a:1, b:{c:3}}, {a:111, b:{c:333, d:444}});
+    // => { a:1, b:{ c:3, d:444 } }
+
 ### qibl.populate( target, val [,options ] )
 
 Similar to `fill()`, but can can fill with computed values and can also populate objects.
