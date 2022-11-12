@@ -3720,6 +3720,11 @@ module.exports = {
             t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {b: {x: true}}), {b: {x: undefined}});
             t.deepEqual(qibl.extractTo({}, {a: 1, b: {c: 2}}, {b: {x: {y: true}}}), {b: {x: undefined}});
 
+            // mask property is undefined
+            // TODO: pending fix to extractTo:
+            t.deepEqual(qibl.extractTo({}, {a:1, b:2}, {a:undefined, b:true}), {b:2});
+            t.deepEqual(qibl.extractTo({}, {x:{a:1, b:2}}, {x:{a:undefined, b:true}}), {x:{b:2}});
+
             t.done();
         },
     },

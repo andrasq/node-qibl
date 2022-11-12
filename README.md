@@ -265,11 +265,16 @@ returns `target`.
 
 ### qibl.extractTo( target, source, mask )
 
-Assign to `target` properties of `source` that occur in `mask`.  Assigns `undefined` if the
-property is not set on `source`.
+Assign to `target` properties of `source` that are set in `mask`.
+A mask property set to `undefined` is treated as unset.  Assigns `undefined` if the
+property is not set on `source`.  The assignment is recursive, nested properties are assigned
+under the control of the same-named nested properties in the `mask`.  Returns the `target`.
 
-    qibl.extractTo({ a: 1 }, { a: 11, b: 22, c: 33 }, { b: undefined, d: 4 });
-    // => { a: 1, b: 22, d: undefined }
+    qibl.extractTo({ a:1 }, { a:111, b:222, c:333 }, { b: undefined, c: null, d: 4 });
+    // => { a: 1, c: 333, d: undefined }
+
+    qibl.extractTo({ a: { b:2, c:3 } }, { a: { c:333, d:444 } }, { a: { c: 'yes' } });
+    // => { a: { b:2, c:333 } }
 
 ### qibl.extractNotTo( target, source, mask )
 
@@ -1159,7 +1164,8 @@ elapsed times as the values.
 Changelog
 ---------
 
-- 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`
+- 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
+           fix `extractTo` to not copy the property if mask is set to `undefined`
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties

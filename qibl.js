@@ -1704,9 +1704,11 @@ function flipTo( target, item ) {
 }
 
 // based on minisql utils:
-// copy onto dst all properties of src that are present in mask
+// copy onto dst all properties of src that are set in mask
+// MAYBE: do not transfer properties unset in src?
 function extractTo( dst, src, mask ) {
     for (var k in mask) {
+        if (mask[k] === undefined) continue;
         dst[k] = isHash(mask[k]) && isHash(src[k]) ? extractTo(isHash(dst[k]) ? dst[k] : {}, src[k], mask[k]) : src[k];
     }
     return dst;
