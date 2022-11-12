@@ -579,6 +579,7 @@ module.exports = {
                 if (typeof tests[i] === 'object') {
                     t.notEqual(copy, tests[i]);
                     t.equal(copy.constructor, tests[i].constructor);
+                    t.deepEqual(copy, tests[i]);
                 }
             }
             t.done();

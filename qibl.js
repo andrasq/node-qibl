@@ -1703,6 +1703,7 @@ function flipTo( target, item ) {
 }
 
 // based on minisql utils:
+// copy onto dst all properties of src that are present in mask
 function extractTo( dst, src, mask ) {
     for (var k in mask) {
         dst[k] = isHash(mask[k]) && isHash(src[k]) ? extractTo(isHash(dst[k]) ? dst[k] : {}, src[k], mask[k]) : src[k];
