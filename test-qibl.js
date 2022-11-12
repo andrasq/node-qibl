@@ -3724,6 +3724,34 @@ module.exports = {
         },
     },
 
+    'extractNotTo': {
+        'merges in values': function(t) {
+            t.deepEqual(qibl.extractNotTo({a:1, b:2, c:3}, {a:11, b:22}, {}), {a:11, b:22, c:3});
+            t.deepEqual(qibl.extractNotTo({a:1, b:2}, {a:11, b:{c:33}}, {}), {a:11, b:{c:33}});
+            t.deepEqual(qibl.extractNotTo({a:1, b:{c:3}}, {a:11, b:{c:33}}, {}), {a:11, b:{c:33}});
+            t.done();
+        },
+        'omits copying properties present in mask': function(t) {
+            t.deepEqual(qibl.extractNotTo({}, {a:1, b:2}, {a:0, b:0}), {});
+            t.deepEqual(qibl.extractNotTo({}, {a:1, b:2, c:3}, {a: 0, b: 0}), {c:3});
+            t.deepEqual(qibl.extractNotTo({a:1, b:2}, {a:11, b:{c:33}}, {b:{c:0}}), {a:11, b:{}});
+            t.done();
+        },
+        'merges, retains and overwrites values under control of mask': function(t) {
+            t.deepEqual(qibl.extractNotTo({a:1, b:2}, {a:11, b:{c:33, d:44}}, {b:{c:0}}), {a:11, b:{d:44}});
+            t.deepEqual(qibl.extractNotTo({a:1, b:{c:3, d:4}}, {a:11, b:{c:33, e:55}}, {b:{c:0}}),
+                {a:11, b:{c:3, d:4, e:55}});
+            t.done();
+        },
+        'sets defaults': function(t) {
+            var defaults = function(dst, src) { return qibl.extractNotTo(dst, src, dst) };
+            t.deepEqual(defaults({}, {a:1, b:2}), {a:1, b:2});
+            t.deepEqual(defaults({a:undefined, c:3}, {a:1, b:2}), {a:1, b:2, c:3});
+            t.deepEqual(defaults({a:{b:{c:1}}}, {a:{b:{c:11, d:22}}}), {a:{b:{c:1, d:22}}});
+            t.done();
+        },
+    },
+
     'vinterpolate': {
         'should interpolate fields': function(t) {
             t.equal(qibl.vinterpolate("foobar", "o", []), "foobar");

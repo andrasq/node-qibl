@@ -1139,7 +1139,7 @@ elapsed times as the values.
 Changelog
 ---------
 
-- 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`
+- 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties

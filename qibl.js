@@ -137,6 +137,7 @@ var qibl = module.exports = {
     pairTo: pairTo,
     flipTo: flipTo,
     extractTo: extractTo,
+    extractNotTo: extractNotTo,
     selectField: selectField,
     mapById: mapById,
     groupById: groupById,
@@ -1707,6 +1708,17 @@ function flipTo( target, item ) {
 function extractTo( dst, src, mask ) {
     for (var k in mask) {
         dst[k] = isHash(mask[k]) && isHash(src[k]) ? extractTo(isHash(dst[k]) ? dst[k] : {}, src[k], mask[k]) : src[k];
+    }
+    return dst;
+}
+
+// counterpart to extractTo, copies onto dst all properties of src that are not present in mask
+// The mask is controlled by the contained keys, even if their value is undefined.
+// nb: defaults(dst, src) === extractNotTo(dst, src, dst)
+function extractNotTo( dst, src, mask ) {
+    for (var k in src) {
+        if (mask[k] === undefined) dst[k] = src[k];
+        else if (isHash(mask[k]) && isHash(src[k])) dst[k] = extractNotTo(isHash(dst[k]) ? dst[k] : {}, src[k], mask[k]);
     }
     return dst;
 }
