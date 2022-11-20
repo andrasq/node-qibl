@@ -1486,7 +1486,7 @@ function globRegex( glob, from, to ) {
         else switch (c) {
         case '?': expr += '[^/]'; break;
         case '*': if (glob[i+1] === '*') { expr += '.*'; i++ } else expr += '[^/]*'; break;
-        case '[': incharlist = true; if (glob[i+1] === '^') { expr += '[^'; i++ } else expr += '['; break;
+        case '[': incharlist = true; expr += (glob[i+1] === '^' || glob[i+1] === '!') ? (i++, '[^') : '['; break;
         case '{':
             // rudimentary parse of flat brace expressions that do not contain commas or metacharacters
             var endpos = glob.indexOf('}', i + 1);
@@ -1552,6 +1552,7 @@ function distinct( items, getKey ) {
 }
 function _toString(x) { return typeof x === 'string' ? x : '' + x }
 // quick-and-dirty Map polyfill to use in a pinch, works for string keys (and numbers, sort of)
+// TODO: add .size
 function _Hashmap(keyvals) { for (var ix in keyvals) { var kv = keyvals[ix]; this[kv[0]] = kv[1] } }
 _Hashmap.prototype.set = function(k, v) { this[k] = v; return this }
 _Hashmap.prototype.get = function(k) { return this[k] }

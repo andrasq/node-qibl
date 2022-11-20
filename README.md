@@ -44,7 +44,7 @@ if is an instance of some class.  Tests the object constructor.
 
 ### qibl.isMethodContext( _this )
 
-Test whether the given `this` is from a global (function call) context or a method call context.
+Test whether the given `_this` is from a global (function call) context or a method call context.
 Method calls have a `this` object that is not `null`, not `global` and not `qibl`.
 
 ### qibl.assignTo( target, src1, ... )
@@ -59,10 +59,10 @@ Assign all enumerable own properties of the sources `src` onto `target`, and ret
 
 Recursively copy all properties of the source objects, including inherited properties, onto
 the `target` object.  All nested hashes are copied onto a new hash `{}` so the target
-will not share any sub-object with any of the sources.  Non-hash objects (ie instances of
-classes other than `Object`) are assigned by value.  Returns the `target`.
+will not share any sub-object with any of the sources.  Arrays and non-hash objects (ie
+instances of classes other than `Object`) are assigned by value.  Returns the `target`.
 
-### qibl.getProperty( target, dottedName [,defaultValue] )
+### qibl.getProperty( [target,] dottedName [,defaultValue] )
 
 Retrieve the value of the named property of the target object.  Dots `.` in the property name
 are interpreted as referring to nested sub-objects or sub-sub-objects etc.
@@ -109,7 +109,7 @@ Properties:
         Looping over more than 10k different dotted names might bust the cache.
 - `getProp.clearCache()` - empty the getter cache, discard all getter functions.
 
-### qibl.setProperty( target, dottedName, value )
+### qibl.setProperty( [target,] dottedName, value )
 
 Set a nested property by dotted name.  Dots `.` in the name imply nested objects,
 which will be traversed or created until the actual target is reached.
@@ -434,7 +434,9 @@ expression.  Returns the string with escapes added.
 
 Convert the glob template to a regular expression pattern.  Returns a string suitable for
 passing to `new RegExp(patt)` to construct a regular expression that identifies strings that
-match the glob template.  The glob syntax is the usual `? * ** [...] {,,,}`, with some notes:
+match the glob template.
+
+The glob syntax is the csh-like `? * ** [abc] [^abc] {a,b,c}`, with some notes:
 
 - `?` matches a single character in the string
 - `*` matches zero or more characters, not including `/` pathname separators
@@ -446,7 +448,7 @@ match the glob template.  The glob syntax is the usual `? * ** [...] {,,,}`, wit
   are recognized, but the list contents must obey regexp syntax, not command shell.
 - `[^...]` matches all characters not listed inside the brackets
 - `{,,,}` matches exactly one of the comma-separated alternates.  The alternates must not contain
-  commas `,` or close-brace `}` characters.
+  comma `,` or close-brace `}` characters.
   *Note:* unlike in the command shell, the alternates must not contain nested meta-patterns.
   Currently they are fully escaped in the regex pattern, with no metacharacter expansion so e.g.
   `{*.[ch],*.js}` matches the literal strings `"*.[ch]"` or `"*.js"`, but in the future this
@@ -1165,7 +1167,8 @@ Changelog
 ---------
 
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
-           fix `extractTo` to not copy the property if mask is set to `undefined`
+           fix `extractTo` to not copy the property if mask is set to `undefined`, fix `globRegex` sh-style
+           `[!abc]` charlist negation
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties

@@ -3226,6 +3226,7 @@ module.exports = {
                 ['foo.[ch]', '^foo\\.[ch]$'],
                 ['foo.[ch],v', '^foo\\.[ch],v$'],
                 ['foo.[^ch]', '^foo\\.[^ch]$'],
+                ['foo.[!ch]', '^foo\\.[^ch]$'],
                 ['foo.{cc,h}', '^foo\\.(cc|h)$'],
                 ['foo.{cc,h},v', '^foo\\.(cc|h),v$'],
                 ['{src,test}/*.[ch]', '^(src|test)/[^/]*\\.[ch]$'],
