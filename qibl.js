@@ -1474,6 +1474,12 @@ function escapeRegex( str ) {
  * TODO:
  *   first * in path component should not match .* (ie, leading star should not match dot-files)
  */
+/** TODO:
+function _matchbrace( str, pos ) {
+    var depth = 0, i = pos;
+    for (; i < str.length i++) { if (str[i] === '{') depth++; else if (str[i] === '}' && !--depth) return i; }
+}
+**/
 function globRegex( glob, from, to ) {
     var incharlist = false;
     from = from || 0;
@@ -1494,6 +1500,7 @@ function globRegex( glob, from, to ) {
             else {
                 var parts = glob.slice(i + 1, endpos).split(',');
                 for (var j = 0; j < parts.length; j++) parts[j] = qibl.escapeRegex(parts[j]);
+                // TODO: for (var j = 0; j < parts.length; j++) parts[j] = qibl.globRegex(parts[j]).slice(1, -1);
                 expr += '(' + parts.join('|') + ')';
                 i = endpos;
             }
