@@ -156,6 +156,7 @@ var qibl = module.exports = {
     makeError: makeError,
     microtime: microtime,
     parseMs: parseMs,
+    Timebase: Timebase,
     QuickId: QuickId,
     makeGetId: makeGetId,
     require: require, // for stubbing
@@ -274,7 +275,7 @@ function setProperty( target, dottedName, value, mode ) {
 
     if (dottedName.indexOf('.') < 0 && !mode) { target[dottedName] = value; return target; }
 
-    // note: split used to be much faster before node-v12
+    // it is mostly faster to split the dottedName than to slice fields one at a time
     var path = dottedName.split('.');
     for (var item=target, i=0; i<path.length-1; i++) {
         var field = path[i];
@@ -1857,6 +1858,7 @@ function Timebase() {
     this.tbTime = 0; this.tbCalls = 0; this.tbTimer = 0;
     this.clear = (function() { this.tbTime = 0; this.tbCalls = 0; this.tbTimer = 0 }).bind(this);
 }
+Timebase.prototype.clear = null;
 Timebase.prototype.getNewerTimestamp = function getNewerTimestamp(when) {
     if (when < this.tbTime && this.tbCalls++ < 50) return this.tbTime;
     this.tbCalls = 0;

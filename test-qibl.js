@@ -348,7 +348,7 @@ module.exports = {
             t.done();
         },
 
-        'should set property with mode': function(t) {
+        'should set mode and property': function(t) {
             var ret;
 
             // enumerable
@@ -4034,6 +4034,25 @@ module.exports = {
             var x, times = ['1h', '30s'];
             for (var i=0; i<1e7; i++) x = qibl.parseMs(times[i % times.length]);
             t.done();
+        },
+    },
+
+    'Timebase': {
+        'getNewerTimestamp': {
+            'returns the current ms': function(t) {
+                var tb = new qibl.Timebase();
+                // align to ms boundary to allow a whole ms for the test to complete
+                tb.getNewerTimestamp(Date.now());
+                for (var i = 0; i < 120; i++) t.equal(tb.getNewerTimestamp(0), Date.now());
+                t.done();
+            },
+            'waits until time advances': function(t) {
+                var tb = new qibl.Timebase();
+                var now = Date.now();
+                var ts = tb.getNewerTimestamp(now + 1);
+                t.equal(Date.now(), now + 2);
+                t.done();
+            },
         },
     },
 

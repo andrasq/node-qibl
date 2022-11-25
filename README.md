@@ -441,7 +441,7 @@ The glob syntax is the csh-like `? * ** [abc] [^abc] {a,b,c}`, with some notes:
 - `?` matches a single character in the string
 - `*` matches zero or more characters, not including `/` pathname separators
   *Note:* currently a `*` as the start of a pathname component also matches dot-files,
-  but in the future this may be changed.  Dot files can be explicitly matched with `.*`
+  but in the future this may be changed.  Dot files are normally explicitly matched with `.*`
 - `**` matches zero or more characters, including pathname separators
 - `[...]` matches the characters listed inside the brackets.  Character ranges `a-z` are ok.
   *Note:* character lists are passed to the regex verbatim, without any escaping.  Escaped `\]` and `\\`
@@ -1118,6 +1118,16 @@ Only handles the standard 9-char timestamp / 4-char sequence id formats.
     new QuickId().parseId('1fkbndu7p-sys2-0008');
     // => { time: 1636776212729, sys: '-sys2-', seq: 8 }
 
+### timebase = new Timebase( )
+
+Fast source of approximate timestamps designed for efficient back-to-back calls.
+Reuses the current timestamp for up to 5 milliseconds or 50 calls, whichever occurs first.
+
+#### timebase.getNewerTimestamp( when )
+
+Wait until the time has passed `when` milliseconds, and return the new current ms.
+The wait is blocking, this call is intended for finding ms transition boundaries not sleeping.
+
 ### new Stopwatch( )
 
 Restartable nanosecond resolution stopwatch timer.  Stopwatch timers check the time-of-day clock
@@ -1168,7 +1178,7 @@ Changelog
 
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
            fix `extractTo` to not copy the property if mask is set to `undefined`, fix `globRegex` sh-style
-           `[!abc]` charlist negation
+           `[!abc]` charlist negation, expose `Timebase`
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties
