@@ -164,6 +164,8 @@ var qibl = module.exports = {
     errorToObject: errorToObject,
     objectToError: objectToError,
     Stopwatch: Stopwatch,
+    Dlist: DlistList,
+    DlistNode: DlistNode,
     // _configure: _configure,
 };
 
@@ -1971,6 +1973,37 @@ Stopwatch.prototype.report = function report() { return this.marks }
 // Stopwatch.prototype.reset = function reset() { (Object.assign || qibl.assignTo)(this, new Stopwatch()) }
 Stopwatch.prototype.reset = function reset() { this.started = qibl.microtime(), this.elapsed = 0, this.marks = {} }
 
+/*
+ * doubly-linked circular list, bascally a simplified qdlist
+ * Head is at list.next, tail at list.prev.
+ */
+function DlistList() {
+    this.prev = this.next = this; // set next before pref
+}
+DlistList.prototype.value2 = DlistList.prototype.value = DlistList.prototype.prev = DlistList.prototype.next = undefined;
+DlistList.prototype.insert = function insert( node, prev, next ) {
+    prev.next = next.prev = node;       // prev --> node <-- next
+    node.prev = prev; node.next = next; // prev <-- node --> next
+    return node;
+}
+DlistList.prototype.remove = function remove( node ) {
+    node.next.prev = node.prev;
+    node.prev.next = node.next;
+    return node;
+}
+DlistList.prototype.push = function push(node) { return this.insert(node, this.prev, this) };
+DlistList.prototype.shift = function shift() { return this.next !== this ? this.remove(this.next) : undefined };
+DlistList.prototype.forEach = function forEach(visitor) {
+    for (var ix = 0, node = this.next; node !== this; ix++, node = node.next) visitor(node, ix, this);
+}
+DlistList.prototype._iterator = function() {
+    var list = this, node = this;
+    var iter = { next: function() { node = node.next; return { value: node, done: node === list } } };
+    return iter;
+}
+eval('if (typeof Symbol !== "undefined") eval("DlistList.prototype[Symbol.iterator] = DlistList.prototype._iterator");');
+function DlistNode() {}
+DlistNode.prototype.prev = DlistNode.prototype.next = undefined; // define (assign) next before prev
 
 /*
  * hook for testing: compile and run the function in local file context,

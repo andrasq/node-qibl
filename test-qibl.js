@@ -4313,4 +4313,107 @@ module.exports = {
             t.done();
         },
     },
+
+    'Dlist': {
+        before: function(done) {
+            qibl.Dlist.prototype.summarize = function summarize( ) {
+                var nodes = [];
+                this.forEach(function(node) { nodes.push([node.prev.value2 || 'NIL', node.value2, node.next.value2 || 'NIL']) });
+                return nodes;
+            }
+            qibl.Dlist.prototype.validate = function validate( ) {
+                var list = this, head = list.next, tail = list.prev;
+                for (var prev = list, ix = 0, node = prev.next; node !== list; ix++, prev = node, node = node.next) {
+                    if (node.prev !== prev) throw new Error('node.prev !== prev');
+                    if (prev.next !== node) throw new Error('prev.next !== node');
+                    if (node.prev.next !== node) throw new Error('prev.next !== node');
+                    if (node.next.prev !== node) throw new Error('next.prev !== node'); // <-- this finds linkage errors
+                }
+                for (var nextNodes = [], ix = 0, node = this.next; node !== this; ix++, node = node.next) {
+                    if (nextNodes.indexOf(node) >= 0) throw new Error('cycle in ' + ix + ' via next, duplicate node ' + node.value2 + '=' + node.value);
+                    nextNodes.push(node);
+                }
+                for (var prevNodes = [], ix = 0, node = this.prev; node !== this; ix++, node = node.prev) {
+                    if (prevNodes.indexOf(node) >= 0) throw new Error('cycle in ' + ix + ' via prev, duplicate node ' + node.value2 + '=' + node.value);
+                    prevNodes.push(node);
+                }
+                require('assert').equal(nextNodes.length, prevNodes.length, 'prev/next lists same length');
+            }
+            qibl.Dlist.prototype.toArray = function toArray() {
+                for (var nodes = [], node = this.next; node !== this; node = node.next) nodes.push(node);
+                return nodes;
+            }
+            done();
+        },
+        beforeEach: function(done) {
+            function Node(key) { this.k = key }
+            qibl.inherits(Node, qibl.DlistNode);
+            this.list = new qibl.Dlist();
+            this.list.insert(new Node('c'), this.list, this.list.next);
+            this.list.insert(new Node('b'), this.list, this.list.next);
+            this.list.insert(new Node('a'), this.list, this.list.next);
+            this.listToArray = function(list) { return list.toArray().map(function(node) { return node.k }); }
+            this.list.validate();
+            done();
+        },
+
+        'exports DlistNode': function(t) {
+            var node = new qibl.DlistNode();
+            var properties = [];
+            for (var prop in node) properties.push(prop);
+            t.deepEqual(properties, ['next', 'prev']);
+            t.done();
+        },
+        'creates an empty list': function(t) {
+            var list = new qibl.Dlist();
+            t.equal(list.next, list);
+            t.equal(list.prev, list);
+            t.done();
+        },
+        'can insert nodes': function(t) {
+            var prev = this.list.next.next; // 'b'
+            var next = this.list.prev; // 'c'
+            this.list.insert({ k: 'bb' }, prev, next);
+            this.list.validate();
+            t.deepEqual(this.listToArray(this.list), ['a', 'b', 'bb', 'c']);
+            t.done();
+        },
+        'can remove nodes': function(t) {
+            var node = this.list.next.next; // 'b'
+            this.list.remove(node);
+            this.list.validate();
+            t.deepEqual(this.listToArray(this.list), ['a', 'c']);
+            t.done();
+        },
+        'can push nodes': function(t) {
+            var node = { x: 1234 }, tail = this.list.prev;
+            var spy = t.spyOnce(this.list, 'insert');
+            this.list.push(node);
+            t.assert(spy.called);
+            t.done();
+        },
+        'can shift nodes': function(t) {
+            t.equal(this.list.shift().k, 'a');
+            t.equal(this.list.shift().k, 'b');
+            t.equal(this.list.shift().k, 'c');
+            t.strictEqual(this.list.shift(), undefined);
+            t.strictEqual(this.list.shift(), undefined);
+            t.done();
+        },
+        'can iterate with forEach': function(t) {
+            var nodes = [], testList = this.list;
+            this.list.forEach(function(node, ix, list) {
+                t.equal(ix, nodes.length);
+                t.equal(list, testList);
+                nodes.push(node);
+            })
+            t.deepEqual(nodes.map(function(node) { return node.k }), ['a', 'b', 'c']);
+            t.done();
+        },
+        'can iterate with iterator': function(t) {
+            if (typeof Symbol === 'undefined' || !Array.from) t.skip();
+            t.deepEqual(Array.from(this.list).map(function(node) { return node.k }), ['a', 'b', 'c']);
+            t.done();
+        },
+    }
 }

@@ -1180,13 +1180,62 @@ overwrites the associated timestamp.
 Return all tagged timestamps as an object with the labels as the keys and the associated
 elapsed times as the values.
 
+### new qibl.Dlist( )
+
+Barebones doubly-linked circular list similar to [`qdlist`](https://npmjs.org/package/qdlist).
+Each node on the list has properties `next` and `prev` linking to the next and previous node in
+the list, respectively.  The list is itself a node with its `next` property pointing to the head
+of the list, and `prev` to the tail.  For bests performance each node on the list should be
+derived from `qibl.DlistNode` or have its first two properties, in order, be `next` and `prev`.
+
+A Dlist is intentionally minimalThe constructor does not auto-initia
+
+    function KeyVal(key, val) { this.key = key; this.val = val }
+    qibl.inherits(KeyVal, qibl.DlistNode);
+
+    var dlist = new qibl.Dlist();
+    dlist.push(new KeyVal('a', 1));
+    dlist.push(new KeyVal('b', 2));
+    var secondKey = [...dlist][1].key;
+    // => 'b'
+
+#### dlist.insert( node, prev, next )
+
+Link the node into the list to follow `prev` and precede `next`.
+
+#### dlist.remove( node )
+
+Unlink the node from the list, linking `node.next` to immediate follow `node.prev`.  A node must
+not be removed if not on a list.
+
+#### dlist.push( node )
+
+Convenience method to link the node onto the tail of the list.  Returns `undefined` if the list is empty.
+Same as `dlist.insert(node, dlist.prev, dlist)`.
+
+#### dlist.shift( )
+
+Convenience method to retrieve the node at the head of the list.
+Same as `dlist.next === dlist ? dlist.remove(dlist.next) : undefined`.
+
+#### dlist.forEach( visitor(node, index, list) )
+
+List iterator similar to `[].forEach`, walks the list from head to tail and calls the `visitor`
+function with each node in turn.  The visitor is passed the node, the index of the node 0..N-1
+on the list, and the list itself.
+
+#### dlist._iterator, dlist[Symbol.iterator]
+
+A Dlist is iteratable with `for ... of` or with the iterator returned by its `_iterator` method.
+
 
 Changelog
 ---------
 
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
            fix `extractTo` to not copy the property if mask is set to `undefined`, fix `globRegex` sh-style
-           `[!abc]` charlist negation, expose `Timebase`, `noTimeout` option to `retry`
+           `[!abc]` charlist negation, expose `Timebase`, `noTimeout` option to `retry`, new `Dlist`
+           doubly-linked circular list
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties
