@@ -2964,12 +2964,25 @@ module.exports = {
 
         'returns error on initial-call timeout': function(t) {
             var ncalls = 0;
-            qibl.retry(function() { return 10 }, 4, function(cb) { ncalls += 1 }, function(err, ret) {
+            qibl.retry(function() { return 10 }, 4, function hang(cb) { ncalls += 1 }, function(err, ret) {
                 t.ok(err);
                 t.equal(err.message, 'timeout');
                 t.equal(ncalls, 1);
                 t.done();
             })
+        },
+
+        'optionally does not time out still-running call': function(t) {
+            var t1 = Date.now();
+            qibl.retry(function(){ return 10 }, 2, function hang(cb) { setTimeout(cb, 5) }, { noTimeout: true },
+                function(err, ret) {
+                    var t2 = Date.now();
+                    t.ifError(err);
+                    t.ok(t2 >= t1 + 5); // first call was allowed to finish
+                    t.ok(t2 < t1 + 8);  // was not called again
+                    t.done();
+                }
+            )
         },
 
         'returns actual error on second-call timeout': function(t) {

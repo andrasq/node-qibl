@@ -1330,7 +1330,8 @@ function _diffit2( target, key, v1, v2 ) {
  * At least two attempts are made, one at the beginning and one at timeout,
  * unless timeout comes before the first call finishes.
  */
-function retry( getDelay, timeout, func, callback ) {
+function retry( getDelay, timeout, func, options, callback ) {
+    if (!callback) { callback = options; options = {} }
     var time = 0, retries = 0, timer = null, returnCount = 0, actualErr = undefined;
     var timeoutErr = {message: 'timeout', code: 'TIMEOUT'};
     function finish(err, result, result2) {
@@ -1341,7 +1342,7 @@ function retry( getDelay, timeout, func, callback ) {
         }
         if (!returnCount++) arguments.length > 2 ?  callback(err, result, result2) : callback(err, result);
     }
-    timer = setTimeout(finish, timeout + 1, timeoutErr);        // time out if func() hangs
+    if (!options.noTimeout) timer = setTimeout(finish, timeout + 1, timeoutErr);  // time out if func() hangs
     func(function _loop(err, result, result2) {
         if (err !== null && err !== undefined) actualErr = err;
         if (!err || err === timeoutErr) return arguments.length > 2 ? finish(err, result, result2) : finish(err, result);

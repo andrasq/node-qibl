@@ -1016,11 +1016,13 @@ matches the `undefined` value.
     qibl.diffarray([1, { a: 1 }], [1, { a: 1, b: 2 }]);
     // => [ , { b: 2 }]
 
-### retry( getDelay(retryNum), timeoutMs, func(cb(err, res, res2)), callback(err, res, res2) )
+### retry( getDelay(), timeoutMs, func(cb), [options,] callback(err, res, res2) )
 
 Repeatedly call `func` until it succeeds or have tried for `timeoutMs` milliseconds.  Pauses
-`getDelay()` backoff ms between retry attempts.  The first `retryNum` to `getDelay` is `1`.
-Returns the result of the last call to `func`, either two result values or the failure Error.
+`getDelay(retryNum)` ms between retry attempts.  The first `retryNum` passed to `getDelay` is `1`.
+`func()` is invoked with a callback `cb(err, res, res2)` that expects an error object `err` and
+up to two result values `res` and `res2`.
+Calls its `callback` with the result of the last call to `func`: any error and up to two result values.
 Makes an initial attempt to `func()` when called, then retry attempts separated by delays,
 and a final attempt at the very end of the timeout period after a possibly shortened delay.
 
@@ -1028,6 +1030,12 @@ Starting with v1.19.4 the `timeoutMs` is enforced with a `setTimeout()` timer, a
 elapsed time.  If `func()` returns immediately, then the sum of delays will be (close to)
 the timeoutMs, but if `func` takes a while to fail the number of attempts will be fewer.  One
 final attempt is made just before timeout unless already timed out.
+
+Starting with v1.22.0 the `options` object, if provided, can specify
+
+- `noTimeout` - do not error out long-running calls to `func`.  This effectively switches
+  the behavior back to the initial implementation that only timed out between calls to
+  `func`, never while `func` was running.
 
 ### makeGetId( uniqueSystemId )
 
@@ -1178,7 +1186,7 @@ Changelog
 
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
            fix `extractTo` to not copy the property if mask is set to `undefined`, fix `globRegex` sh-style
-           `[!abc]` charlist negation, expose `Timebase`
+           `[!abc]` charlist negation, expose `Timebase`, `noTimeout` option to `retry`
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
            to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties
