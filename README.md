@@ -1232,6 +1232,8 @@ A Dlist is iteratable with `for ... of` or with the iterator returned by its `_i
 Changelog
 ---------
 
+- 1.22.1 - fix forEachProperty to return function properties, document groupBy
+           document `makeIterator`, `setIterator`, `getIterator`
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
            fix `extractTo` to not copy the property if mask is set to `undefined`, fix `globRegex` sh-style
            `[!abc]` charlist negation, expose `Timebase`, `noTimeout` option to `retry`, new `Dlist`

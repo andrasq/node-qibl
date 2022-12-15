@@ -462,7 +462,7 @@ function omitUndefined( item ) {
 
 function forEachProperty( hash, visitor ) {
     // only iterate objects / arrays / Buffers, not strings
-    var keys = hash && typeof hash === 'object' ? Object.keys(hash) : [];
+    var keys = hash && (typeof hash === 'object' || typeof hash === 'function') ? qibl.keys(hash) : [];
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
         visitor(hash[key], key, hash);
