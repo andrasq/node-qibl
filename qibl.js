@@ -50,6 +50,7 @@ var qibl = module.exports = {
     setProperty: setProperty,
     getLastDefined: getLastDefined,
     inherits: inherits,
+    abstract: abstract,
     derive: derive,
     clone: clone,
     reparent: reparent,
@@ -333,6 +334,28 @@ function inherits( derived, base ) {
     // util.inherits does not alter it, we crash
     derived.prototype = qibl.reparent({}, derived, base.prototype).__proto__;
 }
+
+function abstract( name /* ,VARARGS */ ) {
+    var fn, argNames = Array.prototype.slice.call(arguments, 1).join(',');
+    fn = eval('true && ' + util.format(
+        'function %s(%s) { throw new Error("abstract method %s: not implemented") }', name, argNames, name));
+    fn._isPureVirtual = true;
+    return fn;
+}
+
+/**
+function implements_( instance, baseClass ) {
+    var derivedClass = instance.prototype || instance.__proto__;
+    for (var method in baseClass.prototype || baseClass.__proto__) {
+        if (typeof derivedClass[method] !== baseClass[method]) throw new Error(method + ": types differ");
+        if (typeof baseClass[method] === 'function') {
+            if (derivedClass[method].length !== baseClass[method].length) throw new Error(method + ": arguments differ");
+            if (derivedClass[method]._isPureVirtual) throw new Error(method + ": abstract method not implemented");
+        }
+    }
+    return true;
+}
+**/
 
 // derive a subclass that inherits from the parent but customizes its own prototype
 // note that is very slow to set-and-call a method in the constructor

@@ -493,6 +493,43 @@ module.exports = {
         },
     },
 
+    'abstract': {
+        'returns a function': function(t) {
+            var fn = qibl.abstract('testT');
+            t.equal(typeof fn, 'function');
+            t.done();
+        },
+        'returned function is tagged _isPureVirtual': function(t) {
+            var fn = qibl.abstract('testT');
+            t.strictEqual(fn._isPureVirtual, true);
+            t.done();
+        },
+        'returned function throws': function(t) {
+            var fn = qibl.abstract('testT');
+            t.throws(function() { fn() }, /abstract .* testT.* not implemented/);
+            t.done();
+        },
+        'returned function has specified name and parameter count': function(t) {
+            var fn0 = qibl.abstract('test0');
+            t.equal(fn0.name, 'test0');
+            t.equal(fn0.length, 0);
+
+            var fn1 = qibl.abstract('test1', 'a1');
+            t.equal(fn1.name, 'test1');
+            t.equal(fn1.length, 1);
+
+            var fn2 = qibl.abstract('test2', 'a1', 'a2');
+            t.equal(fn2.name, 'test2');
+            t.equal(fn2.length, 2);
+
+            var fn5 = qibl.abstract('test5', 'a1', 'a2', 'a3', 'a4', 'a5');
+            t.equal(fn5.name, 'test5');
+            t.equal(fn5.length, 5);
+
+            t.done();
+        },
+    },
+
     'derive': {
         'returns a constructor': function(t) {
             function Foo() {};
