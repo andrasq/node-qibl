@@ -230,6 +230,50 @@ Returns a mapping of ids to lists of objects set on the `target` object, `{}` by
     qibl.mapById(items, 'id')
     // => { a: [{id: 'a', v: 1}, {id: 'a', v: 2}], b: [{id: 'b'}] }
 
+### qibl.groupBy( items, getKey(item) [,target = {}] )
+
+Group the items by their `getKey` value.  Returns the `target` hash with arrays of items
+attached, each array indexed by its key value.
+
+### qibl.makeIterator( step(state, object, result) [,makeState(object)] )
+
+Construct an iterator that uses the `step` next-element function to traverse the `object`.  `Step`
+is passed the current state, the item being iterated, and the `result` to hold the `value` and
+`done` return values.  Note that `step` is invoked as a method on `result`, ie inside the `step`
+function `result === this`.
+
+`makeState` is an optional function that builds and initializes the iterator state.
+It is passed the `object` being iterated.  The default state is an empty object `{}`.
+
+Note that the returned iterator must be invoked as a method call on the iterated object
+to bind the object to the iterator state.
+
+    var arr = [1, 2, 3];
+    var iterator = qibl.makeIterator(
+        function(state, arr, result) {
+            result.done = state.ix >= state.len;
+            result.value = arr[state.ix++];
+        },
+        function(arr) {
+            return { len: arr.length, ix: 0 };
+        }
+    ))
+    qibl.setIterator(arr, iterator);
+
+    assert.equal(iterator, arr[Symbol.iterator]);
+    assert.notEqual([...arr], arr);
+    assert.deepEqual([...arr], arr);
+
+### qibl.setIterator( obj, iterator )
+
+Node-version safe way to attach an iterator to an object / prototype.  Assigns the
+`obj[Symbol.iterator]` property if the nodejs version defines `Symbol`, else sets `obj._iterator`.
+
+### qibl.getIterator( obj )
+
+Node-version safe way to retrieve the iterator of an object.  Returns `obj[Symbol.iterator]` if
+the nodejs version defines `Symbol`, else returns `obj._iterator`.
+
 ### qibl.keys( object)
 
 Return an array with the names of the own properties of the object.  Same as `Object.keys`,
@@ -1232,7 +1276,7 @@ A Dlist is iteratable with `for ... of` or with the iterator returned by its `_i
 Changelog
 ---------
 
-- 1.22.1 - fix forEachProperty to return function properties, document groupBy
+- 1.22.1 - fix forEachProperty to return function properties, document groupBy,
            document `makeIterator`, `setIterator`, `getIterator`
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
            fix `extractTo` to not copy the property if mask is set to `undefined`, fix `globRegex` sh-style
