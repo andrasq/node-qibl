@@ -274,6 +274,9 @@ Node-version safe way to attach an iterator to an object / prototype.  Assigns t
 Node-version safe way to retrieve the iterator of an object.  Returns `obj[Symbol.iterator]` if
 the nodejs version defines `Symbol`, else returns `obj._iterator`.
 
+Note that the returned function is no longer bound to its object instance.  To invoke it
+must be bound again, as when applied to the object e.g. `qibl.getIterator(obj).call(obj)`.
+
 ### qibl.keys( object)
 
 Return an array with the names of the own properties of the object.  Same as `Object.keys`,
