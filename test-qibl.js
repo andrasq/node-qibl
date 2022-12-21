@@ -881,6 +881,13 @@ module.exports = {
             t.deepEqual(contents, [['a', 1], ['b', 2]]);
             t.done();
         },
+        'can delete': function(t) {
+            var map = new qibl._Hashmap([['a', 1], ['b', 2], ['c', 3]]);
+            map.delete('b');
+            t.deepEqual(map.keys(), ['a', 'c']);
+            t.deepEqual(map.values(), [1, 3]);
+            t.done();
+        },
     },
 
     'concat2 should concatenate arrays': function(t) {

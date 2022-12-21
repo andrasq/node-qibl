@@ -1593,6 +1593,7 @@ _Hashmap.prototype.get = function(k) { return this[k] }
 _Hashmap.prototype.keys = function() { return qibl.keys(this) }
 _Hashmap.prototype.values = function() { return qibl.values(this) }     // Map returns an iterator, we return array
 _Hashmap.prototype.forEach = function(visitor) { forEachProperty(this, visitor) }
+_Hashmap.prototype.delete = function(k) { delete this[k] }
 
 function groupBy( items, getKey, target ) {
     target = target || {};
@@ -2003,7 +2004,7 @@ Stopwatch.prototype.reset = function reset() { this.started = qibl.microtime(), 
 function DlistList() {
     this.prev = this.next = this; // set next before pref
 }
-DlistList.prototype.value2 = DlistList.prototype.value = DlistList.prototype.prev = DlistList.prototype.next = undefined;
+DlistList.prototype.prev = DlistList.prototype.next = undefined;
 DlistList.prototype.insert = function insert( node, prev, next ) {
     prev.next = next.prev = node;       // prev --> node <-- next
     node.prev = prev; node.next = next; // prev <-- node --> next
@@ -2021,8 +2022,7 @@ DlistList.prototype.forEach = function forEach(visitor) {
 }
 DlistList.prototype._iterator = function() {
     var list = this, node = this;
-    var iter = { next: function() { node = node.next; return { value: node, done: node === list } } };
-    return iter;
+    return { next: function() { node = node.next; return { value: node, done: node === list } } };
 }
 eval('if (typeof Symbol !== "undefined") eval("DlistList.prototype[Symbol.iterator] = DlistList.prototype._iterator");');
 function DlistNode() {}
@@ -2034,7 +2034,6 @@ DlistNode.prototype.prev = DlistNode.prototype.next = undefined; // define (assi
  */
 /**
 function _configure( fn ) {
-    fn = eval('true && ' + fn);
-    return fn();
+    return eval('fn = ' + fn)();
 }
 **/
