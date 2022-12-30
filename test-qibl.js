@@ -4094,6 +4094,34 @@ module.exports = {
         },
     },
 
+    'timeit': {
+        'times loops run for count': function(t) {
+            var x, timings = qibl.timeit(100, function(i) { x = i });
+            t.equal(timings[0], 100);
+            t.ok(timings[1] > 0);
+            t.ok(timings[2] > 0);
+            t.done();
+        },
+        'times loops run for duration': function(t) {
+            var t1 = qibl.microtime();
+            var x, timings = qibl.timeit(.002, function(i) { x = i });
+            var t2 = qibl.microtime();
+            t.ok(t2 - t1 >= .002);
+            t.ok(timings[0] > 10000);
+            t.ok(timings[1] > 0);
+            t.ok(timings[2] > 0);
+            t.done();
+        },
+        'formats results': function(t) {
+            var str = qibl.timeit.formatRate(123400, .0567, .0123);
+            t.equal(str, '123.400k in 44.40 of 56.70 ms: 2.7793m/s');
+            // overhead is optional
+            var str2 = qibl.timeit.formatRate(100, .456);
+            t.equal(str2, '100 in 456.00 of 456.00 ms: 219.2982/s');
+            t.done();
+        },
+    },
+
     'Timebase': {
         'getNewerTimestamp': {
             'returns the current ms': function(t) {

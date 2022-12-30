@@ -157,6 +157,7 @@ var qibl = module.exports = {
     makeError: makeError,
     microtime: microtime,
     parseMs: parseMs,
+    timeit: timeit,
     Timebase: Timebase,
     QuickId: QuickId,
     makeGetId: makeGetId,
@@ -1880,6 +1881,41 @@ function parseMs( interval ) {
     return lastval !== undefined ? ms : NaN; // NaN if incorrect format, else a number
 }
 
+var _timeitOverhead = 0;
+function timeit( nloops, func ) {
+    if (!_timeitOverhead) timeit.calibrate();
+    var t2, t1 = qibl.microtime(), maxTime = 1e99;
+    if (nloops % 1) (maxTime = nloops, nloops = 1e99);
+    for (var i = 0; i < nloops; i += 100) {
+        for (var j = 0; j < 100 && i + j < nloops; j++) func(i + j);
+        if ((t2 = qibl.microtime()) - t1 >= maxTime) { nloops = i + j; break; }
+    }
+    return [nloops, t2 - t1, _timeitOverhead * nloops]; // count, elapsed, total overhead
+}
+// the calibration functions of (_tmp = i * i) match the loop overhead hand timings.
+// It is presumed that the timed functions will also assign for an external side-effect.
+var _tmp;
+timeit.calibrate = function calibrate() {
+    function mockFunc(i) { _tmp = i * i }
+    function mockLoop() { var i, j; for (i=0; i<1e6; i+=100) { for (j=0; j<100; j++) _tmp = i * i; qibl.microtime() } }
+    _timeitOverhead = 1;
+    return _timeitOverhead = (timeit(0.8e6, mockFunc)[1] - timeit(1, mockLoop)[1] + _tmp - _tmp) / 0.8e6;
+}
+timeit.formatRate = function formatRate( count, elapsed, overhead ) {
+    return util.format("%s in %s of %s ms: %s/s", timeit.autorangeValue(count),
+        ((elapsed - (overhead || 0)) * 1000).toFixed(2), ((elapsed) * 1000).toFixed(2),
+        timeit.autorangeValue(count / (elapsed - (overhead || 0)), 4))
+}
+timeit.autorangeValue = function scaleRate(value, precision) {
+    var _ranges   = [1e9, 1e6, 1e3, -Infinity];
+    var _suffixes = ['g', 'm', 'k', ''];
+    for (var suffix = '', i=0; i<_ranges.length; i++) {
+        if (value >= _ranges[i]) { suffix = _suffixes[i]; if (suffix) value /= _ranges[i]; break; }
+    }
+    return value.toFixed((value === Math.floor(value)) ? 0 : (precision || 3)) + suffix;
+}
+
+
 // source of very fast monotonically increasing not-quite-realtime timestamps, vaguely like qtimebase
 function Timebase() {
     this.tbTime = 0; this.tbCalls = 0; this.tbTimer = 0;
@@ -1953,6 +1989,7 @@ Config.fetchConfig = function(dirname, filename, loaders) {
 function getConfig( options ) {
     options = options || {};
     var configDir = options.dir || process.cwd() + '/config';
+    if (configDir[0] !== '/') configDir = process.cwd() + '/' + configDir;
     var env = options.env || process.env.NODE_ENV || 'development';
     var envConf, conf = new Config()
         ._merge(Config.fetchConfig(configDir, 'default', options.loaders))

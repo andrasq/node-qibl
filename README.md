@@ -1279,6 +1279,8 @@ A Dlist is iteratable with `for ... of` or with the iterator returned by its `_i
 Changelog
 ---------
 
+- 1.22.2 - fix `getConfig` to interpret relative paths against the current working directory,
+           new experimental `timeit`, `timeit.autorageValue`, `timeit.formatRate`
 - 1.22.1 - fix forEachProperty to return function properties, document groupBy,
            document `makeIterator`, `setIterator`, `getIterator`
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
