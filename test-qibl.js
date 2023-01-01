@@ -4302,9 +4302,9 @@ module.exports = {
     },
 
     'errorToObject': {
-        'retains properties and sets __ctor': function(t) {
+        'retains properties and sets __errorCtor': function(t) {
             var obj = qibl.errorToObject(qibl.makeError({ code: 'etest' }, 'test error'));
-            t.strictEqual(obj.__ctor, 'Error');
+            t.strictEqual(obj.__errorCtor, 'Error');
             t.strictEqual(obj.message, 'test error');
             t.strictEqual(obj.code, 'etest');
             t.strictEqual(obj.syscall, undefined);
@@ -4313,7 +4313,7 @@ module.exports = {
 
         'sets constructor': function(t) {
             var obj = qibl.errorToObject(new TypeError('test type err'));
-            t.strictEqual(obj.__ctor, 'TypeError');
+            t.strictEqual(obj.__errorCtor, 'TypeError');
             t.strictEqual(obj.message, 'test type err');
             t.done();
         },
@@ -4322,12 +4322,15 @@ module.exports = {
     'objectToError': {
         'retains properties': function(t) {
             var err1 = qibl.makeError({ code: 'etest', a: 123 }, 'test error');
+            var err1names = Object.getOwnPropertyNames(err1).sort();
             var obj = qibl.errorToObject(err1);
-            var err = qibl.objectToError(obj);
-            t.strictEqual(err.message, 'test error');
-            t.strictEqual(err.code, 'etest');
-            t.strictEqual(err.a, 123);
-            t.ok(!('syscall' in err));
+            var err2 = qibl.objectToError(obj);
+            var err2names = Object.getOwnPropertyNames(err2).sort();
+            t.strictEqual(err2.message, 'test error');
+            t.strictEqual(err2.code, 'etest');
+            t.strictEqual(err2.a, 123);
+            t.ok(!('syscall' in err2));
+            t.deepEqual(err2names, err1names);
             t.done();
         },
 

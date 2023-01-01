@@ -1999,17 +1999,27 @@ function getConfig( options ) {
 }
 
 // convert the error with its non-enumerable fields into a serializable object (adapted from qinvoke)
-var hiddenErrorFields = { message: 1, name: 1, code: 1, errno: 1, syscall: 1, path: 1, address: 1, port: 1, stack: 1 };
+// note that hiddenErrorFields other than stack, message are enumerable own properties when set
+// node v0.8 and v0.10 have two other hidden error properties, set to undefined: `arguments` and `type`
+// some possible error fields: stack, message, name, code, errno, syscall, path, address, fport
+// (see the documentation for a full list, eg https://nodejs.org/docs/latest-v12.x/api/errors.html)
+var hiddenErrorFields = { message: 1, stack: 1, arguments: 1, type: 1 };
 function errorToObject( err ) {
     if (!(err instanceof Error)) return err;
-    return qibl.assignTo({}, err, qibl.omitUndefined(qibl.extractTo({}, err, hiddenErrorFields)),
-        { __ctor: err.constructor.name });
+    return qibl.omitUndefined(Object.getOwnPropertyNames(err)
+        .reduce(function(obj, key) { obj[key] = err[key]; return obj }, { __errorCtor: err.constructor.name }));
 }
+// convert an error object back into an Error instance (see also qinvoke)
+function UnknownError() {}; qibl.inherits(UnknownError, Error);
 function objectToError( obj ) {
-    var err = qibl.assignTo(new (obj.__ctor && global[obj.__ctor] || Error)('objectToError'), qibl.omitUndefined(obj));
-    delete err.__ctor;
+    var err = new (obj.__errorCtor && global[obj.__errorCtor] || UnknownError)();
+    Object.getOwnPropertyNames(err).forEach(function(key) { delete err[key] }); // no own properties other than obj
+    for (var key in obj) err[key] = obj[key];                                   // transcribe obj properties 
+    for (var key in hiddenErrorFields) (key in obj) && hideProperty(err, key);  // re-hide non-enumerables
+    delete err.__errorCtor;                                                     // remove our metadata
     return err;
 }
+function hideProperty( hash, key ) { return Object.defineProperty(hash, key, { enumerable: false }) }
 
 /*
  * Millisecond stopwatch timer.
