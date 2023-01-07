@@ -1976,7 +1976,8 @@ function Config(obj) { qibl.merge(this, obj) }
 // Config.prototype._merge = function(obj) { return qibl.merge(new Config(this), obj) };
 Object.defineProperty(Config.prototype, '_merge',
     {enumerable: false, value: function(obj) { return qibl.merge(new Config(this), obj) }});
-Config.tryLoad = function(loader, file) { try { return loader(file) } catch (err) {} };
+Config.tryLoad = function(loader, file) { try { return loader(file) }
+    catch (err) { /Cannot find module/.test(err.message) || console.error(err) } };
 Config.fetchConfig = function(dirname, filename, loaders) {
     var filepath = dirname + '/' + filename;
     var pkg = qibl.tryRequire(filepath) || qibl.tryRequire(filepath + '.json');

@@ -4292,7 +4292,7 @@ module.exports = {
         },
 
         'uses provided loaders': function(t) {
-            var stub = t.stub().throws(new Error('not found'));
+            var stub = t.stub().throws(new Error('Cannot find module'));
             qibl.getConfig({ dir: '/nonesuch/config', loaders: { yml: stub } });
             t.equal(stub.callCount, 6);
             t.contains(stub.args[0][0], '/config/default');
