@@ -4490,5 +4490,16 @@ module.exports = {
             t.deepEqual(Array.from(this.list).map(function(node) { return node.k }), ['a', 'b', 'c']);
             t.done();
         },
+        'can wrap iterator in a derived class': function(t) {
+            var list = this.list;
+            function derivedIterator() {
+                var iter = list._iterator();
+                return { next: function() { var ret = iter.next(); if (!ret.done) ret.value = ret.value.k; return ret } }
+            }
+            var values = [], walker = derivedIterator();
+            for (var info = walker.next(); !info.done; info = walker.next()) values.push(info.value);
+            t.deepEqual(values, ['a', 'b', 'c']);
+            t.done();
+        },
     }
 }

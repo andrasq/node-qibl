@@ -2014,7 +2014,7 @@ function errorToObject( err ) {
 function UnknownError() {}; qibl.inherits(UnknownError, Error);
 function objectToError( obj ) {
     var err = new (obj.__errorCtor && global[obj.__errorCtor] || UnknownError)();
-    Object.getOwnPropertyNames(err).forEach(function(key) { delete err[key] }); // no own properties other than obj
+    Object.getOwnPropertyNames(err).forEach(function(key) { delete err[key] }); // no own properties, only from obj
     for (var key in obj) err[key] = obj[key];                                   // transcribe obj properties 
     for (var key in hiddenErrorFields) (key in obj) && hideProperty(err, key);  // re-hide non-enumerables
     delete err.__errorCtor;                                                     // remove our metadata
@@ -2072,7 +2072,7 @@ DlistList.prototype._iterator = function() {
     var list = this, node = this;
     return { next: function() { node = node.next; return { value: node, done: node === list } } };
 }
-eval('if (typeof Symbol !== "undefined") eval("DlistList.prototype[Symbol.iterator] = DlistList.prototype._iterator");');
+DlistList.prototype[IteratorProperty] = DlistList.prototype._iterator;
 function DlistNode() {}
 DlistNode.prototype.prev = DlistNode.prototype.next = undefined; // define (assign) next before prev
 
