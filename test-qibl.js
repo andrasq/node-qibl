@@ -11,6 +11,7 @@ var events = require('events');
 var fs = require('fs');
 var net = require('net');
 var qibl = require('./');
+var nodeVersion = parseFloat(process.versions.node);
 var nodeMajor = parseInt(process.versions.node);
 
 var tmpVarargs;
@@ -1215,7 +1216,7 @@ module.exports = {
         },
 
         'can be iterated by nodejs': function(t) {
-            // node-v0.8 and v0.10 die on "Unexpected identifier", later node throw
+            // node-v0.8 and v0.10 die on "Unexpected identifier" because no for...of
             if (nodeMajor < 1) t.skip();
 
             var range = qibl.range(1, 8, function(x) { return x + 3 });
@@ -4096,6 +4097,8 @@ module.exports = {
 
     'timeit': {
         'times loops run for count': function(t) {
+            // node-v0.6 and earlier lack sub-ms resolution timestamps
+            if (nodeVersion < 0.7) t.skip();
             var x, timings = qibl.timeit(100, function(i) { x = i });
             t.equal(timings[0], 100);
             t.ok(timings[1] > 0);
