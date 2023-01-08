@@ -1545,10 +1545,10 @@ function globRegex( glob, from, to ) {
 }
 
 function selectField( arrayOfObjects, key ) {
-    var values = new Array();
+    var values = new Array(arrayOfObjects.length);
     for (var i = 0; i < arrayOfObjects.length; i++) {
         var obj = arrayOfObjects[i];
-        (obj === null || obj === undefined) ? values.push(undefined) : values.push(obj[key]);
+        values[i] = (obj === null || obj === undefined) ? undefined : obj[key];
     }
     return values;
 }
@@ -1710,15 +1710,15 @@ function keys( object ) {
 // Object.values
 function values( object ) {
     var keys = qibl.keys(object);
-    var ret = new Array();
-    for (var i = 0; i < keys.length; i++) ret.push(object[keys[i]]);
+    var ret = new Array(keys.length);
+    for (var i = 0; i < keys.length; i++) ret[i] = object[keys[i]];
     return ret;
 }
 // Object.entries, aka toPairs
 function entries( object ) {
     var keys = qibl.keys(object);
-    var keyvals = new Array();
-    for (var i = 0; i < keys.length; i++) keyvals.push([keys[i], object[keys[i]]]);
+    var keyvals = new Array(keys.length);
+    for (var i = 0; i < keys.length; i++) keyvals[i] = [keys[i], object[keys[i]]];
     return keyvals;
 }
 // Object.fromEntries
