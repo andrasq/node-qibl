@@ -2007,14 +2007,15 @@ function getConfig( options ) {
 var hiddenErrorFields = { message: 1, stack: 1, arguments: 1, type: 1 };
 function errorToObject( err ) {
     if (!(err instanceof Error)) return err;
-    return qibl.omitUndefined(Object.getOwnPropertyNames(err)
-        .reduce(function(obj, key) { obj[key] = err[key]; return obj }, { __errorCtor: err.constructor.name }));
+    return Object.getOwnPropertyNames(err)
+        .reduce(function(obj, key) { obj[key] = err[key]; return obj }, { __errorCtor: err.constructor.name });
 }
 // convert an error object back into an Error instance (see also qinvoke)
 function UnknownError() {}; qibl.inherits(UnknownError, Error);
 function objectToError( obj ) {
     var err = new (obj.__errorCtor && global[obj.__errorCtor] || UnknownError)();
-    Object.getOwnPropertyNames(err).forEach(function(key) { delete err[key] }); // no own properties, only from obj
+    Object.getOwnPropertyNames(err).forEach(function(key) {                     // no own properties, only from obj,
+        if (!(key in hiddenErrorFields)) delete err[key] });                    // but keep vanilla Error own properties
     for (var key in obj) err[key] = obj[key];                                   // transcribe obj properties 
     for (var key in hiddenErrorFields) (key in obj) && hideProperty(err, key);  // re-hide non-enumerables
     delete err.__errorCtor;                                                     // remove our metadata
