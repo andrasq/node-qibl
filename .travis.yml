@@ -20,6 +20,7 @@ before_install:
   - ln -sf ../lib2/node_modules/qnit/bin/qnit $HOME/bin/qnit
   - ln -sf ../lib2/node_modules/npm/bin/npm-cli.js $HOME/bin/npm2
   - npm2 --version
+  - npm2 install .
   #
   # nvm install 0.6 && npm2 -v && node -v && npm2 test -- travis-ci.com breaks on node-v0.6
   - nvm install 0.8.28 && npm2 -v && node -v && npm2 test

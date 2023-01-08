@@ -3876,7 +3876,7 @@ module.exports = {
                 // var interpolate = qibl.compileVinterpolate('Hi ? there ? test', '?');
                 var str = interpolate(['Marco', 'Polo']);
             }
-            t.printf('compiled interpolate: %dk loops in %s ms', nloops/1000, (1000 * (qibl.microtime() - t1)).toFixed(3));
+            t.printf('compiled interpolate: %dk loops in %s ms\n', nloops/1000, (1000 * (qibl.microtime() - t1)).toFixed(3));
             t.done();
         },
     },
