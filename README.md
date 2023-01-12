@@ -968,7 +968,7 @@ error for the directory to already exist.
 
 Remove the named file or directory.  If directory, removes all its contents too.
 
-### filename = tmpfile( [options] )
+### filename = tmpfile( [options] [callback] )
 
 Create a new empty temporary file for exclusive use and return its filename.  The file is
 guaranteed not to have existed before the call, and will be automatically removed when the
@@ -983,6 +983,10 @@ throwing a `"terminated"` exception.  They throw only if no other handlers are l
 the signal, else the other handlers will presumably decide whether to exit or not.  Emitting
 signal names is thus no longer harmless, because it can throw.  Also, if the other handlers
 also only exit only if they are the sole listener, then the process may not exit after all.
+
+If the optional `callback` is provided then `tmpfile` uses async calls to create the temp file and
+returns errors to the callback, otherwise `tmpfile` uses synchronous calls and throws if unable to
+create a file.
 
 Options:
 - `dir` - name of the directory to hold the file, default is `process.env.TMPDIR` else `/tmp`
@@ -1279,6 +1283,7 @@ A Dlist is iteratable with `for ... of` or with the iterator returned by its `_i
 Changelog
 ---------
 
+- 1.23.0 - add optional async mode to `tmpfile`
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,
            fix objectToError to retain undefined own properties too
 - 1.22.3 - only convert errorToObject error own properties to not restore inherited properties,

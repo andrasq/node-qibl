@@ -2659,6 +2659,27 @@ module.exports = {
                 t.throws(function(){ qibl.tmpfile({ dir: '/', name: 'nonesuch-' }) }, /EACCES/);
                 t.done();
             },
+            'throws if too many attempts': function(t) {
+                t.throws(function(){ fn = qibl.tmpfile({ dir: '/nonesuch' }) }, /too many attempts/);
+                t.done();
+            },
+        },
+    },
+    'tmpfile async': {
+        'creates a file': function(t) {
+            qibl.tmpfile(function(err, filename) {
+                t.ifError(err);
+                t.equal(filename[0], '/');
+                fs.closeSync(fs.openSync(filename, 0));
+                t.done();
+            })
+        },
+        'returns error if unable to create': function(t) {
+            qibl.tmpfile({ dir: '/nonesuch' }, function(err, filename) {
+                t.ok(err);
+                t.ok(/too many attempts/.test(err.message));
+                t.done();
+            })
         },
     },
 

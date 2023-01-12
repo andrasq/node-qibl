@@ -1207,18 +1207,21 @@ function _unlinkFileOnExit( filename ) {
         exitSignals.forEach(function(sig) { process.on(sig, function() { onSignal(sig) }) });
     }
 }
-function tmpfile( options ) {
-    options = options || {};
-    var prefix = (options.dir || process.env.TMPDIR || '/tmp') + '/' + (options.name || '/node-tmpfile-');
-
+function _createTmpfileName( options ) {
+    var prefix = (options.dir || process.env.TMPDIR || '/tmp') + '/' + (options.name || 'node-tmpfile-');
+    return prefix + Math.random().toString(36).slice(2, 8) + (options.ext || '');
+}
+function _createTmpfileSync( filename ) {
+    var mode = (0x80 + 0x40 + 0x01) >>> 0;     // O_EXCL + O_CREAT + O_WRONLY
+    try { fs.closeSync(fs.openSync(filename, mode)); return filename } catch (err) { return err }
+}
+function tmpfileSync( options ) {
     // if tmpfile namespace is 99% full, 460 attempts will find a name 99% of the time, 100 attempts 63%, 50 40%
     // if tmpfile namespace is 95% full, 90 attempts will find a name 99% of the time, 59 attemps 95%, 50 92%
     for (var maxAttempts = 100, i = 1; i <= maxAttempts; i++) {
-        var suffix = Math.random().toString(36).slice(2, 8);
-        var filename = prefix + suffix + (options.ext || '');
         try {
-            var fd = fs.openSync(filename, (0x80 + 0x40 + 0x01) >>> 0); // O_EXCL + O_CREAT + O_WRONLY
-            fs.closeSync(fd);
+            var filename = _createTmpfileSync(_createTmpfileName(options));
+            if (typeof filename !== 'string') throw filename;
             /* istanbul ignore else */ // code coverage listens to SIGTERM, disables auto-remove on kill
             if (options.remove || (options.remove === undefined)) _unlinkFileOnExit(filename);
             return filename;
@@ -1227,6 +1230,29 @@ function tmpfile( options ) {
         }
     }
 }
+function _createTmpfileAsync( filename, callback ) {
+    fs.open(filename, (0x80 + 0x40 + 0x01), function(err, fd) {  // mode = O_EXCL + O_CREAT + O_WRONLY
+        fs.close(fd >= 0 ? fd : 9999999, function(err2) { callback(err || err2, filename) }) });
+}
+function tmpfileAsync( options, callback ) {
+    var filename;
+    qibl.repeatUntil(function(done, ix) {
+        if (ix >= 100) return done(new Error('tmpfile: too many attempts'));
+        _createTmpfileAsync(_createTmpfileName(options), function(err, createdName) {
+            err ? done(null, false) : done(null, (filename = createdName));
+        })
+    }, function(err) {
+        // code coverage listens to SIGTERM, disables auto-remove on kill
+        if (!err && (options.remove || (options.remove === undefined))) _unlinkFileOnExit(filename);
+        callback(err, filename);
+    })
+}
+function tmpfile( options, callback ) {
+    if (typeof options === 'function') { callback = options; options = {} }
+    return callback ? tmpfileAsync(options, callback) : tmpfileSync(options || {});
+}
+// TODO: tmpfile.purge() to remove all temp files
+
 
 /*
  * Recursively walk the directory looking for files matching the pattern.
