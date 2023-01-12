@@ -168,7 +168,7 @@ var qibl = module.exports = {
     Stopwatch: Stopwatch,
     Dlist: DlistList,
     DlistNode: DlistNode,
-    // _configure: _configure,
+    __configure: __configure,
 };
 
 // hashes are generic objects without a class
@@ -2001,7 +2001,7 @@ function makeGetId( sysId ) {
 function Config(obj) { qibl.merge(this, obj) }
 // Config.prototype._merge = function(obj) { return qibl.merge(new Config(this), obj) };
 Object.defineProperty(Config.prototype, '_merge',
-    {enumerable: false, value: function(obj) { return qibl.merge(new Config(this), obj) }});
+    { enumerable: false, value: function(obj) { return qibl.merge(new Config(this), obj) } });
 Config.tryLoad = function(loader, file) { try { return loader(file) }
     catch (err) { /Cannot find module/.test(err.message) || console.error(err) } };
 Config.fetchConfig = function(dirname, filename, loaders) {
@@ -2010,6 +2010,7 @@ Config.fetchConfig = function(dirname, filename, loaders) {
     for (var extn in loaders || {}) pkg = pkg ||
         Config.tryLoad(loaders[extn], filepath) ||
         Config.tryLoad(loaders[extn], filepath + '.' + extn);
+    if (!pkg) Config.tryLoad(require, filepath);
     return pkg;
 }
 // like config and qconfig, but simpler (from miniq)
@@ -2041,6 +2042,7 @@ function UnknownError() {}; qibl.inherits(UnknownError, Error);
 function objectToError( obj ) {
     var err = new (obj.__errorCtor && global[obj.__errorCtor] || UnknownError)();
     Object.getOwnPropertyNames(err).forEach(function(key) {                     // no own properties, only from obj,
+        /* istanbul ignore next */ // a new Error() will never have the other possible keys set, but paranoia
         if (!(key in hiddenErrorFields)) delete err[key] });                    // but keep vanilla Error own properties
     for (var key in obj) err[key] = obj[key];                                   // transcribe obj properties 
     for (var key in hiddenErrorFields) (key in obj) && hideProperty(err, key);  // re-hide non-enumerables
@@ -2107,8 +2109,6 @@ DlistNode.prototype.prev = DlistNode.prototype.next = undefined; // define (assi
  * hook for testing: compile and run the function in local file context,
  * letting it examine and change the file globals.
  */
-/**
-function _configure( fn ) {
+function __configure( fn ) {
     return eval('fn = ' + fn)();
 }
-**/

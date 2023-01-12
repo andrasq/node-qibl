@@ -833,6 +833,8 @@ Unlike `qconfig`, the config directory is not searched for, it must be named exp
 in the current working directory.  Unlike `config`, the elaborate override logic is simplified to just 3
 layers.
 
+Errors other than file-not-found errors are logged to stderr with console.error.
+
 Options:
 - `dir` - the directory holding the files with config settings.  The default is `./config` in the
   same directory as the running process, typically the root of the source tree.
@@ -1084,9 +1086,9 @@ final attempt is made just before timeout unless already timed out.
 
 Starting with v1.22.0 the `options` object, if provided, can specify
 
-- `noTimeout` - do not error out long-running calls to `func`.  This effectively switches
-  the behavior back to the initial implementation that only timed out between calls to
-  `func`, never while `func` was running.
+- `noTimeout` - do not error out long-running calls to `func`.  This effectively switches the
+  behavior back to the initial implementation that only timed out between calls to `func`, never
+  while `func` was running.  The default is `false` to time out mid-call if it takes too long.
 
 ### makeGetId( uniqueSystemId )
 
@@ -1283,21 +1285,21 @@ A Dlist is iteratable with `for ... of` or with the iterator returned by its `_i
 Changelog
 ---------
 
-- 1.23.0 - add optional async mode to `tmpfile`
+- 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,
            fix objectToError to retain undefined own properties too
 - 1.22.3 - only convert errorToObject error own properties to not restore inherited properties,
            more accurately restore objectToError error instances and return UnknwnError if __errorCtor not known
 - 1.22.2 - fix `getConfig` to interpret relative paths against the current working directory,
            new experimental `timeit`, `timeit.autorageValue`, `timeit.formatRate`
-- 1.22.1 - fix forEachProperty to return function properties, document groupBy,
+- 1.22.1 - fix `forEachProperty` to return function properties, document `groupBy`,
            document `makeIterator`, `setIterator`, `getIterator`
 - 1.22.0 - new `removeByIndex`, new `str_reverse`, new `remove2`, faster `concat2`, new `extractNotTo`,
            fix `extractTo` to not copy the property if mask is set to `undefined`, fix `globRegex` sh-style
            `[!abc]` charlist negation, expose `Timebase`, `noTimeout` option to `retry`, new `Dlist`
            doubly-linked circular list
 - 1.21.2 - new preliminary `str_count`, prune search tree for much faster `globdir`, allow duplicate calls
-           to makeIteratorPeekable, fix str_count to not infinite loop on zero-length patterns,
+           to `makeIteratorPeekable`, fix `str_count` to not infinite loop on zero-length patterns,
            recognize `mergeTo` as meaning `merge`, fix mergeTo to ensure hash when nesting properties
 - 1.21.1 - have `retry` return the actual error on timeout, better `semverCompar` patch level handling
 - 1.21.0 - new `Stopwatch`, add string support to `addslashes`, tmpfile `remove` option, fix obscure tmpfile unlink,

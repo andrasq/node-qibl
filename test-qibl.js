@@ -27,6 +27,14 @@ function repeatFor(n, proc, callback) {
 var savedTmpdir = process.env.TMPDIR;
 
 module.exports = {
+    'exposes __configure that can inspect file vars': function(t) {
+        var exports = qibl.__configure(function() { return module.exports });
+        t.equal(typeof exports.isHash, 'function');
+        var _createTmpfileName = qibl.__configure(function() { return _createTmpfileName });
+        t.equal(typeof _createTmpfileName, 'function');
+        t.done();
+    },
+
     'isHash should identify hashes': function(t) {
         var tests = [
             [ {}, true ],
@@ -4321,6 +4329,19 @@ module.exports = {
             t.equal(stub.callCount, 6);
             t.contains(stub.args[0][0], '/config/default');
             t.contains(stub.args[1][0], '/config/default.yml');
+            t.done();
+        },
+
+        'logs parse errors to stderr': function(t) {
+            // patch the global require inside qibl to throw
+            var output = "";
+            var spy = t.stub(process.stderr, 'write', function(line) { output += line });
+            qibl.__configure(function() {
+                qibl.__savedRequire = require; require = function() { throw new Error('mock parse error') } });
+            var config = qibl.getConfig({ dir: './mockConfig' });
+            qibl.__configure(function() { require = qibl.__savedRequire });
+            spy.restore();
+            t.ok(/mock parse error/.test(output));
             t.done();
         },
     },
