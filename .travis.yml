@@ -10,9 +10,13 @@ before_install:
   # sometimes node-v5.8.0 gets npm-v2.15.0 pre-installed into ./node_modules, else in ~/.nvm/versions/*/bin
   # other nvm node versions overwerite it, so save this copy
   # Do not reinstall, it can break (module not found) when overwriting itself
+  # npm@5.6.0 removes ./node_modules and breaks the tests
   #
   - mkdir -p $HOME/bin $HOME/lib2 $HOME/lib
   # - echo prefix=$HOME >> $HOME/.npmrc
+  # Install an npm we know will work (but without installing over itself, that has a race condition)
+  # nvm pairs nodejs with different versions of npm, and npm behavior is untrustworthy, so use one that works.
+  # The one that is paired with node-v5.8.0 is npm-v2.15.0, and it works.
   - test -x ./node_modules/.bin/npm || npm install npm@2.15.0
   # - sed -ie /^prefix=/d $HOME/.npmrc
   # - test -d $HOME/lib/node_modules && cp -rpf $HOME/lib/node_modules $HOME/lib2/ || true
@@ -22,7 +26,9 @@ before_install:
   - npm2 --version
   - npm2 install .
   #
-  # nvm install 0.6 && npm2 -v && node -v && npm2 test -- travis-ci.com breaks on node-v0.6
+  # - nvm install 0.6 && npm2 -v && node -v && npm2 test
+  #     /home/travis/.nvm/nvm.sh: line 3385: [: -ne: unary operator expected
+  #     /home/travis/.nvm/nvm.sh: line 3401: [: -eq: unary operator expected
   - nvm install 0.8.28 && npm2 -v && node -v && npm2 test
   - nvm install 0.10 && npm2 -v && node -v && npm2 test
   - nvm install 4 && npm2 -v && node -v && npm2 test
