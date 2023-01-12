@@ -1285,7 +1285,8 @@ A Dlist is iteratable with `for ... of` or with the iterator returned by its `_i
 Changelog
 ---------
 
-- 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr
+- 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
+           fix `timeit` calibration
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,
            fix objectToError to retain undefined own properties too
 - 1.22.3 - only convert errorToObject error own properties to not restore inherited properties,

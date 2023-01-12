@@ -1923,7 +1923,7 @@ function timeit( nloops, func ) {
 var _tmp;
 timeit.calibrate = function calibrate() {
     function mockFunc(i) { _tmp = i * i }
-    function mockLoop() { var i, j; for (i=0; i<1e6; i+=100) { for (j=0; j<100; j++) _tmp = i * i; qibl.microtime() } }
+    function mockLoop() { var i, j; for (i=0; i<.8e6; i+=100) { for (j=0; j<100; j++) _tmp = i * i; qibl.microtime() } }
     _timeitOverhead = 1;
     return _timeitOverhead = (timeit(0.8e6, mockFunc)[1] - timeit(1, mockLoop)[1] + _tmp - _tmp) / 0.8e6;
 }
