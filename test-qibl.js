@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2022 Andras Radics
+ * Copyright (C) 2019-2023 Andras Radics
  * Licensed under the Apache License, Version 2.0
  */
 
@@ -1846,6 +1846,7 @@ module.exports = {
                     emitter.emit('data', data2);
                     emitter.emit('data', data3);
                 }
+                // NOTE: node-v17 is 260 ms for 100k, while node-v16 and older are 36 ms ?!
             },
         },
     },
@@ -2727,6 +2728,7 @@ module.exports = {
                     var len2 = files.length;
                     // on my system I see about 3x more files taking 3x more time
                     t.ok(len2 > 2 * len1);
+                    // FIXME: occasional timing glitch, below test can fail
                     t.ok(t3 - t2 > 2 * (t2 - t1));
                     t.done();
                 })
@@ -4546,5 +4548,174 @@ module.exports = {
             t.deepEqual(values, ['a', 'b', 'c']);
             t.done();
         },
-    }
+    },
+
+    'LruCache': {
+        setUp: function(done) {
+            this.cache = new qibl.LruCache(4);
+            this.cache.set('a', 1);
+            this.cache.set('b', 2);
+            this.cache.set('c', 3);
+            done();
+        },
+
+        'constructor': {
+            'defaults capacity': function(t) {
+                var cache = new qibl.LruCache();
+                t.ok(cache.capacity > 0);
+                t.done();
+            },
+            'uses provided capacity': function(t) {
+                var cache = new qibl.LruCache(123);
+                t.equal(cache.capacity, 123);
+                t.done();
+            },
+        },
+
+        'has the basic get/set/has/delete access methods': function(t) {
+            var cache = new qibl.LruCache();
+            t.strictEqual(cache.has('a'), false);
+            t.strictEqual(cache.get('a'), undefined);
+            cache.set('a', 123);
+            t.strictEqual(cache.get('a'), 123);
+            t.strictEqual(cache.has('a'), true);
+            cache.delete('a');
+            t.strictEqual(cache.get('a'), undefined);
+
+            t.done();
+        },
+
+        'set': {
+            'appends new value': function(t) {
+                this.cache.set('d', 4);
+                t.deepEqual(qibl.toArray(this.cache), [1, 2, 3, 4]);
+                t.done();
+            },
+            'honors capacity': function(t) {
+                this.cache.set('d', 4);
+                this.cache.set('e', 5);
+                this.cache.set('f', 6);
+                t.deepEqual(qibl.toArray(this.cache), [3, 4, 5, 6]);
+                t.done();
+            },
+            'updates cached value': function(t) {
+                this.cache.set('a', 11);
+                t.deepEqual(qibl.toArray(this.cache), [2, 3, 11]);
+                this.cache.set('c', 33);
+                t.deepEqual(qibl.toArray(this.cache), [2, 11, 33]);
+                t.done();
+            },
+            'displaces oldest value': function(t) {
+                this.cache.set('d', 4);
+                t.deepEqual(qibl.toArray(this.cache), [1, 2, 3, 4]);
+                this.cache.set('e', 5);
+                t.deepEqual(qibl.toArray(this.cache), [2, 3, 4, 5]);
+                this.cache.set('c', 33);
+                t.deepEqual(qibl.toArray(this.cache), [2, 4, 5, 33]);
+                t.done();
+            },
+        },
+
+        'get': {
+            'access makes the key most recent': function(t) {
+                t.deepEqual(qibl.toArray(this.cache), [1, 2, 3]);
+                this.cache.get('b');
+                t.deepEqual(qibl.toArray(this.cache), [1, 3, 2]);
+                this.cache.get('c');
+                t.deepEqual(qibl.toArray(this.cache), [1, 2, 3]);
+                this.cache.get('c');
+                t.deepEqual(qibl.toArray(this.cache), [1, 2, 3]);
+                this.cache.get('a');
+                t.deepEqual(qibl.toArray(this.cache), [2, 3, 1]);
+                t.done();
+            },
+        },
+
+        'delete': {
+            'removes values from the cache': function(t) {
+                t.equal(this.cache.has('b'), true);
+                t.equal(!!this.cache.map['b'], true);
+                this.cache.delete('b');
+                t.equal(this.cache.has('b'), false);
+                t.equal(!!this.cache.map['b'], false);
+                t.deepEqual(qibl.toArray(this.cache), [1, 3]);
+
+                this.cache.delete('c');
+                t.deepEqual(qibl.toArray(this.cache), [1]);
+
+                this.cache.delete('a');
+                t.deepEqual(qibl.toArray(this.cache), []);
+                t.equal(this.cache.has('a'), false);
+
+                t.done();
+            },
+            'garbage collects the map': function(t) {
+                var cache = new qibl.LruCache();
+                for (var i = 0; i < 10010; i++) cache.set(i, i), cache.delete(i);
+                t.equal(Object.keys(cache.map).length, 10);
+                t.done();
+            },
+        },
+
+        'keys': {
+            'returns the keys in lru order': function(t) {
+                t.deepEqual(this.cache.keys(), ['a', 'b', 'c']);
+                this.cache.get('b');
+                t.deepEqual(this.cache.keys(), ['a', 'c', 'b']);
+                t.done();
+            },
+        },
+
+        'iterator returns values in lru order, oldest first': function(t) {
+            if (typeof Symbol === 'undefined' || !Array.from) t.skip();
+            t.deepEqual(Array.from(this.cache), [1, 2, 3]);
+            this.cache.get('b');
+            t.deepEqual(Array.from(this.cache), [1, 3, 2]);
+            t.done();
+        },
+
+        'speed': {
+            'calibrate timeit': function(t) {
+                var cache = new qibl.LruCache();
+                var rate = qibl.timeit(1e4, function(ix) { cache.set(ix % 1000, ix) });
+                t.done();
+            },
+            'append new': function(t) {
+                var cache = new qibl.LruCache();
+                var rate = qibl.timeit(1e5, function(ix) { cache.set(ix % 1000, ix) });
+                t.printf("append new: %s\n", qibl.timeit.formatRate.apply(null, rate));
+                // 1m 50m/s or 100m/s if calibrated timeit (faster with longer loop, peak 55m/s)
+                t.done();
+            },
+            'overwrite existing': function(t) {
+                var cache = new qibl.LruCache(1000);
+                var rate = qibl.timeit(1e5, function(ix) { cache.set(ix % 1000, ix) });
+                t.printf("overwrite existing: %s\n", qibl.timeit.formatRate.apply(null, rate));
+                // 1m 50m/s or 86m/s if calibrated timeit (faster with longer loop, peak 55m/s)
+                t.done();
+            },
+            'displace oldest': function(t) {
+                var cache = new qibl.LruCache(2);
+                var rate = qibl.timeit(1e5, function(ix) { cache.set(ix, ix) });
+                t.printf("displace oldest: %s\n", qibl.timeit.formatRate.apply(null, rate));
+                // .1m 3.6m/s (slower with longer loop, peak 4m/s)
+                t.done();
+            },
+            'access existing': function(t) {
+                var cache = new qibl.LruCache();
+                for (var ix=0; ix<1000; ix++) cache.set(ix, ix);
+                var rate = qibl.timeit(1e5, function(ix) { cache.get(ix % 1000, ix) });
+                t.printf("access existing: %s\n", qibl.timeit.formatRate.apply(null, rate));
+                // 1m 160m/s (faster with longer loop, peak 190m/s)
+                t.done();
+            },
+            'insert/delete': function(t) {
+                var cache = new qibl.LruCache();
+                var rate = qibl.timeit(1e5, function(ix) { cache.set(ix % 1000, ix); cache.delete((ix - 25) % 1000) });
+                t.printf("insert/delete: %s\n", qibl.timeit.formatRate.apply(null, rate));
+                // 1m 30m/s (peak 32m/s)
+                t.done();
+            },
+        },
+    },
 }

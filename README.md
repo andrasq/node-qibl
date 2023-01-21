@@ -1233,15 +1233,13 @@ overwrites the associated timestamp.
 Return all tagged timestamps as an object with the labels as the keys and the associated
 elapsed times as the values.
 
-### new qibl.Dlist( )
+### dlist = new qibl.Dlist( )
 
 Barebones doubly-linked circular list similar to [`qdlist`](https://npmjs.org/package/qdlist).
 Each node on the list has properties `next` and `prev` linking to the next and previous node in
 the list, respectively.  The list is itself a node with its `next` property pointing to the head
 of the list, and `prev` to the tail.  For bests performance each node on the list should be
 derived from `qibl.DlistNode` or have its first two properties, in order, be `next` and `prev`.
-
-A Dlist is intentionally minimalThe constructor does not auto-initia
 
     function KeyVal(key, val) { this.key = key; this.val = val }
     qibl.inherits(KeyVal, qibl.DlistNode);
@@ -1269,7 +1267,7 @@ Same as `dlist.insert(node, dlist.prev, dlist)`.
 #### dlist.shift( )
 
 Convenience method to retrieve the node at the head of the list.
-Same as `dlist.next === dlist ? dlist.remove(dlist.next) : undefined`.
+Same as `dlist.next !== dlist ? dlist.remove(dlist.next) : undefined`.
 
 #### dlist.forEach( visitor(node, index, list) )
 
@@ -1281,12 +1279,48 @@ on the list, and the list itself.
 
 A Dlist is iteratable with `for ... of` or with the iterator returned by its `_iterator` method.
 
+### lru = new qibl.LruCache( [capacity] )
+
+Return an empty key-value store limited to `capacity` elements.  Once the cache max capacity is
+reached, elements are displaced using a least-recently-used replacement policy.  By default the
+`capacity` is unlimited.  LruCache is small, fast and iterable.
+
+    const lru = new qibl.LruCache();
+    lru.set('a', 1);
+    lru.set('b', 2);
+    lru.set('c', 3);
+    lru.get('b');               // b becomes the most recent
+    const values = [...lru];
+    // => [1, 3, 2]             // oldest is a, then c, and b most recent
+
+#### lru.set( key, value )
+
+Add the value to the cache, and make it the most recent.  If the `key` is already present its old
+value is overwritten.  If the cache has reached its maximum capacity, adding a new key displaces
+the oldest.
+
+#### lru.get( key )
+
+Return the value stored under the given `key`, or `undefined` if the `key` is not in the cache.
+
+#### lru.has( key )
+
+Return `true` if the `key` is in the cache, `false` if it is not.
+
+#### lru.delete( key )
+
+Remove the value indexed by `key` from the cache.
+
+#### lru.keys( )
+
+Return the keys of the elements currently in the cache.
+
 
 Changelog
 ---------
 
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
-           fix `timeit` calibration
+           fix `timeit` calibration, new `LruCache`
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,
            fix objectToError to retain undefined own properties too
 - 1.22.3 - only convert errorToObject error own properties to not restore inherited properties,

@@ -2,7 +2,7 @@
  * qibl -- quick itty-bitty library
  * Small functions and polyfills that I found useful.
  *
- * Copyright (C) 2019-2022 Andras Radics
+ * Copyright (C) 2019-2023 Andras Radics
  * Licensed under the Apache License, Version 2.0
  *
  * 2019-09-11 - AR.
@@ -168,6 +168,7 @@ var qibl = module.exports = {
     Stopwatch: Stopwatch,
     Dlist: DlistList,
     DlistNode: DlistNode,
+    LruCache: LruCache,
     __configure: __configure,
 };
 
@@ -2104,6 +2105,39 @@ DlistList.prototype._iterator = function() {
 DlistList.prototype[IteratorProperty] = DlistList.prototype._iterator;
 function DlistNode() {}
 DlistNode.prototype.prev = DlistNode.prototype.next = undefined; // define (assign) next before prev
+
+/*
+ * Itty-bitty iterable lru cache, fully functional and quite fast.
+ * Should be very similar to qcache LruCache.
+ */
+function LruCache(capacity) {
+    this.capacity = capacity > 0 ? capacity : Infinity, this.size = 0, this.delcount = 0;
+    this.map = {}, this.list = new DlistList();
+}
+LruCache.prototype.set = function set( key, value ) {
+    if ((node = this.map[key])) {
+        this.list.remove(node); node.value = value }
+    else if (this.size >= this.capacity) {
+        var node = this.remove(this.list.next); this.size += 1; node.key = key; node.value = value; this.map[key] = node }
+    else {
+        var node = (this.size += 1, { next: node, prev: node, key: key, value: value }); this.map[key] = node }
+    this.list.push(node);
+}
+LruCache.prototype.get = function get( key ) {
+    var node; return (node = this.map[key]) && this.list.push(this.list.remove(node)).value }
+LruCache.prototype.has = function has( key ) { return !!this.map[key] }
+LruCache.prototype.remove = function remove( node ) {
+    if (this.delcount >= 10000) { this.map = qibl.omitUndefined(this.map); this.delcount = 0 }
+    this.list.remove(node); this.size -= 1; this.map[node.key] = undefined; this.delcount += 1;
+    return node;
+}
+LruCache.prototype.delete = function _delete( key ) { var node = this.map[key]; return node && this.remove(node) }
+LruCache.prototype.keys = function keys() { return qibl.toArray(this.list).map(function(node) { return node.key }) }
+LruCache.prototype._iterator = function() {
+    var iter = this.list._iterator();
+    return { next: function() { var info = iter.next(); !info.done && (info.value = info.value.value); return info } }
+}
+qibl.setIterator(LruCache.prototype, LruCache.prototype._iterator);
 
 /*
  * hook for testing: compile and run the function in local file context,
