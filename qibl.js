@@ -201,7 +201,8 @@ function assignTo( target /* ,VARARGS */ ) {
 // recursively transfer all enumeriable properties of src(es) onto target
 // See also `qhash`.
 // TODO: should only merge own properties, for consistency with the Object.* functions
-function merge( target /* ,VARARGS */ ) {
+function merge( /* target, VARARGS */ ) {
+    var target = arguments[0];
     for (var src, i = 1; i < arguments.length; i++) {
         for (var key in (src = arguments[i])) {
             var val = src[key];
@@ -498,7 +499,8 @@ function fill( buf, ch, base, bound ) {
 
 // concatenate two arrays, much faster than [].concat for short arrays
 // note that unlike [].concat, a1 and a2 must be arrays and are not flattened
-function concat2( target, a1, a2 /* VARARGS */ ) {
+function concat2( /* target, a1, a2, VARARGS */ ) {
+    var target = arguments[0], a1 = arguments[1], a2 = arguments[2];
     if (!a1) return target;
     var len = a1.length, to = target.length; target.length += a1.length;
     for (var i = 0; i < len; i++) target[to++] = a1[i];
