@@ -1107,6 +1107,10 @@ waiting for the resource to be free, locks one unit of the resource, and calls
 `func(release)`.  `release` is a callback that must be called to release the resource unit;
 the resource will remain locked until freed, no timeout.
 
+Mutex properties of interest
+- `busy` - the count of users currently accessing the resource
+- `queue` - the queue of calls waiting to access the resource
+
     mutex = new qibl.Mutex();
     mutex.acquire((release) => {
         useResource();
