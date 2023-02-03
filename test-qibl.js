@@ -1555,6 +1555,28 @@ module.exports = {
         },
     },
 
+    'ansiColor': {
+        'returns escape sequence for color name': function(t) {
+            var names = [
+                'off', 'gray', 'brightgray', 'orange', 'brown', 'teal',
+                'black', 'red', 'green', 'blue',
+                'yellow', 'cyan', 'magenta', 'white',
+                'brightblack', 'brightred', 'brightgreen', 'brightblue',
+                'brightyellow', 'brightcyan', 'brightmagenta', 'brightwhite',
+            ];
+            for (var i = 0; i < names.length; i++) {
+                var str = qibl.ansiColor(names[i]);
+                t.ok(/\x1B\[[0-9;]+m/.test(str), 'wrong pattern on ' + names[i]);
+            }
+            t.done();
+        },
+        'returns empty string for unknown colors': function(t) {
+            t.equal(qibl.ansiColor('nonesuch'), '');
+            t.equal(qibl.ansiColor('bad-name'), '');
+            t.done();
+        },
+    },
+
     'semverCompar': {
         'exposed under both old and new name': function(t) {
             t.equal(qibl.compareVersions, qibl.semverCompar);

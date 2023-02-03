@@ -72,6 +72,7 @@ var qibl = module.exports = {
     str_locate: str_locate,
     str_count: str_count,
     str_reverse: str_reverse,
+    ansiColor: ansiColor,
     compareVersions: semverCompar,
     semverCompar: semverCompar,
     startsWith: startsWith,
@@ -817,6 +818,32 @@ function strtok( str, sep ) {
         _strtokBase = sepOffset + sep.length;
     }
     return ret;
+}
+
+// ANSI color control escape character sequences: ESC [ (fgcolor) m, ESC [ (fg) ; (bg) m
+// https://en.wikipedia.org/wiki/ANSI_escape_code standard color names 0..7 and 8-15
+function ansiColor(mode) {
+    switch (mode) {
+    // aliases
+    default: return '';                         case 'off': return '\x1B[0m';
+    case 'gray': return '\x1B[90m';             case 'brightgray': return '\x1B[37m';
+
+    // 24-bit foreground colors ESC [ 38 ; 2 ; <r> : <g> : <b> m
+    // these work in a color xterm but not in a mac terminal
+    case 'teal': return '\x1B[38;2;0;85;85m';
+    case 'brown': return '\x1B[38;2;170;85;0m'; case 'orange': return '\x1B[38;2;255;170;0m';
+
+    // foreground colors are 30-37 and 90-97 bright
+    // background colors 40-47 and 100-107; to reset use color 0 or omit it: ESC [ m
+    case 'black': return '\x1B[30m';            case 'brightblack': return '\x1B[90m';
+    case 'red': return '\x1B[31m';              case 'brightred': return '\x1B[91m';
+    case 'green': return '\x1B[32m';            case 'brightgreen': return '\x1B[92m';
+    case 'yellow': return '\x1B[33m';           case 'brightyellow': return '\x1B[93m';
+    case 'blue': return '\x1B[34m';             case 'brightblue': return '\x1B[94m';
+    case 'magenta': return '\x1B[35m';          case 'brightmagenta': return '\x1B[95m';
+    case 'cyan': return '\x1B[36m';             case 'brightcyan': return '\x1B[96m';
+    case 'white': return '\x1B[37m';            case 'brightwhite': return '\x1B[97m';
+    }
 }
 
 // test-coverage-proof efficient polyfills to allocate new Buffers on any version of node

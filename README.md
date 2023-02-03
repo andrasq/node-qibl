@@ -452,6 +452,41 @@ Return true if `substr` is a prefix of the string `str`.  Equivalent to String.p
 
 Return true if `substr` is a suffix of the string `str`.  Equivalent to String.prototype.endsWith.
 
+### qibl.ansiColor( name )
+
+Return a string with the ANSI escape sequence that, when written to the console or sent to an
+ANSI-compatible terminal, will switch the foreground color to the `name`d color.  The special name
+`off` turns off color mode back to the default.
+
+The color names are the standard ANSI names for the three primary and three secondary additive
+colors, all-lowercase no spaces:  the dark shades `black` (true black), `red`, `green`, `yellow`,
+`blue`, `magenta`, `cyan`, `white` (a light gray), and `brightblack` (a dark gray), `brightred`,
+`brightgreen`, `brightyellow`, `brightblue`, `brightmagenta`, `brightbrightcyan`, `brightwhite`
+(true white).
+
+Two aliases and some additional colors are provided, `gray` for `brightblack`, `brightgray` for
+`white`, and `orange`, `brown` and `teal`.  The non-ANSI colors are encoded as 24-bit color
+sequences which may not be supported by all ANSI terminals.
+
+Caution: the ANSI `white` is actually a light gray; true white is `brightwhite`.  The actual
+colors rendered depend on the terminal, since the color values associated with the names vary.
+The below are the VGA colors, composed out of the additive primaries at 0 and 2/3 (light), and 1/3
+and full (bright) intensity levels:
+
+||dark||light|
+|<font color="#000000">black</font>|<font color="#555555">brightblack</font>|
+|<font color="#AA0000">red</font>|<font color="#FF5555">brightred</font>|
+|<font color="#00AA00">green</font>|<font color="#55FF55">brightgreen</font>|
+|<font color="#AAAA00">yellow</font>|<font color="#FFFF55">brightyellow</font>|
+|<font color="#0000AA">blue</font>|<font color="#5555FF">brightblue</font>|
+|<font color="#AA00AA">magenta</font>|<font color="#FF55FF">brightmagenta</font>|
+|<font color="#00AAAA">cyan</font>|<font color="#55FFFF">brightcyan</font>|
+|<font color="#AAAAAA">white</font>|<font color="#FFFFFF">brightwhite</font>|
+|||
+|<font color="#555555">gray</font>|<font color="#AAAAAA">brightgray</font>|
+|<font color="#005555">teal</font>||
+|<font color="#AA5500">brown</font>|<font color="#FFAA00">orange</font>|
+
 ### qibl.strtok( str, sep )
 
 Separate the string `str` into parts delimited by the separator `sep`.  When called with a
@@ -1324,7 +1359,7 @@ Changelog
 ---------
 
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
-           fix `timeit` calibration, new `LruCache`
+           fix `timeit` calibration, new `LruCache`, new `ansiColor`
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,
            fix objectToError to retain undefined own properties too
 - 1.22.3 - only convert errorToObject error own properties to not restore inherited properties,
