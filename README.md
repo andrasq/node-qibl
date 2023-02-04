@@ -464,28 +464,20 @@ colors, all-lowercase no spaces:  the dark shades `black` (true black), `red`, `
 `brightgreen`, `brightyellow`, `brightblue`, `brightmagenta`, `brightbrightcyan`, `brightwhite`
 (true white).
 
-Two aliases and some additional colors are provided, `gray` for `brightblack`, `brightgray` for
-`white`, and `orange`, `brown` and `teal`.  The non-ANSI colors are encoded as 24-bit color
-sequences which may not be supported by all ANSI terminals.
+Two aliases, `gray` and `brightgray`, and some additional colors are provided, `orange`, `brown`
+and `teal`.  The non-ANSI colors are encoded as 24-bit color sequences which may not be supported
+by all ANSI terminals.
 
 Caution: the ANSI `white` is actually a light gray; true white is `brightwhite`.  The actual
 colors rendered depend on the terminal, since the color values associated with the names vary.
 The below are the VGA colors, composed out of the additive primaries at 0 and 2/3 (light), and 1/3
 and full (bright) intensity levels:
 
-||dark||light|
-|<font color="#000000">black</font>|<font color="#555555">brightblack</font>|
-|<font color="#AA0000">red</font>|<font color="#FF5555">brightred</font>|
-|<font color="#00AA00">green</font>|<font color="#55FF55">brightgreen</font>|
-|<font color="#AAAA00">yellow</font>|<font color="#FFFF55">brightyellow</font>|
-|<font color="#0000AA">blue</font>|<font color="#5555FF">brightblue</font>|
-|<font color="#AA00AA">magenta</font>|<font color="#FF55FF">brightmagenta</font>|
-|<font color="#00AAAA">cyan</font>|<font color="#55FFFF">brightcyan</font>|
-|<font color="#AAAAAA">white</font>|<font color="#FFFFFF">brightwhite</font>|
-|||
-|<font color="#555555">gray</font>|<font color="#AAAAAA">brightgray</font>|
-|<font color="#005555">teal</font>||
-|<font color="#AA5500">brown</font>|<font color="#FFAA00">orange</font>|
+|0|1|2|3|4|5|6|7|
+|<font color="#000000">black</font>|<font color="#AA0000">red</font>|<font color="#00AA00">green</font>|<font color="#AAAA00">yellow</font>|<font color="#0000AA">blue</font>|<font color="#AA00AA">magenta</font>|<font color="#00AAAA">cyan</font>|<font color="#AAAAAA">white</font>|
+|<font color="#555555">brightblack</font>|<font color="#FF5555">brightred</font>|<font color="#55FF55">brightgreen</font>|<font color="#FFFF55">brightyellow</font>|<font color="#5555FF">brightblue</font>|<font color="#FF55FF">brightmagenta</font>|<font color="#55FFFF">brightcyan</font>|<font color="#FFFFFF">brightwhite</font>|
+
+|<font color="#555555">gray (= brightblack)</font>|<font color="#AAAAAA">brightgray (= white)</font>|<font color="#FFAA00">orange #FFAA00</font>|<font color="#AA5500">brown #AA5500</font>|<font color="#005555">teal #005555</font>|
 
 ### qibl.strtok( str, sep )
 

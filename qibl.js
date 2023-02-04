@@ -712,6 +712,8 @@ function fromCharCodes( codes ) {
 var _word_charset =   'aaaabbcccddeeeeeefffgghiiiijkkllmnnnooooppqrrrsssstttttuuuvwxyzz';
 var _random_charset = 'aaab ccde eeee ffgh iiij kllm nnn ooop qrrr ssst ttt uuvw xyz   ';
 var hex_charset =     '0123456789abcdef01234567-9abcdef0123456789a-cdef0123456789abcdef';
+// TODO: should guard against multiple spaces.
+// FIXME: space indentation over-represents spaces in text.
 function str_random( len, charset ) {
     charset = charset || _random_charset;
     var s = '';
