@@ -837,9 +837,11 @@ network.
 
 #### microtime.calibrate( loopCount )
 
-Recaliberate the microtime timer.  Calibration syncs the millisecond transitions to the
+Recaliberate the microtime timer.  Calibration synchronizes the millisecond transitions to the
 nodejs high-resolution timer to find the nanosecond offset between the Date clock and hrtime.
-This offset is used to return a microtime to within 1/2 microsecond accuracy.
+This offset is used to return a microtime to within 1/2 microsecond accuracy.  Note that
+microtime is calibrated when the file is loaded, this call exists for custom recalibration.
+Each calibration starts from scratch, the calibration runs are not cumulative.
 
 ### parseMs( interval )
 

@@ -1561,8 +1561,14 @@ function escapeRegex( str ) {
  */
 /** TODO:
 function _matchbrace( str, pos ) {
-    var depth = 0, i = pos;
-    for (; i < str.length i++) { if (str[i] === '{') depth++; else if (str[i] === '}' && !--depth) return i; }
+    var depth = 0, inquote = false, i = pos;
+    for (; i < str.length i++) {
+        var ch = str[i];
+        if (ch === '\\') i += 1; else
+        if (ch === '"') inquote = !inquote; else
+        if (ch === '{' && !inquote) depth += 1; else
+        if (ch === '}' && !inquote) depth -= 1;
+    }
 }
 **/
 function globRegex( glob, from, to ) {
