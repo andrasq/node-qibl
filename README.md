@@ -835,6 +835,12 @@ network.
     new Date(sec * 1000).toISOString();
     // => "2020-12-19T19:52:35.834Z"
 
+#### microtime.calibrate( loopCount )
+
+Recaliberate the microtime timer.  Calibration syncs the millisecond transitions to the
+nodejs high-resolution timer to find the nanosecond offset between the Date clock and hrtime.
+This offset is used to return a microtime to within 1/2 microsecond accuracy.
+
 ### parseMs( interval )
 
 Convert a simple time spec like `'2h'` into milliseconds, `7200000`.
@@ -1351,7 +1357,7 @@ Changelog
 ---------
 
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
-           fix `timeit` calibration, new `LruCache`, new `ansiColor`
+           fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose microtime.calibrate
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,
            fix objectToError to retain undefined own properties too
 - 1.22.3 - only convert errorToObject error own properties to not restore inherited properties,

@@ -858,6 +858,7 @@ function saneBuf( ) {
         alloc: eval('nodeMajor >= 6 ? Buffer.allocUnsafe : Buffer'),
         from:  eval('nodeMajor >= 6 ? Buffer.from : Buffer'),
         concat: function(chunks) {
+            // node-v0.6 does not have Buffer.concat
             for (var size=0, i=0; i<chunks.length; i++) size += chunks[i].length;
             var buf = qibl.allocBuf(size);
             for (var pos=0, i=0; i<chunks.length; i++) { chunks[i].copy(buf, pos); pos += chunks[i].length }
@@ -1006,8 +1007,6 @@ function readBody( emitter, cb ) {
     emitter.on('end', function() {
         if (!chunk1) return cb(null, data);
         else if (!chunks) return cb(null, chunk1);
-        // else cb(null, Buffer.concat(chunks));
-        // node-v0.6 does not have Buffer.concat
         else cb(null, qibl.concatBuf(chunks));
     })
     emitter.on('error', function(err) {
@@ -1909,8 +1908,8 @@ function microtime( ) {
 // This can cause microtime() to sometimes deliver timestamps less than Date.now, e.g. 123 vs 122.9995
 // NOTE: node-v10,v12 calibration is great, but node-v13,v14,v15 is off (or way off)
 function _hrTick() { for (var t1 = Date.now(), t2; (t2 = Date.now()) < t1 + 1; ) ; return t2 }
-function _hrCalibrate() {
-    var clk = microtime, timeRuns = eval("nodeMajor > 11 ? 17000 : 750");  // node-v12 calibrates better with 15k than 5000
+function _hrCalibrate(nruns) {
+    var clk = microtime, timeRuns = nruns;  // node-v12 calibrates better with 15k than 5000
     function _hrDuration() { var t1 = clk(); for (var i=0; i<timeRuns; i++) clk(); return (clk() - t1) / (timeRuns + 1) }
     function _nowDuration() { var t1 = clk(); for (var i=0; i<timeRuns; i++) Date.now(); return (clk() - t1 - hrDuration) / timeRuns }
     var hrDuration = _hrDuration(), nowDuration = _nowDuration();       // warm up and time calls
@@ -1921,8 +1920,10 @@ function _hrCalibrate() {
     _microtimeOffset += hrDuration;                                     // and before that last microtime call we made
     _microtimeOffset += (hrDuration - nowDuration) / 2;                 // will also be sampled a bit slower
 }
+microtime.calibrate = function(nruns) { _microtimeOffset = 0; _hrCalibrate(nruns) }
 // NOTE: occasionally the runtime adds a burst of delay between t1 and t2, if so try again
-do { _microtimeOffset = 0; _hrCalibrate() } while (_hrTick() / 1000 - microtime() > .000002);
+var _hrCalibrationLoops = eval("nodeMajor > 11 ? 17000 : 750")
+do microtime.calibrate(_hrCalibrationLoops); while (_hrTick() / 1000 - microtime() > .000002);
 
 /*
  * Parse time notation like '2h' into 7200000 milliseconds.
