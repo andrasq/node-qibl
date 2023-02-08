@@ -31,7 +31,7 @@ var invoke2 = eval("(nodeMajor < 8) && _invoke2 || tryEval('function(func, self,
 var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.Map : _Hashmap");
 
 // rest arguments are faster starting with node-v8
-var varargs = eval("(nodeMajor < 8) && _varargs ||" +
+var varargs = eval("(nodeMajor < 8) ? _varargs :" +
     " tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
 var setImmediate = eval('global.setImmediate || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) }')
@@ -130,6 +130,7 @@ var qibl = module.exports = {
     diffarray: diffarray,
     retry: retry,
     Mutex: Mutex,
+    mutexCall: mutexCall,
     Cron: Cron,
     socketpair: socketpair,
     keys: keys,
@@ -1439,6 +1440,8 @@ function retry( getDelay, timeout, func, options, callback ) {
 // Mutex from miniq/lib/utils
 // call serializer, each next call is launched by the previous call`s release() callback
 // usage: mutex.acquire(function(release) { ... release() });
+// CAUTION: arrays are **very** slow (quadratic) to shift if contain more than ~ 25k elements (see qlist)
+// TODO: maybe guard against exceptions thrown by user()
 function Mutex( limit ) {
     this.busy = 0;
     this.limit = limit || 1;
@@ -1451,8 +1454,24 @@ function Mutex( limit ) {
     }
     this._release = function _release() {
         var next = self.queue.shift();
-        (next) ? setImmediate(next, self._release) : self.busy -= 1;
+        (next) ? next(self._release) : self.busy -= 1;
     }
+}
+
+function mutexCall( fn, n ) {
+    var mutex = new Mutex(n);
+    var mfunc = varargs(function(argv) {
+        mutex.acquire(function(release) {
+            var cb = argv.pop();
+            argv.push(function(err, result, result2) {
+                release();
+                cb(err, result, result2);
+            })
+            invoke1(fn, argv);
+        })
+    })
+    mfunc.mutex = mutex;
+    return mfunc;
 }
 
 /*

@@ -3152,6 +3152,37 @@ module.exports = {
         },
     },
 
+    'mutexCall': {
+        'returns a function': function(t) {
+            var fn = qibl.mutexCall();
+            t.equal(typeof fn, 'function');
+            t.ok(fn.mutex instanceof qibl.Mutex);
+            t.done();
+        },
+        'sets mutex to provided limit': function(t) {
+            var fn = qibl.mutexCall(null, 34);
+            t.equal(fn.mutex.limit, 34);
+            t.done();
+        },
+        'acquires before call and releases after call': function(t) {
+            var called = false, acquired = false, released = false;
+            var fn = qibl.mutexCall(function(a, b, c, cb) {
+                called = true;
+                t.deepEqual([a, b, c], [1, 2, 3]);
+                t.equal(acquired, true);
+                t.equal(released, false);
+                cb();
+            })
+            t.stub(fn.mutex, 'acquire', function(f) { acquired = true; f(fn.mutex._release) });
+            t.stub(fn.mutex, '_release', function() { released = true });
+            fn(1, 2, 3, function(err) {
+                t.equal(called, true);
+                t.equal(released, true);
+                t.done();
+            })
+        },
+    },
+
     'Cron': {
         setUp: function(done) {
             this.uut = new qibl.Cron();

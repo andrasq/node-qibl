@@ -1152,6 +1152,29 @@ Mutex properties of interest
         release();
     });
 
+### mutexCall( func [,limit] )
+
+Return a function that will serialize calls to `func`.  The optional `limit` controls how many
+calls to `func` to allow to run simultaneously; the default is 1.  `func` may take any number of
+parameters, but the last argument must be callback.  The callback can return up to 3 values,
+normally an error and 2 results.
+
+    const qibl = require('qibl');
+    let running = 0;
+    const greet = (name, cb) => {
+        assert.equal(running, 0);
+        running += 1;
+        setTimeout(() => {
+            console.log('Hello, %s!', name);
+            running -= 1;
+            assert.equal(running, 0);
+            cb();
+        }, 5);
+    }
+    const greet1 = qibl.mutexCall(greet);
+    for (let i = 0; i < 10; i++) greet1('Barbie', function(){});
+    // => "Hello, Barbie!" 10 times, spaced 5 ms apart
+
 ### new Cron( )
 
 Schedule precise-interval cronjobs.  A cronjob is a function taking a callback that it calls
@@ -1358,6 +1381,7 @@ Return the keys of the elements currently in the cache.
 Changelog
 ---------
 
+- 1.24.0 - new `mutexCall`
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
            fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose microtime.calibrate
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,

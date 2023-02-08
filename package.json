@@ -1,6 +1,6 @@
 {
   "name": "qibl",
-  "version": "1.23.0",
+  "version": "1.24.0",
   "description": "many small useful functions",
   "keywords": [ "repeat", "fill", "assign", "merge", "Buffer", "polyfill", "toStruct", "subsample" ],
   "main": "qibl.js",
