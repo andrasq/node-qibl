@@ -1143,6 +1143,7 @@ waiting for the resource to be free, locks one unit of the resource, and calls
 the resource will remain locked until freed, no timeout.
 
 Mutex properties of interest
+- `limit` - the configured maximum number of simultaneous users allowed
 - `busy` - the count of users currently accessing the resource
 - `queue` - the queue of calls waiting to access the resource
 
@@ -1158,6 +1159,9 @@ Return a function that will serialize calls to `func`.  The optional `limit` con
 calls to `func` to allow to run simultaneously; the default is 1.  `func` may take any number of
 parameters, but the last argument must be callback.  The callback can return up to 3 values,
 normally an error and 2 results.
+
+Mutual exclusion is implemented with a `qibl.Mutex` instance, which is attached to the returned
+function as its `.mutex` property.
 
     const qibl = require('qibl');
     let running = 0;

@@ -3140,8 +3140,11 @@ module.exports = {
             var uut = new qibl.Mutex();
             var call1, call2, t1 = Date.now();
             uut.acquire(function(release) { call1 = true; setTimeout(release, 5) });
+            t.equal(uut.length, 1);
             uut.acquire(function(release) { call2 = true; setTimeout(release, 5) });
+            t.equal(uut.length, 2);
             uut.acquire(function(release) {
+                t.equal(uut.length, 1); // other two calls have finished
                 var t2 = Date.now();
                 t.ok(t2 - t1 >= 10 - 1);
                 t.ok(call1);
@@ -3149,6 +3152,7 @@ module.exports = {
                 release();
                 t.done();
             })
+            t.equal(uut.length, 3); // first call is still running, second still waiting
         },
     },
 

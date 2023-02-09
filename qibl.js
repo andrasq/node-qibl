@@ -1457,6 +1457,7 @@ function Mutex( limit ) {
         (next) ? next(self._release) : self.busy -= 1;
     }
 }
+Object.defineProperty(Mutex.prototype, 'length', { get: function() { return this.busy + this.queue.length } });
 
 function mutexCall( fn, n ) {
     var mutex = new Mutex(n);
