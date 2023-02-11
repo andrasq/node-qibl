@@ -171,6 +171,7 @@ var qibl = module.exports = {
     Dlist: DlistList,
     DlistNode: DlistNode,
     LruCache: LruCache,
+    Clist: Clist,
     __configure: __configure,
 };
 
@@ -1987,6 +1988,7 @@ timeit.calibrate = function calibrate() {
     return _timeitOverhead = (timeit(0.8e6, mockFunc)[1] - timeit(1, mockLoop)[1] + _tmp - _tmp) / 0.8e6;
 }
 timeit.formatRate = function formatRate( count, elapsed, overhead ) {
+    if (Array.isArray(count)) { overhead = count[2]; elapsed = count[1]; count = count[0] }
     return util.format("%s in %s of %s ms: %s/s", timeit.autorangeValue(count),
         ((elapsed - (overhead || 0)) * 1000).toFixed(2), ((elapsed) * 1000).toFixed(2),
         timeit.autorangeValue(count / (elapsed - (overhead || 0)), 4))
@@ -2196,6 +2198,68 @@ LruCache.prototype._iterator = function() {
     return { next: function() { var info = iter.next(); !info.done && (info.value = info.value.value); return info } }
 }
 qibl.setIterator(LruCache.prototype, LruCache.prototype._iterator);
+
+/*
+ * tiny little circular list, see qlist for a more featureful version
+ * invariants:
+ *   list.end always points to the free cell at the end of the list
+ *   there is always at least one free cell
+ *   head == end means the list is empty
+ */
+function Clist( arr ) {
+    this.head = 0;
+    this.end = 0;
+    this.mask = 0x003;
+    this.list = new Array(4);
+}
+Clist.prototype.push = function push(item) {
+    var end = this.end;
+    this.list[end] = item;
+    end = this.end = ((end + 1) & this.mask);
+    if (end === this.head) this._growList();
+}
+Clist.prototype.shift = function shift() {
+    var head = this.head, val = this.list[head];
+    if (head === this.end) return undefined;
+    this.list[head] = -1; // overwrite the slot to not retain a reference
+    head = this.head = ((head + 1) & this.mask);
+    // if (this.end >= 10000 && head < 1000 && this.length < this.list.length / 4) this._shrinkList();
+    return val;
+}
+Clist.prototype._growList = function _growList() {
+    var len = this.list.length;
+    this.list = this.copyTo(new Array(2 * len), len);
+    this.mask = (this.mask << 1) | 1;
+    this.head = 0;
+    this.end = len;
+}
+//Clist.prototype.shrinkList = function _shrinkList() {
+//    var len = this.length;
+//    this.copyTo(this.list);
+//    this.list.length /= 4;
+//    this.mask >>= 2;
+//    this.head = 0;
+//    this.end = len;
+//}
+Clist.prototype.copyTo = function copyTo( dst, len ) {
+    len = len || this.length;
+    var base = this.head, mask = this.mask, list = this.list;
+    for (var i = 0; i < len; i++) dst[i] = list[(base + i) & mask];
+    return dst;
+}
+//Clist.prototype.peekAt = function peekAt( ix ) {
+//    if (ix < 0 || ix >= this.length) return undefined;
+//    if (ix < 0) ix += this.length;
+//    return this.list[(this.head + ix) & this.mask];
+//}
+Clist.prototype._iterator = function() {
+    var list = this, ix = this.head;
+    return { next: function() {
+        return (ix & list.mask) === list.end ? { done: true, value: undefined } : { done: false, value: list.list[ix++] } } };
+}
+qibl.setIterator(Clist.prototype, Clist.prototype._iterator);
+Object.defineProperty(Clist.prototype, 'length', {get: function() {
+    return this.head <= this.end ? this.end - this.head : ((this.end - 0) + (this.list.length - this.head)) }});
 
 /*
  * hook for testing: compile and run the function in local file context,

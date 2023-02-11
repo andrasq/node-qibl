@@ -1381,11 +1381,32 @@ Remove the value indexed by `key` from the cache.
 
 Return the keys of the elements currently in the cache.
 
+### clist = new qibl.Clist( )
+
+Efficient minimal circular list implemented with an Array, supporting just `push`, `shift` and `length`.
+The list can grow without limit, but the array space freed when removing elements is not reclaimed.
+
+It is much much _much_ faster to push/shift off a circular list than a nodejs array once the array
+has ~ 10,000 elements, because the nodejs javascript engine runs `shift` in O(n^2) time once the
+array exceeds a built-in threshold.
+
+### clist.push( item )
+
+Append the item to the end of the list.
+
+### clist.shift( )
+
+Remove and return the first item on the list, or `undefined` if the list is empty.
+
+### clist.length
+
+Getter property that always returns the count of elements on the list.
+
 
 Changelog
 ---------
 
-- 1.24.0 - new `mutexCall`
+- 1.24.0 - new `mutexCall`, new `Clist`
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
            fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose microtime.calibrate
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,

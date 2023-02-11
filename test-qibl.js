@@ -3185,6 +3185,28 @@ module.exports = {
                 t.done();
             })
         },
+        'speed': function(t) {
+            var started = false;
+            // a sync function measures runtime, will never need to queue calls (27m/s)
+            var test = function(a, b, cb) { cb(null, a + b) }
+            // var test = function(a, b, cb) { setImmediate(cb, null, a + b) }
+            var test = function(a, b, cb) { (a & 0xFF) ? cb(null, a + b) : setImmediate(cb, null, a + b) };
+            var fn = qibl.mutexCall(test);
+            fn.mutex.busy = 1; // hold execution
+            var nloops = 1e6;
+            var x, sum = 0, callCount = 0;
+            var t1 = qibl.microtime();
+            for (var i=0; i<nloops; i++) fn(i, 1, done);
+            var t2 = qibl.microtime();
+            fn.mutex._release();
+            function done(err, x) { sum += x; callCount += 1; if (callCount === nloops) {
+                var t3 = qibl.microtime();
+                console.log("AR: mutexCall calls", callCount, sum, qibl.timeit.formatRate(nloops, t3 - t1));
+                t.done();
+                // runs calls in 27m/s (no queueing needed), 3m/s if stack broken up, 1.4m/s is all calls are setImmediate
+                // w stack breakup the initial calls add no overhead, same speed whether 1m is buffered or run immediately
+            } }
+        },
     },
 
     'Cron': {
@@ -4773,6 +4795,94 @@ module.exports = {
                 // 1m 30m/s (peak 32m/s)
                 t.done();
             },
+        },
+    },
+
+    'Clist': {
+        'push': {
+            'appends elements': function(t) {
+                var list = new qibl.Clist();
+                t.deepEqual(list.copyTo([]), []);
+                list.push(1);
+                t.deepEqual(list.copyTo([]), [1]);
+                list.push(2);
+                t.deepEqual(list.copyTo([]), [1, 2]);
+                for (var i=3; i<8; i++) list.push(i);
+                t.deepEqual(list.copyTo([]), [1, 2, 3, 4, 5, 6, 7]);
+
+                for (var i=0; i<3; i++) list.shift();
+                t.deepEqual(list.copyTo([]), [4, 5, 6, 7]);
+
+                for (var i=8; i<=10; i++) list.push(i);
+                t.deepEqual(list.copyTo([]), [4, 5, 6, 7, 8, 9, 10]);
+                t.done();
+            },
+        },
+
+        'shift': {
+            'returns elements': function(t) {
+                var list = new qibl.Clist();                    // empty list
+                t.strictEqual(list.shift(), undefined);
+
+                list.push(1);                                   // remove last item
+                t.strictEqual(list.shift(), 1);
+                t.strictEqual(list.shift(), undefined);
+                t.strictEqual(list.shift(), undefined);
+
+                for (var i=2; i<=5; i++) list.push(i);          // remove items that wrap back to start
+                t.strictEqual(list.shift(), 2);
+                t.strictEqual(list.shift(), 3);
+                t.strictEqual(list.shift(), 4);
+                t.strictEqual(list.shift(), 5);
+                t.strictEqual(list.shift(), undefined);
+                t.strictEqual(list.shift(), undefined);
+
+                t.done();
+            },
+        },
+
+        'length': {
+            'returns the count of items on the list': function(t) {
+                var list = new qibl.Clist();
+                t.equal(list.length, 0);
+                list.push(1);
+                list.push(2);
+                t.equal(list.length, 2);
+                list.shift();
+                t.equal(list.length, 1);
+                for (var i=3; i<=123; i++) list.push(i);
+                t.equal(list.length, 122);
+                for (var i=0; i<200; i++) list.shift();
+                t.equal(list.length, 0);
+                t.done();
+            },
+        },
+
+        'iterator': {
+            'loops over items': function(t) {
+                var list = new qibl.Clist();
+                list.push(0); list.push(1); list.push(2);
+                list.shift();
+                list.push(3); list.push(4);
+                var items = [], iter = list._iterator();
+                for (var info; !(info = iter.next()).done; ) items.push(info.value);
+                t.deepEqual(items, [1, 2, 3, 4]);
+                t.done();
+            },
+        },
+
+        'speed': function(t) {
+            var x, list = new qibl.Clist()
+            console.log("AR: push", qibl.timeit.formatRate(
+                qibl.timeit(1e6, function(i) { list.push(1e9 - i) })));
+            console.log("AR: push/shift", qibl.timeit.formatRate(
+                qibl.timeit(1e6, function(i) { list.push(1e9 - i); x = list.shift() })));
+            var rate = qibl.timeit(1e6/10, function(i) {
+                for (var j=0; j<10; j++) list.push(1e9 - i);
+                for (var j=0; j<10; j++) x = list.shift() });
+            rate[0] *= 10;
+            console.log("AR: push/shift ripple 10", qibl.timeit.formatRate(rate));
+            t.done();
         },
     },
 }
