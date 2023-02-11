@@ -1450,33 +1450,38 @@ function Mutex( limit ) {
 
     var self = this;
     this.acquire = function acquire(user) {
-        if (self.busy < self.limit) { self.busy += 1; user(self._release) }
+        if (self.busy < self.limit) (self.busy += 1, user.acq ? user.acq(self._release, user.cx) : user(self._release))
         else self.queue.push(user);
     }
     this._release = function _release() {
         var next = self.queue.shift();
-        (next) ? next(self._release) : self.busy -= 1;
+        (next) ? (next.acq ? next.acq(self._release, next.cx) : next(self._release)) : self.busy -= 1;
     }
 }
 Object.defineProperty(Mutex.prototype, 'length', { get: function() { return this.busy + this.queue.length } });
 
+// Mutex optimized for calling with a context
+var ContextMutex = eval('true && ' + String(Mutex));
+qibl.inherits(ContextMutex, Mutex);
+
 function _tryInvokeCbA(fn, cb, a) {
     try { return invoke1(fn, a) } catch (err) { cb(err) } }
 function mutexCall( fn, n ) {
-    var mutex = new Mutex(n);
+    var mutex = new ContextMutex(n);
     var mfunc = varargs(function(argv) {
-        var cb = argv.pop();
-        // if (typeof cb !== 'function') throw new Error('callback must be last argument');
-        // TODO: might be faster to wrap a manual closure around fn, argv and onAcquire, and reuse the handler functions
-        mutex.acquire(function(release) {
-            var released = false;
-            var releaseOnce = function(err, result) { released ? 0 : (released = true, release()); cb(err, result) }
-            argv.push(releaseOnce);
-            _tryInvokeCbA(fn, releaseOnce, argv);
-        })
+        var context = { fn: fn, av: argv, cx: null, acq: onAcquire, released: false, release: null };
+        context.cx = context;
+        mutex.acquire(context);
     })
     mfunc.mutex = mutex;
     return mfunc;
+    function onAcquire(release, cx) {
+        var cb = cx.av.pop();
+        var released = false;
+        var releaseOnce = function(err, result) { released ? 0 : (released = true, release()); cb(err, result) }
+        cx.av.push(releaseOnce);
+        _tryInvokeCbA(cx.fn, releaseOnce, cx.av);
+    }
 }
 
 /*

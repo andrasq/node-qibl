@@ -16,6 +16,8 @@ var nodeMajor = parseInt(process.versions.node);
 
 var tmpVarargs;
 
+var setImmediate = eval('global.setImmediate || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) }')
+
 // from minisql:
 function repeatFor(n, proc, callback) {
     (function _loop(err) {
@@ -3154,6 +3156,24 @@ module.exports = {
             })
             t.equal(uut.length, 3); // first call is still running, second still waiting
         },
+
+        'speed': function(t) {
+            var mutex = new qibl.Mutex();
+            mutex.busy = 1;
+            var ndone = 0;
+            var user = function(release) { (ndone++ & 0xFF) ? release() : setImmediate(release) };
+            var t1 = qibl.microtime();
+            for (var i=0; i<1e6; i++) mutex.acquire(user);
+            var t2 = qibl.microtime();
+            mutex.acquire(function(release) {
+                var t3 = qibl.microtime();
+                console.log("AR: queued mutexes", qibl.timeit.formatRate(1e6, t2 - t1));
+                console.log("AR: ran mutexes", qibl.timeit.formatRate(1e6, t3 - t2));
+                console.log("AR: mutex", qibl.timeit.formatRate(1e6, t3 - t1));
+                t.done();
+            })
+            mutex._release();
+        },
     },
 
     'mutexCall': {
@@ -3177,7 +3197,7 @@ module.exports = {
                 t.equal(released, false);
                 cb(null, a + b + c);
             })
-            t.stub(fn.mutex, 'acquire', function(f) { acquired = true; f(fn.mutex._release) });
+            t.stub(fn.mutex, 'acquire', function(f) { acquired = true; (f.acq || f)(fn.mutex._release, f.cx) });
             t.stub(fn.mutex, '_release', function() { released = true });
             fn(1, 2, 3, function(err, sum) {
                 t.equal(called, true);
