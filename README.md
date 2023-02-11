@@ -1142,6 +1142,11 @@ waiting for the resource to be free, locks one unit of the resource, and calls
 `func(release)`.  `release` is a callback that must be called to release the resource unit;
 the resource will remain locked until freed, no timeout.
 
+Note that the next call to use the mutex is invoked directly by the `release()` of the previous
+call without the call stack being broken up, so queueing many hundreds of synchronous calls could
+throw a "stack size exceeded" exception.  Note too that synchronous functions do not need to be
+serialized, since they run inherently consecutively.
+
 Mutex properties of interest
 - `limit` - the configured maximum number of simultaneous users allowed
 - `busy` - the count of users currently accessing the resource
@@ -1153,12 +1158,18 @@ Mutex properties of interest
         release();
     });
 
-### mutexCall( func [,limit] )
+### mutexCall( func(..., callback) [,limit] )
 
 Return a function that will serialize calls to `func`.  The optional `limit` controls how many
 calls to `func` to allow to run simultaneously; the default is 1.  `func` may take any number of
-parameters, but the last argument must be callback.  The callback can return up to 3 values,
-normally an error and 2 results.
+parameters, but the last argument must be callback.
+
+The serialized call has the same function signature as `func`, taking the same arguments and the
+same callback.  The mutex is acquired before `func` is called, and is released when `func` invokes
+its callback.  The callback can deliver up to 2 values back to the caller, normally an error and a
+data value.  Errors thrown inside `func` are caught and passed to its callback, including errors
+thrown after the callback has been called.  The mutex is released only once, on the first occasion
+(ie the first time the callback is called and/or error is thrown).
 
 Mutual exclusion is implemented with a `qibl.Mutex` instance, which is attached to the returned
 function as its `.mutex` property.
@@ -1176,7 +1187,7 @@ function as its `.mutex` property.
         }, 5);
     }
     const greet1 = qibl.mutexCall(greet);
-    for (let i = 0; i < 10; i++) greet1('Barbie', function(){});
+    for (let i = 0; i < 10; i++) greet1('Barbie', function callback(){});
     // => "Hello, Barbie!" 10 times, spaced 5 ms apart
 
 ### new Cron( )

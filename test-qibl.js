@@ -3175,15 +3175,40 @@ module.exports = {
                 t.deepEqual([a, b, c], [1, 2, 3]);
                 t.equal(acquired, true);
                 t.equal(released, false);
-                cb();
+                cb(null, a + b + c);
             })
             t.stub(fn.mutex, 'acquire', function(f) { acquired = true; f(fn.mutex._release) });
             t.stub(fn.mutex, '_release', function() { released = true });
-            fn(1, 2, 3, function(err) {
+            fn(1, 2, 3, function(err, sum) {
                 t.equal(called, true);
                 t.equal(released, true);
+                t.equal(sum, 1 + 2 + 3);
                 t.done();
             })
+        },
+        'errors': {
+            'releases only once': function(t) {
+                var fn = qibl.mutexCall(function(cb) { fn.mutex.busy = 3; cb(); cb(); throw new Error('test error') });
+                var cbCount = 0;
+                fn(function(err) {
+                    cbCount += 1;
+                    // each release that empties the queue decrements the busy count
+                    t.equal(fn.mutex.busy, 2);
+                    if (err) {
+                        t.equal(err.message, 'test error');
+                        t.equal(cbCount, 3);
+                        t.done();
+                    }
+                })
+            },
+            'traps func errors': function(t) {
+                var fn = qibl.mutexCall(function(cb) { throw new Error('test error') });
+                fn(function(err) {
+                    t.ok(err);
+                    t.equal(err.message, 'test error');
+                    t.done();
+                })
+            },
         },
         'speed': function(t) {
             var started = false;
@@ -3192,7 +3217,7 @@ module.exports = {
             // var test = function(a, b, cb) { setImmediate(cb, null, a + b) }
             var test = function(a, b, cb) { (a & 0xFF) ? cb(null, a + b) : setImmediate(cb, null, a + b) };
             var fn = qibl.mutexCall(test);
-            fn.mutex.busy = 1; // hold execution
+            fn.mutex.busy = 1; // hold execution until queued all calls
             var nloops = 1e6;
             var x, sum = 0, callCount = 0;
             var t1 = qibl.microtime();
@@ -3201,6 +3226,8 @@ module.exports = {
             fn.mutex._release();
             function done(err, x) { sum += x; callCount += 1; if (callCount === nloops) {
                 var t3 = qibl.microtime();
+                console.log("AR: queued calls", qibl.timeit.formatRate(nloops, t2 - t1));
+                console.log("AR: ran calls", qibl.timeit.formatRate(nloops, t3 - t2));
                 console.log("AR: mutexCall calls", callCount, sum, qibl.timeit.formatRate(nloops, t3 - t1));
                 t.done();
                 // runs calls in 27m/s (no queueing needed), 3m/s if stack broken up, 1.4m/s is all calls are setImmediate

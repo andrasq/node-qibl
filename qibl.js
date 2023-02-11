@@ -1460,16 +1460,19 @@ function Mutex( limit ) {
 }
 Object.defineProperty(Mutex.prototype, 'length', { get: function() { return this.busy + this.queue.length } });
 
+function _tryInvokeCbA(fn, cb, a) {
+    try { return invoke1(fn, a) } catch (err) { cb(err) } }
 function mutexCall( fn, n ) {
     var mutex = new Mutex(n);
     var mfunc = varargs(function(argv) {
+        var cb = argv.pop();
+        // if (typeof cb !== 'function') throw new Error('callback must be last argument');
+        // TODO: might be faster to wrap a manual closure around fn, argv and onAcquire, and reuse the handler functions
         mutex.acquire(function(release) {
-            var cb = argv.pop();
-            argv.push(function(err, result, result2) {
-                release();
-                cb(err, result, result2);
-            })
-            invoke1(fn, argv);
+            var released = false;
+            var releaseOnce = function(err, result) { released ? 0 : (released = true, release()); cb(err, result) }
+            argv.push(releaseOnce);
+            _tryInvokeCbA(fn, releaseOnce, argv);
         })
     })
     mfunc.mutex = mutex;
@@ -2105,7 +2108,7 @@ function objectToError( obj ) {
     Object.getOwnPropertyNames(err).forEach(function(key) {                     // no own properties, only from obj,
         /* istanbul ignore next */ // a new Error() will never have the other possible keys set, but paranoia
         if (!(key in hiddenErrorFields)) delete err[key] });                    // but keep vanilla Error own properties
-    for (var key in obj) err[key] = obj[key];                                   // transcribe obj properties 
+    for (var key in obj) err[key] = obj[key];                                   // transcribe obj properties
     for (var key in hiddenErrorFields) (key in obj) && hideProperty(err, key);  // re-hide non-enumerables
     delete err.__errorCtor;                                                     // remove our metadata
     return err;
