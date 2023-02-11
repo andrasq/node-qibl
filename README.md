@@ -1406,7 +1406,7 @@ Getter property that always returns the count of elements on the list.
 Changelog
 ---------
 
-- 1.24.0 - new `mutexCall`, new `Clist`
+- 1.24.0 - new `mutexCall`, new `Clist`, implement Mutex with Clist
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
            fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose microtime.calibrate
 - 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,

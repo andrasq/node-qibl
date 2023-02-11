@@ -1441,12 +1441,12 @@ function retry( getDelay, timeout, func, options, callback ) {
 // Mutex from miniq/lib/utils
 // call serializer, each next call is launched by the previous call`s release() callback
 // usage: mutex.acquire(function(release) { ... release() });
-// CAUTION: arrays are **very** slow (quadratic) to shift if contain more than ~ 25k elements (see qlist)
-// TODO: maybe guard against exceptions thrown by user()
 function Mutex( limit ) {
     this.busy = 0;
     this.limit = limit || 1;
-    this.queue = new Array();
+    // WARNING: nodejs arrays are **abysmally** slow to shift (quadratic) if contain more than ~ 10k elements
+    this.queue = new qibl.Clist();
+    this.ndone = 0;
 
     var self = this;
     this.acquire = function acquire(user) {
