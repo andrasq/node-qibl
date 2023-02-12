@@ -1398,7 +1398,8 @@ Return the keys of the elements currently in the cache.
 ### clist = new qibl.Clist( )
 
 Efficient minimal circular list implemented with an Array, supporting just `push`, `shift` and `length`.
-The list can grow without limit, but the array space freed when removing elements is not reclaimed.
+The list can grow without limit, but the array space freed when removing elements is not reclaimed (use
+`list.resize()` to free unused storage space).
 This is a stripped-down version of the very efficient [`qlist`](https://npmjs.org/package/qlist).
 
 It is much much _much_ faster to push/shift off a circular list than a nodejs array once the array
@@ -1416,6 +1417,15 @@ Remove and return the first item on the list, or `undefined` if the list is empt
 ### clist.length
 
 Getter property that always returns the count of elements on the list.
+
+### clist.resize( [count] )
+
+Double or halve the length of the storage array to better fit `count` elements, and retain `count`
+elements.  If not specified `count` defaults to `clist.length`.  This method is used internally to
+grow the list when appending items, and can be called to shrink the list to free unused storage.
+
+    // reclaim any unused storage from the list
+    clist.resize();
 
 
 Changelog

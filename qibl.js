@@ -2215,59 +2215,50 @@ qibl.setIterator(LruCache.prototype, LruCache.prototype._iterator);
  *   head == end means the list is empty
  */
 function Clist( arr ) {
-    this.head = 0;
-    this.end = 0;
-    this.mask = 0x003;
+    this.head = 0;              // base of the list
+    this.end = 0;               // end of the list
+    this.mask = 0x003;          // capacity mask
     this.list = new Array(4);
 }
 Clist.prototype.push = function push(item) {
     var end = this.end;
     this.list[end] = item;
     end = this.end = ((end + 1) & this.mask);
-    if (end === this.head) this._growList();
+    if (end === this.head) this._resize(this.mask + 1);
 }
 Clist.prototype.shift = function shift() {
     var head = this.head, val = this.list[head];
     if (head === this.end) return undefined;
     this.list[head] = -1; // overwrite the slot to not retain a reference
     head = this.head = ((head + 1) & this.mask);
-    // if (this.end >= 10000 && head < 1000 && this.length < this.list.length / 4) this._shrinkList();
     return val;
 }
-Clist.prototype._growList = function _growList() {
-    var len = this.list.length;
-    this.list = this.copyTo(new Array(2 * len), len);
-    this.mask = (this.mask << 1) | 1;
+Clist.prototype.resize = function resize( len ) { return this._resize(len === undefined ? this.length : len) }
+Clist.prototype._resize = function _resize( len ) {
+    var len2 = this.mask + 1;
+    if (len >= len2) len2 <<= 1;
+    else while (len < (len2 >> 1)) len2 >>= 1;
+    this.list = this._copyTo(new Array(len2), len);
+    this.mask = len2 - 1;
     this.head = 0;
     this.end = len;
 }
-//Clist.prototype.shrinkList = function _shrinkList() {
-//    var len = this.length;
-//    this.copyTo(this.list);
-//    this.list.length /= 4;
-//    this.mask >>= 2;
-//    this.head = 0;
-//    this.end = len;
-//}
-Clist.prototype.copyTo = function copyTo( dst, len ) {
-    len = len || this.length;
+Clist.prototype.copyTo = function copyTo( dst, len ) { return this._copyTo(dst, len || this.length) }
+Clist.prototype._copyTo = function _copyTo( dst, len ) {
     var base = this.head, mask = this.mask, list = this.list;
     for (var i = 0; i < len; i++) dst[i] = list[(base + i) & mask];
     return dst;
 }
-//Clist.prototype.peekAt = function peekAt( ix ) {
-//    if (ix < 0 || ix >= this.length) return undefined;
-//    if (ix < 0) ix += this.length;
-//    return this.list[(this.head + ix) & this.mask];
-//}
 Clist.prototype._iterator = function() {
     var list = this, ix = this.head;
     return { next: function() {
         return (ix & list.mask) === list.end ? { done: true, value: undefined } : { done: false, value: list.list[ix++] } } };
 }
 qibl.setIterator(Clist.prototype, Clist.prototype._iterator);
-Object.defineProperty(Clist.prototype, 'length', {get: function() {
-    return this.head <= this.end ? this.end - this.head : ((this.end - 0) + (this.list.length - this.head)) }});
+// distance_A_to_B = (B - A + Range) % Range
+Object.defineProperty(Clist.prototype, 'length', {enumerable: true, get: function() {
+    var mask = this.mask; return (this.end - this.head + mask + 1) & mask }});
+
 
 /*
  * hook for testing: compile and run the function in local file context,

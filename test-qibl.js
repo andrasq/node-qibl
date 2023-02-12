@@ -4888,19 +4888,56 @@ module.exports = {
             },
         },
 
+        'copyTo': {
+            'copies out the array contents': function(t) {
+                var list = new qibl.Clist();
+                t.deepEqual(list.copyTo([]), []);
+                list.push(1);
+                t.deepEqual(list.copyTo([]), [1]);
+                for (var i=2; i<= 5; i++) list.push(i);
+                t.deepEqual(list.copyTo([]), [1, 2, 3, 4, 5]);
+                list.shift();
+                t.deepEqual(list.copyTo([]), [2, 3, 4, 5]);
+                t.done();
+            },
+        },
+
+        'resize': {
+            'doubles the storage array once it is full': function(t) {
+                var list = new qibl.Clist();
+                list.push(1);
+                var sz = list.list.length;
+                list.resize(sz);
+                t.equal(list.list.length, 2 * sz);
+                t.done();
+            },
+            'shrinks the storage array': function(t) {
+                var list = new qibl.Clist();
+                list.resize(5);
+                list.resize(10);
+                list.resize(20);
+                t.equal(list.list.length, 32);
+                list.resize(6);
+                t.equal(list.list.length, 8);
+                list.resize(2);
+                t.equal(list.list.length, 4);
+                t.done();
+            },
+        },
+
         'length': {
             'returns the count of items on the list': function(t) {
                 var list = new qibl.Clist();
-                t.equal(list.length, 0);
-                list.push(1);
-                list.push(2);
-                t.equal(list.length, 2);
-                list.shift();
-                t.equal(list.length, 1);
-                for (var i=3; i<=123; i++) list.push(i);
-                t.equal(list.length, 122);
-                for (var i=0; i<200; i++) list.shift();
-                t.equal(list.length, 0);
+                var n = 0;
+                for (var i=0; i<1000; i++) {
+                    list.push(i);
+                    t.equal(list.length, ++n);
+                }
+                for (var i=0; i<1010; i++) {
+                    list.shift();
+                    list.resize();
+                    t.equal(list.length, Math.max(--n, 0));
+                }
                 t.done();
             },
         },
@@ -4924,6 +4961,8 @@ module.exports = {
                 qibl.timeit(1e6, function(i) { list.push(1e9 - i) })));
             console.log("AR: push/shift", qibl.timeit.formatRate(
                 qibl.timeit(1e6, function(i) { list.push(1e9 - i); x = list.shift() })));
+            list.resize(0);
+            for (var i=0; i<20; i++) list.push(i);
             var rate = qibl.timeit(1e6/10, function(i) {
                 for (var j=0; j<10; j++) list.push(1e9 - i);
                 for (var j=0; j<10; j++) x = list.shift() });
