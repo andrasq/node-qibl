@@ -160,6 +160,7 @@ var qibl = module.exports = {
     microtime: microtime,
     parseMs: parseMs,
     timeit: timeit,
+    formatRate: formatRate,
     Timebase: Timebase,
     QuickId: QuickId,
     makeGetId: makeGetId,
@@ -1995,17 +1996,18 @@ timeit.calibrate = function calibrate() {
     _timeitOverhead = 1;
     return _timeitOverhead = (timeit(0.8e6, mockFunc)[1] - timeit(1, mockLoop)[1] + _tmp - _tmp) / 0.8e6;
 }
-timeit.formatRate = function formatRate( count, elapsed, overhead ) {
+function formatRate( count, elapsed, overhead ) {
     if (Array.isArray(count)) { overhead = count[2]; elapsed = count[1]; count = count[0] }
-    return util.format("%s in %s of %s ms: %s/s", timeit.autorangeValue(count),
-        ((elapsed - (overhead || 0)) * 1000).toFixed(2), ((elapsed) * 1000).toFixed(2),
+    var used = (elapsed - (overhead || 0));
+    return util.format("%s in %s ms: %s/s", timeit.autorangeValue(count),
+        (overhead ? (used * 1000).toFixed(2) + ' of ' + (elapsed * 1000).toFixed(2) : (elapsed * 1000).toFixed(2)),
         timeit.autorangeValue(count / (elapsed - (overhead || 0)), 4))
 }
-timeit.autorangeValue = function scaleRate(value, precision) {
-    var _ranges   = [1e9, 1e6, 1e3, -Infinity];
-    var _suffixes = ['g', 'm', 'k', ''];
-    for (var suffix = '', i=0; i<_ranges.length; i++) {
-        if (value >= _ranges[i]) { suffix = _suffixes[i]; if (suffix) value /= _ranges[i]; break; }
+timeit.formatRate = formatRate;
+timeit.autorangeValue = function autorangeValue(value, precision) {
+    var _ranges   = [1e9, 'g', 1.2e9, 0,  1e6, 'm', 1.2e6, 0,  1e3, 'k', 1.2e3, 0,  -Infinity, '', 1, 0];
+    for (var suffix = '', i=0; i<_ranges.length; i+=4) {
+        if (value >= (_ranges[i])) { suffix = _ranges[i+1]; if (suffix) value /= _ranges[i]; break; }
     }
     return value.toFixed((value === Math.floor(value)) ? 0 : (precision || 3)) + suffix;
 }

@@ -4272,13 +4272,19 @@ module.exports = {
             t.ok(timings[2] > 0);
             t.done();
         },
-        'formats results': function(t) {
-            var str = qibl.timeit.formatRate(123400, .0567, .0123);
-            t.equal(str, '123.400k in 44.40 of 56.70 ms: 2.7793m/s');
-            // overhead is optional
-            var str2 = qibl.timeit.formatRate(100, .456);
-            t.equal(str2, '100 in 456.00 of 456.00 ms: 219.2982/s');
-            t.done();
+        'formatRate': {
+            'exposed on qibl': function(t) {
+                t.equal(qibl.formatRate, qibl.timeit.formatRate);
+                t.done();
+            },
+            'formats results': function(t) {
+                var str = qibl.timeit.formatRate(123400, .0567, .0123);
+                t.equal(str, '123.400k in 44.40 of 56.70 ms: 2.7793m/s');
+                // overhead is optional
+                var str2 = qibl.timeit.formatRate(100, .456);
+                t.equal(str2, '100 in 456.00 ms: 219.2982/s');
+                t.done();
+            },
         },
     },
 
