@@ -820,6 +820,9 @@ See also the description of `emitlines`, which is built on top of `emitchunks`.
 Create a new `Error` object with the error message `message` and having the given properties.
 The message arguments are interpolated into the message with `util.format(message, arg1, ...)`.
 
+    qibl.makeError({ code: 'MOOD' }, 'bad %s', 'mood');
+    // => Error { message: 'bad mood', code: 'MOOD', stack: "..." }
+
 ### microtime( )
 
 Return a high precision real-time timestamp with the seconds elapsed since the epoch,
@@ -848,7 +851,7 @@ Each calibration starts from scratch, the calibration runs are not cumulative.
 Convert a simple time spec like `'2h'` into milliseconds, `7200000`.
 Recognizes the modifiers `s`, `m`, `h`, `d` and `w` meaning seconds, minutes, hours, days
 and weeks.  Plain numbers are assumed to represent milliseconds and are returned as is.
-Multiple time specs are summed.  Returns `NaN` if unable to parse the value or the format.
+Multiple time specs `'2h 15m'` are summed, `8100000`.  Returns `NaN` if unable to parse the value or the format.
 
     qibl.parseMs('2m .5s');
     // => 120500
@@ -1396,14 +1399,15 @@ Return the keys of the elements currently in the cache.
 
 Efficient minimal circular list implemented with an Array, supporting just `push`, `shift` and `length`.
 The list can grow without limit, but the array space freed when removing elements is not reclaimed.
+This is a stripped-down version of the very efficient [`qlist`](https://npmjs.org/package/qlist).
 
 It is much much _much_ faster to push/shift off a circular list than a nodejs array once the array
-has ~ 10,000 elements, because the nodejs javascript engine runs `shift` in O(n^2) time once the
+has ~ 10,000 elements, because the nodejs javascript engine runs `shift` in _O(n^2)_ time once the
 array exceeds a built-in threshold.
 
 ### clist.push( item )
 
-Append the item to the end of the list.
+Append the item to the end of the list.  The list grows as needed to fit the items.
 
 ### clist.shift( )
 
@@ -1419,11 +1423,11 @@ Changelog
 
 - 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
-           fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose microtime.calibrate
-- 1.22.4 - log getConfig load errors that are not "Cannot find module" to expose eg syntax errors,
-           fix objectToError to retain undefined own properties too
-- 1.22.3 - only convert errorToObject error own properties to not restore inherited properties,
-           more accurately restore objectToError error instances and return UnknwnError if __errorCtor not known
+           fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose `microtime.calibrate`
+- 1.22.4 - log `getConfig` load errors that are not "Cannot find module" to expose eg syntax errors,
+           fix `objectToError` to retain undefined own properties too
+- 1.22.3 - only convert `errorToObject` error own properties to not restore inherited properties,
+           more accurately restore `objectToError` error instances and return UnknwnError if __errorCtor not known
 - 1.22.2 - fix `getConfig` to interpret relative paths against the current working directory,
            new experimental `timeit`, `timeit.autorageValue`, `timeit.formatRate`
 - 1.22.1 - fix `forEachProperty` to return function properties, document `groupBy`,
@@ -1440,7 +1444,7 @@ Changelog
            tmpfile fail faster, support multi-term times in `parseMs`
 - 1.20.1 - fix getConfig to not expose the _merge method,
            fix tmpfile to exit on sighup/int/term, and do nothing on sigquit
-- 1.20.0 - new forEachProperty, hashToMap, mapToHash, new undocumented makeIteratorPeekable
+- 1.20.0 - new `forEachProperty`, `hashToMap`, `mapToHash`, new undocumented `makeIteratorPeekable`
 - 1.19.4 - fix walktree 'visit' to not iterate strings, fix retry timeout and timeout error return
 - 1.19.2 - faster diffarray
 - 1.19.1 - support 'visit' in walktree
@@ -1457,11 +1461,11 @@ Changelog
            make `repeatUntil` iterate as fast as `repeatFor`, fix code to work under node-v0.6
 - 1.15.2 - fix `walkdir` to recurse into symlinked directories if told to `'visit'`,
            fix `flatMap2` so can append self to self
-- 1.15.1 - fix flipTo unit test to work with older node
+- 1.15.1 - fix `flipTo` unit test to work with older node
 - 1.15.0 - new `flipTo`, `getLastDefined`
-- 1.14.1 - fix copytreeDecycle toJSON and cycles in arrays; faster copyObject on node-v10 and up
+- 1.14.1 - fix `copytreeDecycle` toJSON and cycles in arrays; faster copyObject on node-v10 and up
 - 1.14.0 - new `chunk` array splitter, `copytreeDecycle` cycle-free object copy
-- 1.13.1 - fix retry to return the computed result
+- 1.13.1 - fix `retry` to return the computed result
 - 1.13.0 - allow `extractTo` to copy nested properties
 - 1.12.2 - experimental `flatMap2`
 - 1.12.1 - make `difftree` recursively diff array contents for full json support, expose `diffarray`
