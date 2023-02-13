@@ -1979,6 +1979,7 @@ function parseMs( interval ) {
 var _timeitOverhead = 0;
 function timeit( nloops, func ) {
     if (!_timeitOverhead) timeit.calibrate();
+    if (nloops >= 1e5) timeit(10000, func);
     var t2, t1 = qibl.microtime(), maxTime = 1e99;
     if (nloops % 1) (maxTime = nloops, nloops = 1e99);
     for (var i = 0; i < nloops; i += 100) {
@@ -1991,10 +1992,15 @@ function timeit( nloops, func ) {
 // It is presumed that the timed functions will also assign for an external side-effect.
 var _tmp;
 timeit.calibrate = function calibrate() {
+    var nloops, t1, t2;
     function mockFunc(i) { _tmp = i * i }
-    function mockLoop() { var i, j; for (i=0; i<.8e6; i+=100) { for (j=0; j<100; j++) _tmp = i * i; qibl.microtime() } }
-    _timeitOverhead = 1;
-    return _timeitOverhead = (timeit(0.8e6, mockFunc)[1] - timeit(1, mockLoop)[1] + _tmp - _tmp) / 0.8e6;
+    function mockLoop() { var i, j; for (i=0; i<nloops; i+=100) { for (j=0; j<100; j++) _tmp = i * i; qibl.microtime() } }
+    [10000, 800000].forEach(function(n) { // warm up the timing loop, then time the call overhead
+        nloops = n;
+        _timeitOverhead = 1;
+        t1 = timeit(nloops, mockFunc)[1]; t2 = timeit(1, mockLoop)[1];
+    })
+    _timeitOverhead = (_tmp + t1 - t2 - _tmp) / nloops;
 }
 function formatRate( count, elapsed, overhead ) {
     if (Array.isArray(count)) { overhead = count[2]; elapsed = count[1]; count = count[0] }
