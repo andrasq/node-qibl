@@ -856,6 +856,24 @@ Multiple time specs `'2h 15m'` are summed, `8100000`.  Returns `NaN` if unable t
     qibl.parseMs('2m .5s');
     // => 120500
 
+### timeit( runCount, func( i ) )
+
+Measure how many seconds are needed to call `func` `runCount` times.  `func` is passed the
+iteration index `0 .. runCount - 1`.  Returns an array with `[runCount, elapsedSec, overheadSec]`
+that reports the timings result as well as the estimated overhead that the timing loop added to
+the time used by `func`.  See `qtimeit` for a more accurate timing loop.
+
+#### formatRate( countOrRateArray, elapsedSec, overheadSec )
+
+Return a string that summarizes the timing results in a human-friendly format.
+
+    rate = qibl.timeit(1e7, function(i) { return Math.sin(i / 360) });
+    // => [ 10000000, 0.17456579208374023, 0.03967285156249999 ]
+
+    console.log(qibl.formatRate(rate));
+    // => "10m in 134.89 of 174.57 ms: 74.1329m/s"
+
+
 ### config = getConfig( [options] )
 
 Read the environment-specific configs from the configs directory.  Similar to `config` or `qconfig`,
@@ -1431,7 +1449,8 @@ grow the list when appending items, and can be called to shrink the list to free
 Changelog
 ---------
 
-- 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist
+- 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist, document `timeit`,
+           promote `formatRate` to qibl
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
            fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose `microtime.calibrate`
 - 1.22.4 - log `getConfig` load errors that are not "Cannot find module" to expose eg syntax errors,
