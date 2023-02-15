@@ -3235,7 +3235,7 @@ module.exports = {
             // a sync function measures runtime, will never need to queue calls (27m/s)
             var test = function(a, b, cb) { cb(null, a + b) }
             // var test = function(a, b, cb) { setImmediate(cb, null, a + b) }
-            var test = function(a, b, cb) { (a & 0xFF) ? cb(null, a + b) : setImmediate(cb, null, a + b) };
+            // var test = function(a, b, cb) { (a & 0xFF) ? cb(null, a + b) : setImmediate(cb, null, a + b) };
             var fn = qibl.mutexCall(test);
             fn.mutex.busy = 1; // hold execution until queued all calls
             var nloops = 1e6;
@@ -4967,6 +4967,9 @@ module.exports = {
                 qibl.timeit(1e6, function(i) { list.push(1e9 - i) })));
             console.log("AR: push/shift", qibl.timeit.formatRate(
                 qibl.timeit(1e6, function(i) { list.push(1e9 - i); x = list.shift() })));
+            var x, t1 = qibl.microtime(), iter = list._iterator();
+            for (var info; !(info = iter.next()).done; ) x = info.value;
+            console.log("AR: iterate", qibl.formatRate(list.length, qibl.microtime() - t1));
             list.resize(0);
             for (var i=0; i<20; i++) list.push(i);
             var rate = qibl.timeit(1e6/10, function(i) {

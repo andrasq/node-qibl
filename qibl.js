@@ -1442,6 +1442,7 @@ function retry( getDelay, timeout, func, options, callback ) {
 // Mutex from miniq/lib/utils
 // call serializer, each next call is launched by the previous call`s release() callback
 // usage: mutex.acquire(function(release) { ... release() });
+// Note that it is not possible to guarantee in-order execution if the calls yield, just in-order start.
 function Mutex( limit ) {
     this.busy = 0;
     this.limit = limit || 1;
@@ -1455,6 +1456,7 @@ function Mutex( limit ) {
         else self.queue.push(user);
     }
     this._release = function _release() {
+        if ((++self.ndone & 0xFF) === 0) return setImmediate(self._release);
         var next = self.queue.shift();
         (next) ? (next.acq ? next.acq(self._release, next.cx) : next(self._release)) : self.busy -= 1;
     }
@@ -1996,8 +1998,7 @@ timeit.calibrate = function calibrate() {
     function mockFunc(i) { _tmp = i * i }
     function mockLoop() { var i, j; for (i=0; i<nloops; i+=100) { for (j=0; j<100; j++) _tmp = i * i; qibl.microtime() } }
     [10000, 800000].forEach(function(n) { // warm up the timing loop, then time the call overhead
-        nloops = n;
-        _timeitOverhead = 1;
+        nloops = n; _timeitOverhead = 1;
         t1 = timeit(nloops, mockFunc)[1]; t2 = timeit(1, mockLoop)[1];
     })
     _timeitOverhead = (_tmp + t1 - t2 - _tmp) / nloops;

@@ -1029,24 +1029,25 @@ Remove the named file or directory.  If directory, removes all its contents too.
 ### filename = tmpfile( [options] [callback] )
 
 Create a new empty temporary file for exclusive use and return its filename.  The file is
-guaranteed not to have existed before the call, and will be automatically removed when the
+momentarily opened in O_CREAT | O_EXCL | O_WRONLY mode to guarantee to not to have existed
+before the call, and will be automatically removed when the
 process exits (by normal exit, or unhandled SIGTERM, SIGHUP, or SIGINT).  The
 filename is constructed by concatenating the directory name, core filename, a six-character
-random suffix, and filename extension.  If the file cannot be created an error is thrown.
+random suffix, and filename extension.
 
 Note that this call behaves like a cross between `tempfile(1)` and its namesake `tmpfile(3)`.
 
 Note that the installed signal handlers try to keep to the default behavior of exiting by
 throwing a `"terminated"` exception.  They throw only if no other handlers are listening for
 the signal, else the other handlers will presumably decide whether to exit or not.  Emitting
-signal names is thus no longer harmless, because it can throw.  Also, if the other handlers
+signal names from `process` is thus no longer harmless, because it can throw.  Also, if the other handlers
 also only exit only if they are the sole listener, then the process may not exit after all.
 
 If the optional `callback` is provided then `tmpfile` uses async calls to create the temp file and
 returns errors to the callback, otherwise `tmpfile` uses synchronous calls and throws if unable to
 create a file.
 
-Options:
+The options are not required, and may specify:
 - `dir` - name of the directory to hold the file, default is `process.env.TMPDIR` else `/tmp`
 - `name` - core filename without the leading path separators, default `node-tmpfile-`
 - `ext` - filename extension to append including any `'.'` separator, default `''` empty string
@@ -1151,34 +1152,6 @@ Starting with v1.22.0 the `options` object, if provided, can specify
 Return a function that will generate unique ids for the given system.  This is a convenience
 wrapper around `qibl.QuickId`.
 
-
-Classes
--------
-
-### new Mutex( limit )
-
-Create a mutual exclusion semaphore that allows `limit` concurrent users to a limited-use
-resource; default `1` one.  A Mutex has one method: `acquire(func)`.  It queues `func`
-waiting for the resource to be free, locks one unit of the resource, and calls
-`func(release)`.  `release` is a callback that must be called to release the resource unit;
-the resource will remain locked until freed, no timeout.
-
-Note that the next call to use the mutex is invoked directly by the `release()` of the previous
-call without the call stack being broken up, so queueing many hundreds of synchronous calls could
-throw a "stack size exceeded" exception.  Note too that synchronous functions do not need to be
-serialized, since they run inherently consecutively.
-
-Mutex properties of interest
-- `limit` - the configured maximum number of simultaneous users allowed
-- `busy` - the count of users currently accessing the resource
-- `queue` - the queue of calls waiting to access the resource
-
-    mutex = new qibl.Mutex();
-    mutex.acquire((release) => {
-        useResource();
-        release();
-    });
-
 ### mutexCall( func(..., callback) [,limit] )
 
 Return a function that will serialize calls to `func`.  The optional `limit` controls how many
@@ -1210,6 +1183,34 @@ function as its `.mutex` property.
     const greet1 = qibl.mutexCall(greet);
     for (let i = 0; i < 10; i++) greet1('Barbie', function callback(){});
     // => "Hello, Barbie!" 10 times, spaced 5 ms apart
+
+
+Classes
+-------
+
+### new Mutex( limit )
+
+Create a mutual exclusion semaphore that allows `limit` concurrent users to a limited-use
+resource; default `1` one.  A Mutex has one method: `acquire(func)`.  It queues `func`
+waiting for the resource to be free, locks one unit of the resource, and calls
+`func(release)`.  `release` is a callback that must be called to release the resource unit;
+the resource will remain locked until freed, no timeout.
+
+Note that the next call to use the mutex is invoked directly by the `release()` of the previous
+call without the call stack being broken up, so queueing many hundreds of synchronous calls could
+throw a "stack size exceeded" exception.  Note too that synchronous functions do not need to be
+serialized, since they run inherently consecutively.
+
+Mutex properties of interest
+- `limit` - the configured maximum number of simultaneous users allowed
+- `busy` - the count of users currently accessing the resource
+- `queue` - the queue of calls waiting to access the resource
+
+    mutex = new qibl.Mutex();
+    mutex.acquire((release) => {
+        useResource();
+        release();
+    });
 
 ### new Cron( )
 
