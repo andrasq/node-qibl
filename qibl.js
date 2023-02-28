@@ -1241,6 +1241,7 @@ function _unlinkFileOnExit( filename ) {
         exitSignals.forEach(function(sig) { process.on(sig, function() { onSignal(sig) }) });
     }
 }
+var exclusiveWrite = eval('parseFloat(process.versions.node) >= 0.7 ? "wx" : (0x80 | 0x40 | 0x01)');
 function _createTmpfileName( options ) {
     var prefix = (options.dir || process.env.TMPDIR || '/tmp') + '/' + (options.name || 'node-tmpfile-');
     return prefix + Math.random().toString(36).slice(2, 8) + (options.ext || '');
@@ -1253,7 +1254,7 @@ function tmpfileSync( options ) {
     // if tmpfile namespace is 95% full, 90 attempts will find a name 99% of the time, 59 attemps 95%, 50 92%
     for (var maxAttempts = 100, i = 1; i <= maxAttempts; i++) {
         try {
-            var filename = _createTmpfileSync(_createTmpfileName(options), options.flags || 'wx');
+            var filename = _createTmpfileSync(_createTmpfileName(options), options.flags || exclusiveWrite);
             if (typeof filename !== 'string') throw filename;
             /* istanbul ignore else */ // code coverage listens to SIGTERM, disables auto-remove on kill
             if (options.remove || (options.remove === undefined)) _unlinkFileOnExit(filename);
@@ -1271,7 +1272,7 @@ function tmpfileAsync( options, callback ) {
     var filename;
     qibl.repeatUntil(function(done, ix) {
         if (ix >= 100) return done(new Error('tmpfile: too many attempts'));
-        _createTmpfileAsync(_createTmpfileName(options), options.flags || 'wx', function(err, createdName) {
+        _createTmpfileAsync(_createTmpfileName(options), options.flags || exclusiveWrite, function(err, createdName) {
             err ? done(null, false) : done(null, (filename = createdName));
         })
     }, function(err) {

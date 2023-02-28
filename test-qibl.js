@@ -2688,7 +2688,7 @@ module.exports = {
         },
         'uses the provided flags': function(t) {
             var spy = t.spyOnce(fs, 'openSync');
-            t.throws(function(){ qibl.tmpfile({ flags: 'zx' }) }, /invalid/);
+            t.throws(function(){ qibl.tmpfile({ flags: 'zx' }) }, /Unknown|invalid/);
             t.ok(spy.called);
             t.equal(spy.args[0][1], 'zx');
             t.done();
@@ -4274,6 +4274,7 @@ module.exports = {
             var x, timings = qibl.timeit(.002, function(i) { x = i });
             var t2 = qibl.microtime();
             t.ok(t2 - t1 >= .002);
+            // assertions #1 and #3 sometimes fail on node-v0.6
             t.ok(timings[0] > 10000);
             t.ok(timings[1] > 0);
             t.ok(timings[2] > 0);
