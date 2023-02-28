@@ -1245,16 +1245,15 @@ function _createTmpfileName( options ) {
     var prefix = (options.dir || process.env.TMPDIR || '/tmp') + '/' + (options.name || 'node-tmpfile-');
     return prefix + Math.random().toString(36).slice(2, 8) + (options.ext || '');
 }
-function _createTmpfileSync( filename ) {
-    var mode = (0x80 + 0x40 + 0x01) >>> 0;     // O_EXCL + O_CREAT + O_WRONLY
-    try { fs.closeSync(fs.openSync(filename, mode)); return filename } catch (err) { return err }
+function _createTmpfileSync( filename, flags ) {
+    try { fs.closeSync(fs.openSync(filename, flags)); return filename } catch (err) { return err }
 }
 function tmpfileSync( options ) {
     // if tmpfile namespace is 99% full, 460 attempts will find a name 99% of the time, 100 attempts 63%, 50 40%
     // if tmpfile namespace is 95% full, 90 attempts will find a name 99% of the time, 59 attemps 95%, 50 92%
     for (var maxAttempts = 100, i = 1; i <= maxAttempts; i++) {
         try {
-            var filename = _createTmpfileSync(_createTmpfileName(options));
+            var filename = _createTmpfileSync(_createTmpfileName(options), options.flags || 'wx');
             if (typeof filename !== 'string') throw filename;
             /* istanbul ignore else */ // code coverage listens to SIGTERM, disables auto-remove on kill
             if (options.remove || (options.remove === undefined)) _unlinkFileOnExit(filename);
@@ -1264,15 +1263,15 @@ function tmpfileSync( options ) {
         }
     }
 }
-function _createTmpfileAsync( filename, callback ) {
-    fs.open(filename, (0x80 + 0x40 + 0x01), function(err, fd) {  // mode = O_EXCL + O_CREAT + O_WRONLY
+function _createTmpfileAsync( filename, flags, callback ) {
+    fs.open(filename, flags, function(err, fd) {
         fs.close(fd >= 0 ? fd : 9999999, function(err2) { callback(err || err2, filename) }) });
 }
 function tmpfileAsync( options, callback ) {
     var filename;
     qibl.repeatUntil(function(done, ix) {
         if (ix >= 100) return done(new Error('tmpfile: too many attempts'));
-        _createTmpfileAsync(_createTmpfileName(options), function(err, createdName) {
+        _createTmpfileAsync(_createTmpfileName(options), options.flags || 'wx', function(err, createdName) {
             err ? done(null, false) : done(null, (filename = createdName));
         })
     }, function(err) {
@@ -1330,7 +1329,7 @@ function _visitnodes( node, visitor, state ) {
         var next = visitor(node[k], k, node, state.depth);
         if (next === 'stop') state.stop = true;
         else if (next === 'skip') continue;
-        else if (qibl.isHash(node[k]) || next === 'visit' && typeof node[k] === 'object') {
+        else if (qibl.isHash(node[k]) || (next === 'visit' && typeof node[k] === 'object')) {
             state.depth += 1; _visitnodes(node[k], visitor, state); state.depth -= 1; }
     }
 }
@@ -1981,6 +1980,7 @@ function parseMs( interval ) {
 var _timeitOverhead = 0;
 function timeit( nloops, func ) {
     if (!_timeitOverhead) timeit.calibrate();
+    if (nloops >= 1e4) timeit(2500, func);
     if (nloops >= 1e5) timeit(10000, func);
     var t2, t1 = qibl.microtime(), maxTime = 1e99;
     if (nloops % 1) (maxTime = nloops, nloops = 1e99);

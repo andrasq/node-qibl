@@ -2686,6 +2686,13 @@ module.exports = {
                 }
             }, 0)
         },
+        'uses the provided flags': function(t) {
+            var spy = t.spyOnce(fs, 'openSync');
+            t.throws(function(){ qibl.tmpfile({ flags: 'zx' }) }, /invalid/);
+            t.ok(spy.called);
+            t.equal(spy.args[0][1], 'zx');
+            t.done();
+        },
         'errors': {
             'throws if unable to create file': function(t) {
                 t.throws(function(){ qibl.tmpfile({ dir: '/nonesuch' }) }, /ENOENT/);

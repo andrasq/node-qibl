@@ -1053,7 +1053,11 @@ The options are not required, and may specify:
 - `ext` - filename extension to append including any `'.'` separator, default `''` empty string
 - `remove` - whether to auto-remove the file on exit, default enabled, set to `false` to create
     a permanent file that will not be removed on fatal signal or process exit
-
+- `flags` - file creation mode.  This setting is normally not specified, and defaults to `"wx"`.
+  *Note*: this setting must be specified as a numeric value for node versions 0.6 and older that
+  reject the `"x"` exclusive-mode modifier; for them the Unix creation flags are `0x80 | 0x40 | 0x01`
+  meaning `(O_EXCL | O_CREAT | O_WRONLY)`.  The values of `O_EXCL` et al are defined in `fs.constants`
+  in nodejs v6 and up. Note that the numeric values of the macOS `O_CREAT` and `O_EXCL` differ from Unix.
 
     const filename = qibl.tmpfile();
     // => "/tmp/node-tmpfile-wp3tio"
@@ -1451,7 +1455,7 @@ Changelog
 ---------
 
 - 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist, document `timeit`,
-           promote `formatRate` to qibl, better `timeit` calibration
+           promote `formatRate` to qibl, better `timeit` calibration, `flags` tmpfile option, fix `tmpfile` for macOS
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
            fix `timeit` calibration, new `LruCache`, new `ansiColor`, expose `microtime.calibrate`
 - 1.22.4 - log `getConfig` load errors that are not "Cannot find module" to expose eg syntax errors,
