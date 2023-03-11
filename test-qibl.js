@@ -1541,6 +1541,9 @@ module.exports = {
             t.ok(qibl.startsWith('foobar', ''));
             t.ok(!qibl.startsWith('foobar', 'bar'));
             t.ok(!qibl.startsWith('foobar', 'o'));
+            t.ok(!qibl.startsWith('foobar', 'r'));
+            t.ok(!qibl.startsWith('foobar', 'foobark'));
+            t.ok(!qibl.startsWith('foobar', 'afoobar'));
             t.done();
         },
     },
@@ -1552,7 +1555,9 @@ module.exports = {
             t.ok(qibl.endsWith('foobar', 'r'));
             t.ok(qibl.endsWith('foobar', ''));
             t.ok(!qibl.endsWith('foobar', 'a'));
+            t.ok(!qibl.endsWith('foobar', 'f'));
             t.ok(!qibl.endsWith('foobar', 'foobark'));
+            t.ok(!qibl.endsWith('foobar', 'afoobar'));
             t.done();
         },
     },

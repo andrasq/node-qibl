@@ -34,7 +34,10 @@ var Hashmap = eval("nodeMajor >= 1 && typeof global.Map === 'function' ? global.
 var varargs = eval("(nodeMajor < 8) ? _varargs :" +
     " tryEval('function(handler, self) { return function(...argv) { return handler(argv, _activeThis(self, this)) } }')");
 
+// on node-v0.8 and older nextTick has macrotask semantics
 var setImmediate = eval('global.setImmediate || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) }')
+// Promise.resolve().then is also on microtask queue and is faster than queueMicrotask in node v13-v17
+var queueMicrotask = eval('(global.Promise && function(fn) { Promise.resolve().then(fn) }) || process.nextTick');
 
 function tryEval(str) { try { return eval('1 && ' + str) } catch (e) { } }
 // function tryError(str) { throw new Error(str) }
@@ -797,11 +800,13 @@ function semverCompar( version1, version2 ) {
 
 // "string".startsWith, missing in node-v0.10
 function startsWith( string, prefix ) {
-    return string.indexOf(prefix) === 0;
+    var slen = string.length, plen = prefix.length;
+    return !plen || (string[0] === prefix[0] && plen <= slen && string.slice(0, plen) === prefix);
 }
 // "string".endsWith, missing in node-v0.10
 function endsWith( string, suffix ) {
-    return string.indexOf(suffix, string.length - suffix.length) >= 0;
+    var slen = string.length, xlen = suffix.length;
+    return !suffix || (string[slen - 1] === suffix[xlen - 1] && xlen <= slen && string.indexOf(suffix, slen - xlen) >= 0);
 }
 
 // similar to strtok() and strsep() but empty strings are allowed
