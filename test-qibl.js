@@ -4292,10 +4292,22 @@ module.exports = {
             },
             'formats results': function(t) {
                 var str = qibl.timeit.formatRate(123400, .0567, .0123);
-                t.equal(str, '123.400k in 44.40 of 56.70 ms: 2.7793m/s');
+                t.equal(str, '123.400k in 44.400 of 56.700 ms: 2.7793m/s');
                 // overhead is optional
                 var str2 = qibl.timeit.formatRate(100, .456);
-                t.equal(str2, '100 in 456.00 ms: 219.2982/s');
+                t.equal(str2, '100 in 456.000 ms: 219.2982/s');
+                t.done();
+            },
+        },
+        'timeitf': {
+            'times and reports': function(t) {
+                var x, spy = t.stub(process.stdout, 'write');
+                // 123 loops take .01 ms because fn not optimized yet
+                qibl.timeitf(123, function(i) { x = i });
+                spy.restore();
+                var output = spy.args[0][0];
+                t.contains(output, 'function(i) { x = i }');
+                t.contains(output, '123 in 0.');
                 t.done();
             },
         },

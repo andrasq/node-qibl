@@ -1454,7 +1454,7 @@ grow the list when appending items, and can be called to shrink the list to free
 Changelog
 ---------
 
-- 1.24.1 - faster `startsWith` and `endsWith`
+- 1.24.1 - faster `startsWith` and `endsWith`, new `timeitf`, show 3 digits precision in elapsed `timeit.formatRate`
 - 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist, document `timeit`,
            promote `formatRate` to qibl, better `timeit` calibration, `flags` tmpfile option, fix `tmpfile` for macOS
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,

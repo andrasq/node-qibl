@@ -164,6 +164,7 @@ var qibl = module.exports = {
     parseMs: parseMs,
     timeit: timeit,
     formatRate: formatRate,
+    timeitf: timeitf,
     Timebase: Timebase,
     QuickId: QuickId,
     makeGetId: makeGetId,
@@ -2013,7 +2014,7 @@ function formatRate( count, elapsed, overhead ) {
     if (Array.isArray(count)) { overhead = count[2]; elapsed = count[1]; count = count[0] }
     var used = (elapsed - (overhead || 0));
     return util.format("%s in %s ms: %s/s", timeit.autorangeValue(count),
-        (overhead ? (used * 1000).toFixed(2) + ' of ' + (elapsed * 1000).toFixed(2) : (elapsed * 1000).toFixed(2)),
+        (overhead ? (used * 1000).toFixed(3) + ' of ' + (elapsed * 1000).toFixed(3) : (elapsed * 1000).toFixed(3)),
         timeit.autorangeValue(count / (elapsed - (overhead || 0)), 4))
 }
 timeit.formatRate = formatRate;
@@ -2024,7 +2025,11 @@ timeit.autorangeValue = function autorangeValue(value, precision) {
     }
     return value.toFixed((value === Math.floor(value)) ? 0 : (precision || 3)) + suffix;
 }
-
+function timeitf( nloops, fn, log ) {
+    var rate = timeit(nloops, fn);
+    (log || console.log)('' + fn + ':	' + timeit.formatRate(rate));
+    return rate;
+}
 
 // source of very fast monotonically increasing not-quite-realtime timestamps, vaguely like qtimebase
 function Timebase() {
