@@ -4306,6 +4306,7 @@ module.exports = {
                 qibl.timeitf(123, function(i) { x = i });
                 spy.restore();
                 var output = spy.args[0][0];
+                output = output.replace('function (', 'function('); // node-v9 and lower insert a space after 'function'
                 t.contains(output, 'function(i) { x = i }');
                 t.contains(output, '123 in 0.');
                 t.done();
