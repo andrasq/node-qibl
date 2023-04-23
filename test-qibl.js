@@ -4334,7 +4334,10 @@ module.exports = {
                 var tb = new qibl.Timebase();
                 var now = Date.now();
                 var ts = tb.getNewerTimestamp(now + 1);
-                t.equal(Date.now(), now + 2);
+                // NOTE: occasional timing race condition (node-v6.13.0)
+                // NOTE: node-v12 on github always takes more than 2 ms to return a timestamp
+                // t.equal(Date.now(), now + 2);
+                t.ok(Date.now() >= now + 2);
                 t.done();
             },
         },
