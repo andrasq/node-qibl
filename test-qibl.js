@@ -1584,6 +1584,13 @@ module.exports = {
         },
     },
 
+    'str_flatten': {
+        'returns the string': function(t) {
+            t.equal(qibl.str_flatten('a' + 'b' + 'c'), 'abc');
+            t.done();
+        },
+    },
+
     'semverCompar': {
         'exposed under both old and new name': function(t) {
             t.equal(qibl.compareVersions, qibl.semverCompar);

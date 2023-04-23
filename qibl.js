@@ -75,6 +75,7 @@ var qibl = module.exports = {
     str_locate: str_locate,
     str_count: str_count,
     str_reverse: str_reverse,
+    str_flatten: str_flatten,
     ansiColor: ansiColor,
     compareVersions: semverCompar,
     semverCompar: semverCompar,
@@ -781,6 +782,11 @@ function str_reverse( str ) {
     var chars = new Array(str.length), len = str.length;
     for (var i = 0; i < len; i++) chars[len - 1 - i] = str.charCodeAt(i);
     return qibl.fromCharCodes(chars);
+}
+
+// convert the nodejs internal string storage representation to a flat array of chars
+function str_flatten( str ) {
+    return Number(str), str;
 }
 
 // compare semver version strings
