@@ -806,9 +806,11 @@ function semverCompar( version1, version2 ) {
 }
 
 // "string".startsWith, missing in node-v0.10
+// indexOf is slow in node-v5, even slower in node-v7, but node-v8 and up are very fast
 function startsWith( string, prefix ) {
-    var slen = string.length, plen = prefix.length;
-    return !plen || (string[0] === prefix[0] && plen <= slen && string.slice(0, plen) === prefix);
+    var plen = prefix.length;
+    for (var i=0; i<plen; i++) if (string.charCodeAt(i) !== prefix.charCodeAt(i)) return false;
+    return true;
 }
 // "string".endsWith, missing in node-v0.10
 function endsWith( string, suffix ) {
