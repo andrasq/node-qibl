@@ -76,6 +76,7 @@ var qibl = module.exports = {
     str_count: str_count,
     str_reverse: str_reverse,
     str_flatten: str_flatten,
+    stringBound: stringBound,
     ansiColor: ansiColor,
     compareVersions: semverCompar,
     semverCompar: semverCompar,
@@ -789,6 +790,34 @@ function str_flatten( str ) {
     return Number(str), str;
 }
 
+// find the end of the substring starting at pos and delimited by the closing bound
+// Characters escaped by \-escapes are skipped (including valid surrogate pairs).
+// If the bound is not found, returns the end of the string.
+// The bound may be any substring, but the escape character must be a single character.
+// See also _matchbrace below.
+function stringBound( str, bound, pos, esc ) {
+    if (pos === undefined) throw new Error('offset required');
+    var escCode = esc ? esc.charCodeAt(0) : -1;
+    var closeCode = bound.charCodeAt(0);
+    for (var len = str.length, i = pos; i < len; i++) {
+        var code = str.charCodeAt(i);
+        if (code === escCode) {
+            if (i < str.length - 1) {
+                // skip the escaped byte, also the second byte of valid surrogate pair
+                i += 1 + isSurrogatePair(str, i + 1);
+            }
+        }
+        else if (code === closeCode && _continuesWith(str, bound, i)) return i;
+    }
+    return len;
+}
+// return truthy if the string contains a valid surrogate pair at offset i, else falsy
+// returns 1 or 0 to make the result directly usable in computations without a cast or coercion
+function isSurrogatePair( str, i ) {
+    var code1 = str.charCodeAt(i), code2;
+    return (code1 >= 0xD800 && code1 < 0xDC00 && (code2 = str.charCodeAt(i + 1)) >= 0xDC00 && code2 <= 0xDFFF) ? 1 : 0;
+}
+
 // compare semver version strings
 // scan for the first version differece by decreasing significance, and return -1, 0 or +1
 // like for a sort comparison function
@@ -808,14 +837,18 @@ function semverCompar( version1, version2 ) {
 // "string".startsWith, missing in node-v0.10
 // indexOf is slow in node-v5, even slower in node-v7, but node-v8 and up are very fast
 function startsWith( string, prefix ) {
-    var plen = prefix.length;
-    for (var i=0; i<plen; i++) if (string.charCodeAt(i) !== prefix.charCodeAt(i)) return false;
-    return true;
+    return _continuesWith(string, prefix, 0);
 }
 // "string".endsWith, missing in node-v0.10
 function endsWith( string, suffix ) {
     var slen = string.length, xlen = suffix.length;
-    return !suffix || (string[slen - 1] === suffix[xlen - 1] && xlen <= slen && string.indexOf(suffix, slen - xlen) >= 0);
+    return slen >= xlen && _continuesWith(string, suffix, slen - xlen);
+}
+// return truthy if the string contains substr at the offset
+function _continuesWith( string, substr, offset ) {
+    var len = substr.length;
+    for (var i=0; i<len; i++) if (string.charCodeAt(offset + i) !== substr.charCodeAt(i)) return false;
+    return true;
 }
 
 // similar to strtok() and strsep() but empty strings are allowed
@@ -1606,6 +1639,7 @@ function escapeRegex( str ) {
  *   first * in path component should not match .* (ie, leading star should not match dot-files)
  */
 /** TODO:
+// see also stringBound above
 function _matchbrace( str, pos ) {
     var depth = 0, inquote = false, i = pos;
     for (; i < str.length i++) {
@@ -2236,7 +2270,8 @@ LruCache.prototype._iterator = function() {
 qibl.setIterator(LruCache.prototype, LruCache.prototype._iterator);
 
 /*
- * tiny little circular list, see qlist for a more featureful version
+ * tiny little circular list, see qlist for a more featureful version (qlist was
+ * incorporated into the denqueue npm package and used in ioredis, mariadb and mysql2)
  * invariants:
  *   list.end always points to the free cell at the end of the list
  *   there is always at least one free cell

@@ -1591,6 +1591,52 @@ module.exports = {
         },
     },
 
+    'stringBound': {
+        'requires base offset': function(t) {
+            t.throws(function(){ qibl.stringBound("foo", 'o') }, /offset required/);
+            t.done();
+        },
+        'returns matching close-quote': function(t) {
+            t.equal(qibl.stringBound('x"foo"bar', '"', 2), 5);
+            t.done();
+        },
+        'supports escaped quotes': function(t) {
+            t.equal(qibl.stringBound('x"foo\\"bar"y', '"', 2, '\\'), 10);
+            t.equal(qibl.stringBound('x"foo\\""bar"y', '"', 2, '\\'), 7);
+            t.done();
+        },
+        'supports escaped surrogate pairs': function(t) {
+            // not escaped (note that the bound is an invalid utf8 string)
+            t.equal(qibl.stringBound('a\uD800\uDFFFb', '\uDFFF', 1, '\\'), 2);
+            // yes escaped
+            t.equal(qibl.stringBound('a\\\uD800\uDFFFb', '\uDFFF', 1, '\\'), 5);
+            t.done();
+        },
+        'returns end-of-string if no close-quote': function(t) {
+            t.equal(qibl.stringBound('', '"', 0), 0);
+            t.equal(qibl.stringBound('a', '"', 0), 1);
+            t.equal(qibl.stringBound('abc', '"', 1), 3);
+            t.equal(qibl.stringBound('ab\\"c', '"', 1, '\\'), 5);
+            t.done();
+        },
+        'supports other quoting characters': function(t) {
+            t.equal(qibl.stringBound('x[a]y', ']', 2, '\\'), 3);
+            t.equal(qibl.stringBound('x(foo\\)bar)y', ')', 2, '\\'), 10);
+            t.done();
+        },
+        'support other escape characters': function(t) {
+            t.equal(qibl.stringBound("'ab|'c'", "'", 1, '|'), 6);
+            t.done();
+        },
+        'can escape with close-quote': function(t) {
+            t.equal(qibl.stringBound('abcaab', 'a', 1, 'a'), 6);
+            t.equal(qibl.stringBound('abcaaba', 'a', 1, 'a'), 7);
+            t.equal(qibl.stringBound('abcaabaa', 'a', 1, 'a'), 8);
+            t.equal(qibl.stringBound('abcaabaab', 'a', 1, 'a'), 9);
+            t.done();
+        },
+    },
+
     'semverCompar': {
         'exposed under both old and new name': function(t) {
             t.equal(qibl.compareVersions, qibl.semverCompar);

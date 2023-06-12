@@ -1455,7 +1455,7 @@ Changelog
 ---------
 
 - 1.24.1 - faster `startsWith` and `endsWith`, show 3 digits precision in elapsed `timeit.formatRate`,
-           new undocumented `timeitf`, new undocumented `str_flatten`
+           new undocumented `timeitf`, new undocumented `str_flatten`, `stringBound`
 - 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist, document `timeit`,
            promote `formatRate` to qibl, better `timeit` calibration, `flags` tmpfile option, fix `tmpfile` for macOS
 - 1.23.0 - add optional async mode to `tmpfile`, fix `getConfig` to show parse errors on stderr,
