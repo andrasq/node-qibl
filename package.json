@@ -10,7 +10,7 @@
   "readme": "see README.md",
 
   "scripts": {
-    "test": "qnit test-qibl.js",
+    "test": "node -v ; qnit test-qibl.js",
     "coverage": "env NYC_COVERAGE=1 nyc -r text -r lcov npm test",
     "clean": "rm -rf .nyc_output coverage npm-debug.log"
   }
