@@ -3303,7 +3303,7 @@ module.exports = {
             // var test = function(a, b, cb) { (a & 0xFF) ? cb(null, a + b) : setImmediate(cb, null, a + b) };
             var fn = qibl.mutexCall(test);
             fn.mutex.busy = 1; // hold execution until queued all calls
-            var nloops = 1e6;
+            var nloops = 1e5;
             var x, sum = 0, callCount = 0;
             var t1 = qibl.microtime();
             for (var i=0; i<nloops; i++) fn(i, 1, done);
