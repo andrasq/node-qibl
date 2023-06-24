@@ -23,6 +23,7 @@ jobs:
         if: ${{ matrix.node == '5.8.0' }}
         run: |
           # npm@1 cannot ssl connect to npmjs.org or github.com, so use node-v5.8 setup to test
+          mkdir -p node_modules/.bin
           curl -s https://nodejs.org/dist/v0.8.28/node-v0.8.28-linux-x64.tar.gz > node.tgz
           tar xfzO node.tgz node-v0.8.28-linux-x64/bin/node > node_modules/.bin/node
           chmod a+rx node_modules/.bin/node
