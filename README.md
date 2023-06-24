@@ -1,6 +1,6 @@
 qibl
 ====
-[![nodejs ci](https://github.com/andrasq/node-qibl/actions/workflows/nodejs.yml/badge.svg)](https://github.com/andrasq/node-qibl/actions/workflows/nodejs.yml)
+[![Build Status](https://github.com/andrasq/node-qibl/actions/workflows/nodejs.yml/badge.svg)](https://github.com/andrasq/node-qibl/actions/workflows/nodejs.yml)
 [![Coverage Status](https://coveralls.io/repos/github/andrasq/node-qibl/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-qibl?branch=master)
 
 Quick Itty-Bitty Library.
