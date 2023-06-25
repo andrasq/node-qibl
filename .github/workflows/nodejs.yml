@@ -30,11 +30,13 @@ jobs:
           npm test
           rm node_modules/.bin/node
 
+      - name: install nyc
+        if: ${{ matrix.node == '5.8.0' }}
+        run: npm install -g nyc@8.4.0
+
       - name: test coverage
         if: ${{ matrix.node == '5.8.0' }}
-        run: |
-          npm install -g nyc@8.4.0
-          npm run coverage
+        run: npm run coverage
 
       - name: upload coverage
         if: ${{ matrix.node == '5.8.0' }}
