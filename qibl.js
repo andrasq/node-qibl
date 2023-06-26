@@ -136,6 +136,7 @@ var qibl = module.exports = {
     retry: retry,
     Mutex: Mutex,
     mutexCall: mutexCall,
+    monitorHeartbeat: monitorHeartbeat,
     Cron: Cron,
     socketpair: socketpair,
     keys: keys,
@@ -1532,6 +1533,19 @@ function mutexCall( fn, n ) {
         cx.av.push(releaseOnce);
         _tryInvokeCbA(cx.fn, releaseOnce, cx.av);
     }
+}
+
+// report on event loop blockage
+function monitorHeartbeat( interval, maxElapsed, reportDelay ) {
+    var ranAt = Date.now();
+    var stop = false;
+    setTimeout(function loop() {
+        var now = Date.now(), elapsed = now - ranAt;
+        if (now > ranAt + maxElapsed) reportDelay(elapsed, interval);
+        ranAt = now;
+        if (!stop) setTimeout(loop, interval);
+    }, interval);
+    return { clearInterval: function() { stop = true } };
 }
 
 /*

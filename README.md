@@ -1189,6 +1189,16 @@ function as its `.mutex` property.
     for (let i = 0; i < 10; i++) greet1('Barbie', function callback(){});
     // => "Hello, Barbie!" 10 times, spaced 5 ms apart
 
+### monitorHeartbeat( interval, maxElapsed, reportDelay(elapsed) )
+
+Monitor event loop blockage by checking that an interval timer is run every `interval`
+milliseconds.  Excessive CPU usage delays asynchronous events and expired timers from being
+processed.  If more than `maxElapsed` milliseconds elapsed between calls, call `reportDelay`
+with the elapsed duration.  Returns the created interval timer.
+
+    const timer = qibl.monitorHeartbeat(100, 600, (actual, expected) =>
+        console.log('Heartbeat delayed by ${actual - expected} ms'));
+
 
 Classes
 -------
@@ -1455,6 +1465,7 @@ grow the list when appending items, and can be called to shrink the list to free
 Changelog
 ---------
 
+- 1.25.0 - new `monitorHeartbeat`
 - 1.24.1 - faster `startsWith` and `endsWith`, show 3 digits precision in elapsed `timeit.formatRate`,
            new undocumented `timeitf`, new undocumented `str_flatten`, `stringBound`
 - 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist, document `timeit`,

@@ -3321,6 +3321,26 @@ module.exports = {
         },
     },
 
+    'monitorHeartbeat': {
+        'returns an object with a clearInterval method': function(t) {
+            var timer = qibl.monitorHeartbeat(1, 1, function(){});
+            setTimeout(function() {
+                timer.clearInterval();
+                t.done();
+            }, 2);
+        },
+        'reports delay': function(t) {
+            var timer = qibl.monitorHeartbeat(2, 3, function(actual, expected) {
+                t.ok(actual > 3);
+                t.equal(expected, 2);
+                timer.clearInterval();
+                t.done();
+            })
+            var x = 4.5;
+            for (var i=0; i<1e6; i++) x = Math.sqrt(4 * x);
+        },
+    },
+
     'Cron': {
         setUp: function(done) {
             this.uut = new qibl.Cron();
