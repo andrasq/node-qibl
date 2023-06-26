@@ -25,10 +25,11 @@ Use cut-and-paste functions:
 To run the tests, check out the repo.
 
 Topics:
-- Objects
-- Strings
-- Arrays and Buffers
-- Functions
+- [Objects](#objects)
+- [Strings](#strings)
+- [Arrays and Buffers](#buffers-and-arrays)
+- [Functions](#functions)
+- [Classes](#classes)
 
 
 API
@@ -1179,8 +1180,8 @@ function as its `.mutex` property.
         running += 1;
         setTimeout(() => {
             console.log('Hello, %s!', name);
+            assert.equal(running, 1);
             running -= 1;
-            assert.equal(running, 0);
             cb();
         }, 5);
     }
