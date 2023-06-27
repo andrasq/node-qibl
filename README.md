@@ -900,6 +900,14 @@ Return a string that summarizes the timing results in a human-friendly format.
     console.log(qibl.formatRate(rate));
     // => "10m in 134.89 of 174.57 ms: 74.1329m/s"
 
+### qibl.timeitf( runCount, func( i ) )
+
+Convenience wrapper around `timeit` and `formatRate` that prints the timing function and the results:
+
+    let x = 4.5;
+    qibl.timeitf(1e7, () => x = Math.sqrt(4 * x));
+    // => "() => x = Math.sqrt(4 * x): 10m in 77.795 of 105.261 ms: 128.5425m/s"
+
 
 ### config = getConfig( [options] )
 
@@ -1491,7 +1499,7 @@ grow the list when appending items, and can be called to shrink the list to free
 Changelog
 ---------
 
-- 1.25.0 - new `monitorHeartbeat`, new `isSurrogatePair`, document `stringBound`, readme edits
+- 1.25.0 - new `monitorHeartbeat`, new `isSurrogatePair`, document `stringBound` and `timeitf`
 - 1.24.1 - faster `startsWith` and `endsWith`, show 3 digits precision in elapsed `timeit.formatRate`,
            new undocumented `timeitf`, new undocumented `str_flatten`, `stringBound`
 - 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist, document `timeit`,
