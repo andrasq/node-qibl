@@ -5,22 +5,24 @@ qibl
 
 Quick Itty-Bitty Library.
 
-A miscellaneous collection of small functions and polyfills I wrote that that I found myself
-reusing, gathered into a single place.  Most are pretty efficient, at times faster even
-than the equivalent built-in.  Tested to work with node v0.6 through v16.
+A miscellaneous collection of small functions and polyfills I wrote that that looked useful or
+interesting.  Most are pretty efficient, often faster than alternatives.  Tested to work with node
+v0.6 through v18.
 
-Use either directly as a dependency, or as a library of cut-and-paste functions.  If using cut-and-paste,
-add an attribution comment line identifying the qibl source version that it came from, e.g.
+Use this package directly as a dependency, or as a library of cut-and-paste functions, or as a
+source of ideas and implementation approaches.  This package has no external dependencies nor a
+dependency on any particular javascript version.  All functions should work with nodejs 0.6 and
+above.  If found useful, would appreciate a comment by the function giving qibl credit.
 
 Use as a dependency:
 
     var qibl = require('qibl');
-    qibl.subsample(...);
+    qibl.difftree(node1, node2);
 
-Use cut-and-paste functions:
+Use as a cut-and-paste library:
 
-    // adapted from qibl@1.4.0
-    function subsample(items, count) { ... }
+    // adapted from qibl@1.12.1
+    function difftree(node1, node2) { ... }
 
 To run the tests, check out the repo.
 
@@ -452,6 +454,30 @@ Return true if `substr` is a prefix of the string `str`.  Equivalent to String.p
 ### qibl.endsWith( str, substr )
 
 Return true if `substr` is a suffix of the string `str`.  Equivalent to String.prototype.endsWith.
+
+### qibl.stringBound( str, boundStr, offset [,escapeChar] )
+
+Locate the end of the substring of `str` between `offset` the first occurrence of `strBound`.
+Similar to `indexOf`, except returns the end of string if the bound is not found, and supports
+escaping characters (including valid surrage pairs) to not have them be considered part of the bound.
+
+Find the end of the substring in `str` starting at `offset` and delimited by the closing
+`boundStr`.  Similar to `indexOf` but if an escape character `esc` is specified, then characters preceded by `esc` are
+skipped (including valid surrogate pairs).  If the `boundStr` is not present, returns the end of
+the string.  The bound may be any substring, but the escape character must be a single character.
+
+    qibl.stringBound('{"age":123}', '}', 1);   // => 10
+    qibl.stringBound('{"age":123}', '"', 2);   // => 5
+    qibl.stringBound('{"age":123}', '"', 1);   // => 1
+    qibl.stringBound('{"age":123}', 'XX', 0);  // => 11
+
+### qibl.isSurrogatePair( str, offset )
+
+Test whether the string `str` contains a UTF-8 surrogate pair at the `offset`.  A surrogate pair
+is two utf8 characters where the first, the high surrogate, is in the range [\uD800-\uDBFF] and
+the second, the low surrogate, is in the range [\uDC00-\uDFFF].
+
+    qibl.isSurrogatePair("abc\uD800\uDC00", 3);  // => true
 
 ### qibl.ansiColor( name )
 
@@ -1465,7 +1491,7 @@ grow the list when appending items, and can be called to shrink the list to free
 Changelog
 ---------
 
-- 1.25.0 - new `monitorHeartbeat`
+- 1.25.0 - new `monitorHeartbeat`, new `isSurrogatePair`, document `stringBound`, readme edits
 - 1.24.1 - faster `startsWith` and `endsWith`, show 3 digits precision in elapsed `timeit.formatRate`,
            new undocumented `timeitf`, new undocumented `str_flatten`, `stringBound`
 - 1.24.0 - new `mutexCall`, new `Clist`, faster Mutex implemented with Clist, document `timeit`,

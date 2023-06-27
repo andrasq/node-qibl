@@ -1637,6 +1637,19 @@ module.exports = {
         },
     },
 
+    'isSurrogatePair': {
+        'detects surrogate pairs': function(t) {
+            t.equal(qibl.isSurrogatePair("abc", 1), false);
+            t.equal(qibl.isSurrogatePair("a\uD800\uDC00c", 1), true);
+            t.equal(qibl.isSurrogatePair("a\uD800\uDFFF", 1), true);
+            t.equal(qibl.isSurrogatePair("a\uDBFF\uDC00", 1), true);
+            t.equal(qibl.isSurrogatePair("a\uDBFF\uDCFF", 1), true);
+            t.equal(qibl.isSurrogatePair("a\uD000\uDC00c", 1), false);
+            t.equal(qibl.isSurrogatePair("a\uDC00\uDC00c", 1), false);
+            t.done();
+        },
+    },
+
     'semverCompar': {
         'exposed under both old and new name': function(t) {
             t.equal(qibl.compareVersions, qibl.semverCompar);

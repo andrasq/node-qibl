@@ -77,6 +77,7 @@ var qibl = module.exports = {
     str_reverse: str_reverse,
     str_flatten: str_flatten,
     stringBound: stringBound,
+    isSurrogatePair: isSurrogatePair,
     ansiColor: ansiColor,
     compareVersions: semverCompar,
     semverCompar: semverCompar,
@@ -814,6 +815,7 @@ function stringBound( str, bound, pos, esc ) {
 }
 // return truthy if the string contains a valid surrogate pair at offset i, else falsy
 // returns 1 or 0 to make the result directly usable in computations without a cast or coercion
+// Surrogate pairs are two characters [\uD800-\uDBFF][\uDC00-\uDFFF] (high surrogate and low surrogate).
 function isSurrogatePair( str, i ) {
     var code1 = str.charCodeAt(i), code2;
     return (code1 >= 0xD800 && code1 < 0xDC00 && (code2 = str.charCodeAt(i + 1)) >= 0xDC00 && code2 <= 0xDFFF) ? 1 : 0;
